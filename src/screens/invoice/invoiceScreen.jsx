@@ -26,23 +26,19 @@ export default function InvoiceScreen({ navigation }) {
     const colors = useThemeColors();
     const styles = getStyles(colors);
 
-    // Data
     const [invoices, setInvoices] = useState([]);
     const [categories, setCategories] = useState([]);
     const [filtered, setFiltered] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Filters
     const [filterClient, setFilterClient] = useState("");
     const [filterStatus, setFilterStatus] = useState("");
     const [filterFrom, setFilterFrom] = useState("");
     const [filterTo, setFilterTo] = useState("");
 
-    // Pagination
     const [pageIndex, setPageIndex] = useState(0);
     const pageSize = 10;
 
-    // Create/Edit Modal
     const [showModal, setShowModal] = useState(false);
     const [editing, setEditing] = useState(null);
     const [form, setForm] = useState({
@@ -56,7 +52,6 @@ export default function InvoiceScreen({ navigation }) {
     const [saving, setSaving] = useState(false);
     const [formError, setFormError] = useState("");
 
-    // Validate Modal
     const [showValidate, setShowValidate] = useState(false);
     const [validatingInvoice, setValidatingInvoice] = useState(null);
     const [validateForm, setValidateForm] = useState({
@@ -64,14 +59,13 @@ export default function InvoiceScreen({ navigation }) {
         total: 0,
         categoryId: "",
         description: "",
+        direction: "Sales",
     });
     const [validating, setValidating] = useState(false);
     const [validateError, setValidateError] = useState("");
 
-    // Delete confirmation
     const [deleteInvoice, setDeleteInvoice] = useState(null);
 
-    // Load data
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
@@ -94,7 +88,6 @@ export default function InvoiceScreen({ navigation }) {
         return unsubscribe;
     }, [navigation, loadData]);
 
-    // Apply filters
     useEffect(() => {
         let result = [...invoices];
         if (filterClient)
@@ -128,7 +121,6 @@ export default function InvoiceScreen({ navigation }) {
         setFilterTo("");
     };
 
-    // Create/Edit handlers
     const openCreate = () => {
         setEditing(null);
         setForm({
@@ -163,6 +155,23 @@ export default function InvoiceScreen({ navigation }) {
         setFormError("");
     };
 
+    const openValidateModal = (invoice) => {
+        setValidatingInvoice(invoice);
+        setValidateForm({
+            paidDate: dayjs().format("YYYY-MM-DD"),
+            total: invoice.amount + invoice.tax,
+            categoryId: "",
+            description: `Facture #${invoice.id} - ${invoice.client}`,
+            direction: "Sales",
+        });
+        setValidateError("");
+        setShowValidate(true);
+    };
+
+    const confirmDelete = (invoice) => {
+        setDeleteInvoice(invoice);
+    };
+
     const getStatusColor = (status) => {
         switch (status?.toLowerCase()) {
             case "paid":
@@ -190,9 +199,7 @@ export default function InvoiceScreen({ navigation }) {
                         </Text>
                     </View>
                     <View style={[styles.statusBadge, { backgroundColor: `${statusColor}22` }]}>
-                        <Text style={[styles.statusText, { color: statusColor }]}>
-                            {item.status}
-                        </Text>
+                        <Text style={[styles.statusText, { color: statusColor }]}>{item.status}</Text>
                     </View>
                 </View>
 
@@ -244,19 +251,20 @@ export default function InvoiceScreen({ navigation }) {
         );
     }
 
+
     return (
+
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
                 {/* Header */}
                 <View style={styles.header}>
                     <View>
                         <Text style={styles.title}>🧾 Factures</Text>
-                        <Text style={styles.subtitle}>Gérez vos factures et suivez les paiements</Text>
+                        <Text style={styles.subtitle}>
+                            Gérez vos factures et suivez les paiements
+                        </Text>
                     </View>
-                    <TouchableOpacity style={styles.btnPrimary} onPress={openCreate}>
-                        <Ionicons name="add" size={18} color="#fff" />
-                        <Text style={styles.btnText}>Nouveau</Text>
-                    </TouchableOpacity>
+
                 </View>
 
                 {/* Filters */}
@@ -324,6 +332,146 @@ export default function InvoiceScreen({ navigation }) {
                     />
                 )}
             </ScrollView>
+
+            {/* ==================== Modal Créer / Éditer ==================== */}
+            <Modal visible={showModal} animationType="fade" transparent onRequestClose={closeModal}>
+                <View style={styles.overlay}>
+                    <View style={styles.modalContainer}>
+                        {/* Header */}
+                        <View style={styles.header}>
+                            <Text style={styles.title}>
+                                {editing ? "Modifier la facture" : "Nouvelle facture"}
+                            </Text>
+                            <TouchableOpacity onPress={closeModal} style={styles.closeBtn}>
+                                <Ionicons name="close" size={22} color={colors.textSoft} />
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Body */}
+                        <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
+                            <View style={styles.formGroup}>
+                                <Text style={styles.label}>Nom du client</Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Nom du client"
+                                    placeholderTextColor={colors.textSoft}
+                                    value={form.client}
+                                    onChangeText={(t) => setForm({ ...form, client: t })}
+                                />
+                            </View>
+
+                            <View style={styles.formGroupRow}>
+                                <View style={[styles.formGroup, { flex: 1 }]}>
+                                    <Text style={styles.label}>Montant (HT)</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        keyboardType="numeric"
+                                        placeholder="0.00"
+                                        placeholderTextColor={colors.textSoft}
+                                        value={form.amount}
+                                        onChangeText={(t) => setForm({ ...form, amount: t })}
+                                    />
+                                </View>
+
+                                <View style={[styles.formGroup, { flex: 1 }]}>
+                                    <Text style={styles.label}>TVA (€)</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        keyboardType="numeric"
+                                        placeholder="0.00"
+                                        placeholderTextColor={colors.textSoft}
+                                        value={form.tax}
+                                        onChangeText={(t) => setForm({ ...form, tax: t })}
+                                    />
+                                </View>
+                            </View>
+
+                            <View style={styles.formGroupRow}>
+                                <View style={[styles.formGroup, { flex: 1 }]}>
+                                    <Text style={styles.label}>Date d’émission</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="YYYY-MM-DD"
+                                        placeholderTextColor={colors.textSoft}
+                                        value={form.issueDate}
+                                        onChangeText={(t) => setForm({ ...form, issueDate: t })}
+                                    />
+                                </View>
+
+                                <View style={[styles.formGroup, { flex: 1 }]}>
+                                    <Text style={styles.label}>Date de paiement</Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="YYYY-MM-DD"
+                                        placeholderTextColor={colors.textSoft}
+                                        value={form.paidDate}
+                                        onChangeText={(t) => setForm({ ...form, paidDate: t })}
+                                    />
+                                </View>
+                            </View>
+
+                            <View style={styles.formGroup}>
+                                <Text style={styles.label}>Statut</Text>
+                                <View style={styles.typeSelector}>
+                                    {statusOptions.map((status) => (
+                                        <TouchableOpacity
+                                            key={status}
+                                            onPress={() => setForm({ ...form, status })}
+                                            style={[
+                                                styles.typeOption,
+                                                form.status === status && styles.typeSelected,
+                                            ]}
+                                        >
+                                            <Text
+                                                style={[
+                                                    styles.typeText,
+                                                    {
+                                                        color:
+                                                            form.status === status
+                                                                ? colors.primary
+                                                                : colors.textSoft,
+                                                    },
+                                                ]}
+                                            >
+                                                {status}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            </View>
+                        </ScrollView>
+
+                        {/* Footer */}
+                        <View style={styles.footer}>
+                            <TouchableOpacity
+                                onPress={closeModal}
+                                style={styles.btnSecondary}
+                            >
+                                <Text style={styles.btnSecondaryText}>Annuler</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                onPress={() => Alert.alert("Save pressed (mock)")}
+                                style={[styles.btnPrimary, saving && { opacity: 0.6 }]}
+                                disabled={saving}
+                            >
+                                <Text style={styles.btnPrimaryText}>
+                                    {editing ? "Enregistrer" : "Créer"}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Floating "New Invoice" Button */}
+            <TouchableOpacity
+                style={styles.fab}
+                onPress={openCreate}
+            >
+                <Ionicons name="add" size={26} color="#fff" />
+            </TouchableOpacity>
+
         </SafeAreaView>
     );
 }

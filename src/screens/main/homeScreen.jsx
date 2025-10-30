@@ -118,15 +118,15 @@ export default function DashboardScreen() {
         });
 
         const income = monthTransactions
-            .filter(t => t.type === "Income")
+            .filter(t => t.type === "income")
             .reduce((sum, t) => sum + t.amount, 0);
 
         const expense = monthTransactions
-            .filter(t => t.type === "Expense")
+            .filter(t => t.type === "expense")
             .reduce((sum, t) => sum + t.amount, 0);
 
         const transfer = monthTransactions
-            .filter(t => t.type === "Transfer")
+            .filter(t => t.type === "transfer")
             .reduce((sum, t) => sum + t.amount, 0);
 
         setTotalIncome(income);
@@ -160,19 +160,19 @@ export default function DashboardScreen() {
 
             revenues.push(
                 monthTransactions
-                    .filter(t => t.type === "Income")
+                    .filter(t => t.type === "income")
                     .reduce((sum, t) => sum + t.amount, 0)
             );
 
             expenses.push(
                 monthTransactions
-                    .filter(t => t.type === "Expense")
+                    .filter(t => t.type === "expense")
                     .reduce((sum, t) => sum + t.amount, 0)
             );
 
             transfers.push(
                 monthTransactions
-                    .filter(t => t.type === "Transfer")
+                    .filter(t => t.type === "transfer")
                     .reduce((sum, t) => sum + t.amount, 0)
             );
         }

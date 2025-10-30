@@ -11,14 +11,14 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../contexts/authContext";
 import { categoryApi } from "../../api/categoryApi";
-import { useThemeColors } from "../../theme/color"; //  dynamic colors
-import { getStyles } from "../../theme/styles"; //  unified style system
-import { SafeAreaView } from "react-native-safe-area-context"; //  safe area
+import { useThemeColors } from "../../theme/color"; // ✅ dynamic colors
+import { getStyles } from "../../theme/styles"; // ✅ unified style system
+import { SafeAreaView } from "react-native-safe-area-context"; // ✅ safe area
 
 export default function CategoriesScreen({ navigation }) {
     const { token } = useAuth();
     const colors = useThemeColors();
-    const styles = getStyles(colors); //  generate themed styles
+    const styles = getStyles(colors); // ✅ generate themed styles
 
     const [categories, setCategories] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -80,13 +80,6 @@ export default function CategoriesScreen({ navigation }) {
                         Organisez et gérez vos catégories de transactions
                     </Text>
                 </View>
-                <TouchableOpacity
-                    style={styles.btnPrimary}
-                    onPress={() => navigation.navigate("CategoryModel", { mode: "create" })}
-                >
-                    <Ionicons name="add" size={18} color="#fff" />
-                    <Text style={styles.btnText}>Nouvelle catégorie</Text>
-                </TouchableOpacity>
             </View>
 
             {/* Toggle */}
@@ -175,6 +168,14 @@ export default function CategoriesScreen({ navigation }) {
                     )}
                 />
             )}
+
+            {/* Floating "New" Button */}
+            <TouchableOpacity
+                style={styles.fab}
+                onPress={() => navigation.navigate("CategoryModel", { mode: "create" })}
+            >
+                <Ionicons name="add" size={24} color="#fff" />
+            </TouchableOpacity>
         </SafeAreaView>
     );
 }

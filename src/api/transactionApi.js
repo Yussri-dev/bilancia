@@ -1,6 +1,7 @@
 // src/api/transactionApi.js
 import axios from "axios";
 
+// const API_BASE = "https://saasfinanceapp-v8zp.onrender.com/api/transaction";
 const API_BASE = "https://saasfinanceapp-v8zp.onrender.com/api/transaction";
 
 // Helper function to convert string booleans
@@ -16,12 +17,26 @@ const convertBooleans = (obj) => {
 export const transactionApi = {
     // GET /api/transaction
     getMyTransactions: async (token) => {
-        const res = await axios.get(API_BASE, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        return res.data?.map(transaction => convertBooleans(transaction)) || [];
-    },
+        try {
+            const res = await axios.get(API_BASE, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
 
+            const list = res.data || [];
+            return list.map((t) => ({
+                id: t.id ?? t.Id,
+                amount: t.amount ?? t.Amount,
+                date: t.date ?? t.Date,
+                description: t.description ?? t.Description,
+                categoryId: t.categoryId ?? t.CategoryId,
+                categoryName: t.categoryName ?? t.CategoryName,
+                type: (t.type ?? t.Type)?.toLowerCase() || "expense", // normalize
+            }));
+        } catch (error) {
+            console.error("Error fetching transactions:", error.message);
+            throw error;
+        }
+    },
     // POST /api/transaction
     createTransaction: async (token, dto) => {
         const res = await axios.post(API_BASE, dto, {

@@ -11,6 +11,7 @@ import AnalyticsScreen from "../screens/analytic/analyticsScreen";
 import AdviceScreen from "../screens/advice/adviceScreen";
 import GoalsScreen from "../screens/goals/goalsScreen";
 import InvoiceScreen from "../screens/invoice/invoiceScreen";
+import TransactionScreen from "../screens/transaction/transactionScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -34,6 +35,9 @@ function Tabs() {
                     else if (route.name === "Categories") iconName = "folder";
                     else if (route.name === "Analytics") iconName = "stats-chart";
                     else if (route.name === "Advices") iconName = "bulb";
+                    else if (route.name === "Goals") iconName = "locate";
+                    else if (route.name === "Invoice") iconName = "newspaper";
+                    else if (route.name === "Transaction") iconName = "card";
                     return <Ionicons name={iconName} size={22} color={color} />;
                 },
             })}
@@ -44,6 +48,7 @@ function Tabs() {
             <Tab.Screen name="Advices" component={AdviceScreen} options={{ title: "Conseils" }} />
             <Tab.Screen name="Goals" component={GoalsScreen} options={{ title: "Objectifs" }} />
             <Tab.Screen name="Invoice" component={InvoiceScreen} options={{ title: "Invoices" }} />
+            <Tab.Screen name="Transaction" component={TransactionScreen} options={{ title: "Transactions" }} />
         </Tab.Navigator>
     );
 }
