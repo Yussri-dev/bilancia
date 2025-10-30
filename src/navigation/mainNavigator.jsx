@@ -10,11 +10,11 @@ import CategoryModel from "../screens/categories/categoryModel";
 import AnalyticsScreen from "../screens/analytic/analyticsScreen";
 import AdviceScreen from "../screens/advice/adviceScreen";
 import GoalsScreen from "../screens/goals/goalsScreen";
+import InvoiceScreen from "../screens/invoice/invoiceScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-// your existing bottom tabs
 function Tabs() {
     return (
         <Tab.Navigator
@@ -43,6 +43,7 @@ function Tabs() {
             <Tab.Screen name="Analytics" component={AnalyticsScreen} options={{ title: "Analytics" }} />
             <Tab.Screen name="Advices" component={AdviceScreen} options={{ title: "Conseils" }} />
             <Tab.Screen name="Goals" component={GoalsScreen} options={{ title: "Objectifs" }} />
+            <Tab.Screen name="Invoice" component={InvoiceScreen} options={{ title: "Invoices" }} />
         </Tab.Navigator>
     );
 }
