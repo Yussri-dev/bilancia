@@ -1,4 +1,3 @@
-// src/screens/categories/CategoriesScreen.jsx
 import React, { useEffect, useState } from "react";
 import {
     View,
@@ -7,16 +6,20 @@ import {
     FlatList,
     ActivityIndicator,
     Alert,
-    StyleSheet,
     Switch,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "../../theme/color";
-import { categoryApi } from "../../api/categoryApi";
 import { useAuth } from "../../contexts/authContext";
+import { categoryApi } from "../../api/categoryApi";
+import { useThemeColors } from "../../theme/color"; //  dynamic colors
+import { getStyles } from "../../theme/styles"; //  unified style system
+import { SafeAreaView } from "react-native-safe-area-context"; //  safe area
 
 export default function CategoriesScreen({ navigation }) {
     const { token } = useAuth();
+    const colors = useThemeColors();
+    const styles = getStyles(colors); //  generate themed styles
+
     const [categories, setCategories] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showArchived, setShowArchived] = useState(false);
@@ -60,15 +63,15 @@ export default function CategoriesScreen({ navigation }) {
 
     if (isLoading) {
         return (
-            <View style={styles.centered}>
+            <SafeAreaView style={styles.centered}>
                 <ActivityIndicator size="large" color={colors.primary} />
-                <Text style={styles.text}>Chargement des catégories...</Text>
-            </View>
+                <Text style={styles.loadingText}>Chargement des catégories...</Text>
+            </SafeAreaView>
         );
     }
 
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
                 <View>
@@ -157,13 +160,13 @@ export default function CategoriesScreen({ navigation }) {
                                             category: item,
                                         })
                                     }
-                                    style={styles.btnOutlinePrimary}
+                                    style={[styles.btn, { borderColor: colors.primary, borderWidth: 1 }]}
                                 >
                                     <Ionicons name="pencil" size={16} color={colors.primary} />
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     onPress={() => deleteCategory(item.id)}
-                                    style={styles.btnOutlineDanger}
+                                    style={[styles.btn, { borderColor: colors.danger, borderWidth: 1 }]}
                                 >
                                     <Ionicons name="trash" size={16} color={colors.danger} />
                                 </TouchableOpacity>
@@ -172,90 +175,6 @@ export default function CategoriesScreen({ navigation }) {
                     )}
                 />
             )}
-        </View>
+        </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.background, padding: 16 },
-    header: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 12,
-    },
-    title: { fontSize: 24, fontWeight: "700", color: colors.text },
-    subtitle: { color: colors.textSoft, fontSize: 14 },
-    btnPrimary: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: colors.primary,
-        paddingHorizontal: 14,
-        paddingVertical: 10,
-        borderRadius: 12,
-    },
-    btnText: { color: "#fff", marginLeft: 6, fontWeight: "600" },
-    toggleRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginBottom: 14,
-        gap: 8,
-    },
-    toggleText: { color: colors.textSoft },
-    statsGrid: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        gap: 12,
-        marginBottom: 12,
-    },
-    statCard: {
-        flexBasis: "47%",
-        backgroundColor: colors.surface,
-        borderRadius: 14,
-        borderWidth: 1,
-        borderColor: colors.border,
-        padding: 12,
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 10,
-    },
-    statIcon: {
-        width: 42,
-        height: 42,
-        borderRadius: 10,
-        justifyContent: "center",
-        alignItems: "center",
-        borderWidth: 1,
-    },
-    statValue: { fontSize: 18, fontWeight: "700", color: colors.text },
-    statLabel: { color: colors.textSoft, fontSize: 12 },
-    card: {
-        backgroundColor: colors.surface2,
-        borderRadius: 14,
-        padding: 14,
-        borderWidth: 1,
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 10,
-    },
-    cardName: { color: colors.text, fontWeight: "600", fontSize: 16 },
-    cardButtons: { flexDirection: "row", gap: 10 },
-    btnOutlinePrimary: {
-        borderColor: colors.primary,
-        borderWidth: 1,
-        borderRadius: 8,
-        padding: 6,
-    },
-    btnOutlineDanger: {
-        borderColor: colors.danger,
-        borderWidth: 1,
-        borderRadius: 8,
-        padding: 6,
-    },
-    empty: { alignItems: "center", marginTop: 60 },
-    emptyIcon: { fontSize: 42, marginBottom: 10 },
-    emptyText: { color: colors.textSoft },
-    centered: { flex: 1, justifyContent: "center", alignItems: "center" },
-    text: { color: colors.textSoft },
-});

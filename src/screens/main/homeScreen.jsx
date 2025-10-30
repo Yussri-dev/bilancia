@@ -12,11 +12,16 @@ import {
 import { LineChart, PieChart } from "react-native-chart-kit";
 import { useAuth } from "../../contexts/authContext";
 import { transactionApi, recurringPaymentApi, categoryApi } from "../../api";
+import { useThemeColors } from "../../theme/color";
+import { getStyles } from "../../theme/styles";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const screenWidth = Dimensions.get("window").width;
 
 export default function DashboardScreen() {
     const { token } = useAuth();
+    const colors = useThemeColors();
+    const styles = getStyles(colors);
 
     // State
     const [loading, setLoading] = useState(true);
@@ -253,287 +258,155 @@ export default function DashboardScreen() {
     }
 
     return (
-        <ScrollView style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>📊 Tableau de bord</Text>
-                <Text style={styles.monthLabel}>{getMonthLabel()}</Text>
-            </View>
+        <SafeAreaView style={styles.container}>
 
-            {/* Offline Warning */}
-            {!isOnline && (
-                <View style={styles.warningContainer}>
-                    <Text style={styles.warningText}>
-                        Vous êtes hors-ligne. Les graphiques utilisent les données locales.
-                    </Text>
-                </View>
-            )}
-
-            {/* KPIs */}
-            <View style={styles.kpiGrid}>
-                <View style={styles.kpiCard}>
-                    <Text style={styles.kpiTitle}>Revenus</Text>
-                    <Text style={[styles.kpiValue, styles.success]}>
-                        {formatCurrency(totalIncome)}
-                    </Text>
-                    <Text style={styles.kpiSub}>Mois {getMonthLabel()}</Text>
+            <ScrollView showsVerticalScrollIndicator={false}>
+                {/* Header */}
+                <View style={styles.header}>
+                    <Text style={styles.headerTitle}>📊 Tableau de bord</Text>
+                    <Text style={styles.monthLabel}>{getMonthLabel()}</Text>
                 </View>
 
-                <View style={styles.kpiCard}>
-                    <Text style={styles.kpiTitle}>Dépenses</Text>
-                    <Text style={[styles.kpiValue, styles.danger]}>
-                        {formatCurrency(totalExpense)}
-                    </Text>
-                    <Text style={styles.kpiSub}>Mois {getMonthLabel()}</Text>
-                </View>
-
-                <View style={styles.kpiCard}>
-                    <Text style={styles.kpiTitle}>Transferts</Text>
-                    <Text style={[styles.kpiValue, styles.warning]}>
-                        {formatCurrency(totalTransfer)}
-                    </Text>
-                    <Text style={styles.kpiSub}>Mois {getMonthLabel()}</Text>
-                </View>
-
-                <View style={styles.kpiCard}>
-                    <Text style={styles.kpiTitle}>Solde net</Text>
-                    <Text style={[styles.kpiValue, netBalance >= 0 ? styles.success : styles.danger]}>
-                        {formatCurrency(netBalance)}
-                    </Text>
-                    <Text style={styles.kpiSub}>
-                        {netBalance >= 0 ? "En bonne voie" : "⚠️ À surveiller"}
-                    </Text>
-                </View>
-
-                <View style={styles.kpiCard}>
-                    <Text style={styles.kpiTitle}>Taux d'épargne</Text>
-                    <Text style={styles.kpiValue}>
-                        {(savingsRate * 100).toFixed(0)}%
-                    </Text>
-                    <Text style={styles.kpiSub}>Revenus − Dépenses</Text>
-                </View>
-            </View>
-
-            {/* Revenue/Expense Chart */}
-            {revExpData ? (
-                <View style={styles.card}>
-                    <Text style={styles.cardTitle}>
-                        Revenus / Dépenses / Transferts (6 derniers mois)
-                    </Text>
-                    <LineChart
-                        data={revExpData}
-                        width={screenWidth - 48}
-                        height={220}
-                        chartConfig={{
-                            backgroundColor: "#1E293B",
-                            backgroundGradientFrom: "#1E293B",
-                            backgroundGradientTo: "#1E293B",
-                            decimalPlaces: 0,
-                            color: (opacity = 1) => `rgba(124, 58, 237, ${opacity})`,
-                            labelColor: (opacity = 1) => `rgba(229, 231, 235, ${opacity})`,
-                            style: { borderRadius: 16 },
-                            propsForDots: { r: "4", strokeWidth: "2" },
-                        }}
-                        bezier
-                        style={styles.chart}
-                    />
-                </View>
-            ) : (
-                <View style={styles.card}>
-                    <Text style={styles.cardTitle}>
-                        Revenus / Dépenses / Transferts (6 derniers mois)
-                    </Text>
-                    <Text style={styles.emptyText}>Aucune donnée à afficher.</Text>
-                </View>
-            )}
-
-            {/* Category Pie Chart */}
-            {pieData.length > 0 ? (
-                <View style={styles.card}>
-                    <Text style={styles.cardTitle}>
-                        Dépenses par catégorie ({getMonthLabel()})
-                    </Text>
-                    <PieChart
-                        data={pieData}
-                        width={screenWidth - 48}
-                        height={220}
-                        chartConfig={{
-                            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-                        }}
-                        accessor="amount"
-                        backgroundColor="transparent"
-                        paddingLeft={15}
-                        absolute
-                    />
-                </View>
-            ) : (
-                <View style={styles.card}>
-                    <Text style={styles.cardTitle}>
-                        Dépenses par catégorie ({getMonthLabel()})
-                    </Text>
-                    <Text style={styles.emptyText}>Aucune dépense ce mois.</Text>
-                </View>
-            )}
-
-            {/* Upcoming Payments */}
-            <View style={styles.card}>
-                <Text style={styles.cardTitle}>À venir (14 jours)</Text>
-                {upcomingPayments.length === 0 ? (
-                    <Text style={styles.emptyText}>Aucune échéance à venir 🎉</Text>
-                ) : (
-                    <View style={styles.upcomingList}>
-                        {upcomingPayments.map((payment) => (
-                            <View key={payment.id} style={styles.upcomingItem}>
-                                <View style={styles.upcomingLeft}>
-                                    <Text style={styles.upcomingName}>{payment.name}</Text>
-                                    <Text style={styles.upcomingMeta}>
-                                        {payment.categoryName} · {formatDate(payment.nextDueDate)}
-                                    </Text>
-                                </View>
-                                <Text style={styles.upcomingAmount}>
-                                    {formatCurrency(payment.amount)}
-                                </Text>
-                            </View>
-                        ))}
+                {/* Offline Warning */}
+                {!isOnline && (
+                    <View style={styles.warningContainer}>
+                        <Text style={styles.warningText}>
+                            Vous êtes hors-ligne. Les graphiques utilisent les données locales.
+                        </Text>
                     </View>
                 )}
-            </View>
-        </ScrollView>
+
+                {/* KPIs */}
+                <View style={styles.kpiGrid}>
+                    <View style={styles.kpiCard}>
+                        <Text style={styles.kpiTitle}>Revenus</Text>
+                        <Text style={[styles.kpiValue, styles.success]}>
+                            {formatCurrency(totalIncome)}
+                        </Text>
+                        <Text style={styles.kpiSub}>Mois {getMonthLabel()}</Text>
+                    </View>
+
+                    <View style={styles.kpiCard}>
+                        <Text style={styles.kpiTitle}>Dépenses</Text>
+                        <Text style={[styles.kpiValue, styles.danger]}>
+                            {formatCurrency(totalExpense)}
+                        </Text>
+                        <Text style={styles.kpiSub}>Mois {getMonthLabel()}</Text>
+                    </View>
+
+                    <View style={styles.kpiCard}>
+                        <Text style={styles.kpiTitle}>Transferts</Text>
+                        <Text style={[styles.kpiValue, styles.warning]}>
+                            {formatCurrency(totalTransfer)}
+                        </Text>
+                        <Text style={styles.kpiSub}>Mois {getMonthLabel()}</Text>
+                    </View>
+
+                    <View style={styles.kpiCard}>
+                        <Text style={styles.kpiTitle}>Solde net</Text>
+                        <Text style={[styles.kpiValue, netBalance >= 0 ? styles.success : styles.danger]}>
+                            {formatCurrency(netBalance)}
+                        </Text>
+                        <Text style={styles.kpiSub}>
+                            {netBalance >= 0 ? "En bonne voie" : "⚠️ À surveiller"}
+                        </Text>
+                    </View>
+
+                    <View style={styles.kpiCard}>
+                        <Text style={styles.kpiTitle}>Taux d'épargne</Text>
+                        <Text style={styles.kpiValue}>
+                            {(savingsRate * 100).toFixed(0)}%
+                        </Text>
+                        <Text style={styles.kpiSub}>Revenus − Dépenses</Text>
+                    </View>
+                </View>
+
+                {/* Revenue/Expense Chart */}
+                {revExpData ? (
+                    <View style={styles.card}>
+                        <Text style={styles.cardTitle}>
+                            Revenus / Dépenses / Transferts (6 derniers mois)
+                        </Text>
+                        <LineChart
+                            data={revExpData}
+                            width={screenWidth - 48}
+                            height={220}
+                            chartConfig={{
+                                backgroundColor: "#1E293B",
+                                backgroundGradientFrom: "#1E293B",
+                                backgroundGradientTo: "#1E293B",
+                                decimalPlaces: 0,
+                                color: (opacity = 1) => `rgba(124, 58, 237, ${opacity})`,
+                                labelColor: (opacity = 1) => `rgba(229, 231, 235, ${opacity})`,
+                                style: { borderRadius: 16 },
+                                propsForDots: { r: "4", strokeWidth: "2" },
+                            }}
+                            bezier
+                            style={styles.chart}
+                        />
+                    </View>
+                ) : (
+                    <View style={styles.card}>
+                        <Text style={styles.cardTitle}>
+                            Revenus / Dépenses / Transferts (6 derniers mois)
+                        </Text>
+                        <Text style={styles.emptyText}>Aucune donnée à afficher.</Text>
+                    </View>
+                )}
+
+                {/* Category Pie Chart */}
+                {pieData.length > 0 ? (
+                    <View style={styles.card}>
+                        <Text style={styles.cardTitle}>
+                            Dépenses par catégorie ({getMonthLabel()})
+                        </Text>
+                        <PieChart
+                            data={pieData}
+                            width={screenWidth - 48}
+                            height={220}
+                            chartConfig={{
+                                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                            }}
+                            accessor="amount"
+                            backgroundColor="transparent"
+                            paddingLeft={15}
+                            absolute
+                        />
+                    </View>
+                ) : (
+                    <View style={styles.card}>
+                        <Text style={styles.cardTitle}>
+                            Dépenses par catégorie ({getMonthLabel()})
+                        </Text>
+                        <Text style={styles.emptyText}>Aucune dépense ce mois.</Text>
+                    </View>
+                )}
+
+                {/* Upcoming Payments */}
+                <View style={styles.card}>
+                    <Text style={styles.cardTitle}>À venir (14 jours)</Text>
+                    {upcomingPayments.length === 0 ? (
+                        <Text style={styles.emptyText}>Aucune échéance à venir 🎉</Text>
+                    ) : (
+                        <View style={styles.upcomingList}>
+                            {upcomingPayments.map((payment) => (
+                                <View key={payment.id} style={styles.upcomingItem}>
+                                    <View style={styles.upcomingLeft}>
+                                        <Text style={styles.upcomingName}>{payment.name}</Text>
+                                        <Text style={styles.upcomingMeta}>
+                                            {payment.categoryName} · {formatDate(payment.nextDueDate)}
+                                        </Text>
+                                    </View>
+                                    <Text style={styles.upcomingAmount}>
+                                        {formatCurrency(payment.amount)}
+                                    </Text>
+                                </View>
+                            ))}
+                        </View>
+                    )}
+                </View>
+            </ScrollView>
+        </SafeAreaView>
+
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#0B1221",
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#0B1221",
-    },
-    loadingText: {
-        color: "#94A3B8",
-        marginTop: 12,
-        fontSize: 14,
-    },
-    header: {
-        padding: 24,
-        paddingBottom: 16,
-    },
-    headerTitle: {
-        fontSize: 24,
-        fontWeight: "bold",
-        color: "#E5E7EB",
-        marginBottom: 8,
-    },
-    monthLabel: {
-        fontSize: 16,
-        color: "#94A3B8",
-    },
-    warningContainer: {
-        backgroundColor: "#854D0E",
-        padding: 12,
-        marginHorizontal: 24,
-        marginBottom: 16,
-        borderRadius: 8,
-    },
-    warningText: {
-        color: "#FEF3C7",
-        fontSize: 14,
-    },
-    warningColor: {
-        color: "#F59E0B",
-    },
-
-    kpiGrid: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        padding: 16,
-        gap: 12,
-    },
-    kpiCard: {
-        backgroundColor: "#1E293B",
-        padding: 16,
-        borderRadius: 12,
-        flex: 1,
-        minWidth: "45%",
-    },
-    card: {
-        backgroundColor: "#1E293B",
-        margin: 16,
-        marginTop: 8,
-        padding: 16,
-        borderRadius: 12,
-    },
-    kpiTitle: {
-        fontSize: 12,
-        color: "#94A3B8",
-        marginBottom: 8,
-        textTransform: "uppercase",
-    },
-    kpiValue: {
-        fontSize: 24,
-        fontWeight: "bold",
-        color: "#E5E7EB",
-        marginBottom: 4,
-    },
-    kpiSub: {
-        fontSize: 12,
-        color: "#64748B",
-    },
-    success: {
-        color: "#22C55E",
-    },
-    danger: {
-        color: "#EF4444",
-    },
-    warning: {
-        color: "#F59E0B",
-    },
-    cardTitle: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: "#E5E7EB",
-        marginBottom: 16,
-    },
-    chart: {
-        marginVertical: 8,
-        borderRadius: 16,
-    },
-    emptyText: {
-        color: "#94A3B8",
-        textAlign: "center",
-        padding: 16,
-    },
-    upcomingList: {
-        gap: 12,
-    },
-    upcomingItem: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: "#334155",
-    },
-    upcomingLeft: {
-        flex: 1,
-    },
-    upcomingName: {
-        fontSize: 16,
-        color: "#E5E7EB",
-        fontWeight: "500",
-        marginBottom: 4,
-    },
-    upcomingMeta: {
-        fontSize: 12,
-        color: "#64748B",
-    },
-    upcomingAmount: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: "#7C3AED",
-    },
-});
