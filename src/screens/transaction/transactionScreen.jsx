@@ -1,4 +1,4 @@
-// src/screens/main/TransactionScreen.jsx
+// src/screens/transactions/TransactionScreen.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import {
     View,
@@ -14,12 +14,11 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
-import { transactionApi } from "../../api/transactionApi";
-import { categoryApi } from "../../api/categoryApi";
 import { useAuth } from "../../contexts/authContext";
 import { useThemeColors } from "../../theme/color";
 import { getStyles } from "../../theme/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
+import apiClient from "../../api/apiClient";
 
 export default function TransactionScreen({ navigation }) {
     const { token } = useAuth();
@@ -31,14 +30,11 @@ export default function TransactionScreen({ navigation }) {
     const [filtered, setFiltered] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Summary stats
     const [incomeTotal, setIncomeTotal] = useState(0);
     const [expenseTotal, setExpenseTotal] = useState(0);
+    const balance = incomeTotal - expenseTotal;
 
-    // Filters
     const [searchText, setSearchText] = useState("");
-
-    // Modal form
     const [showModal, setShowModal] = useState(false);
     const [editing, setEditing] = useState(null);
     const [form, setForm] = useState({
@@ -51,7 +47,6 @@ export default function TransactionScreen({ navigation }) {
     const [saving, setSaving] = useState(false);
     const [formError, setFormError] = useState("");
 
-    // Dropdowns
     const [dropdownCategoryOpen, setDropdownCategoryOpen] = useState(false);
     const [dropdownTypeOpen, setDropdownTypeOpen] = useState(false);
     const dropdownAnim = useState(new Animated.Value(0))[0];
@@ -69,16 +64,18 @@ export default function TransactionScreen({ navigation }) {
         setDropdownCategoryOpen(!dropdownCategoryOpen);
     };
 
-    // Load data
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
-            const [txData, catData] = await Promise.all([
-                transactionApi.getMyTransactions(token),
-                categoryApi.getMyCategories(token),
+            apiClient.setAuthToken(token);
+
+            const [txRes, catRes] = await Promise.all([
+                apiClient.get("/transaction"),
+                apiClient.get("/category"),
             ]);
-            setTransactions(txData || []);
-            setCategories(catData || []);
+
+            setTransactions(txRes.data || []);
+            setCategories(catRes.data || []);
         } catch (e) {
             console.error("Error loading data:", e.message);
             Alert.alert("Erreur", "Impossible de charger les transactions ou catégories.");
@@ -92,7 +89,6 @@ export default function TransactionScreen({ navigation }) {
         return unsubscribe;
     }, [navigation, loadData]);
 
-    // Derived stats + filter
     useEffect(() => {
         if (!transactions.length) {
             setFiltered([]);
@@ -121,9 +117,6 @@ export default function TransactionScreen({ navigation }) {
         setExpenseTotal(expense);
     }, [transactions, searchText]);
 
-    const balance = incomeTotal - expenseTotal;
-
-    // CRUD
     const openCreate = () => {
         setEditing(null);
         setForm({
@@ -173,13 +166,16 @@ export default function TransactionScreen({ navigation }) {
 
         setSaving(true);
         try {
-            if (editing)
-                await transactionApi.updateTransaction(token, editing.id, dto);
-            else await transactionApi.createTransaction(token, dto);
+            apiClient.setAuthToken(token);
+            if (editing) {
+                await apiClient.put(`/transaction/${editing.id}`, dto);
+            } else {
+                await apiClient.post("/transaction", dto);
+            }
             closeModal();
             await loadData();
         } catch (e) {
-            console.error(e);
+            console.error("Save error:", e);
             Alert.alert("Erreur", "Impossible d'enregistrer la transaction");
         } finally {
             setSaving(false);
@@ -194,7 +190,8 @@ export default function TransactionScreen({ navigation }) {
                 style: "destructive",
                 onPress: async () => {
                     try {
-                        await transactionApi.deleteTransaction(token, id);
+                        apiClient.setAuthToken(token);
+                        await apiClient.delete(`/transaction/${id}`);
                         await loadData();
                     } catch {
                         Alert.alert("Erreur", "Impossible de supprimer");
@@ -215,18 +212,11 @@ export default function TransactionScreen({ navigation }) {
             <View style={[styles.card, { marginHorizontal: 4, marginBottom: 12 }]}>
                 <View style={styles.cardHeader}>
                     <View style={{ flex: 1 }}>
-                        <Text style={styles.clientName}>
-                            {category?.name || "Sans catégorie"}
-                        </Text>
+                        <Text style={styles.clientName}>{category?.name || "Sans catégorie"}</Text>
                         <Text style={styles.meta}>
                             {dayjs(item.date).format("DD/MM/YYYY")} · {item.categoryName || "—"}
                         </Text>
-                        <Text
-                            style={[
-                                styles.kpiValue,
-                                { fontSize: 18, marginTop: 4 },
-                            ]}
-                        >
+                        <Text style={[styles.kpiValue, { fontSize: 18, marginTop: 4 }]}>
                             €{item.amount.toFixed(2)}
                         </Text>
                     </View>
@@ -297,22 +287,43 @@ export default function TransactionScreen({ navigation }) {
                 renderItem={renderItem}
                 ListHeaderComponent={
                     <>
-                        {/* Header */}
-                        <View style={{ marginBottom: 16 }}>
-                            <Text style={styles.headerTitle}>💳 Transactions</Text>
-                            <Text style={styles.monthLabel}>
-                                Suivez vos revenus et dépenses
-                            </Text>
+                        {/* === HEADER WITH DRAWER === */}
+                        <View
+                            style={[
+                                styles.header,
+                                {
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                    marginBottom: 12,
+                                },
+                            ]}
+                        >
+                            {/* Drawer Button */}
+                            <TouchableOpacity onPress={() => navigation.openDrawer()}>
+                                <Ionicons name="menu" size={26} color={colors.text} />
+                            </TouchableOpacity>
+
+                            <View style={{ flex: 1, alignItems: "center" }}>
+                                <Text style={[styles.headerTitle, { fontSize: 20 }]}>
+                                    💳 Transactions
+                                </Text>
+                                <Text style={styles.subtitle}>
+                                    Suivez vos revenus et dépenses
+                                </Text>
+                            </View>
+
+                            {/* Placeholder to balance layout */}
+                            <View style={{ width: 26 }} />
                         </View>
 
-                        {/* KPI Summary */}
+                        {/* KPIs */}
                         <View style={styles.kpiGrid}>
                             <View style={styles.kpiCard}>
                                 <Text style={styles.kpiTitle}>Revenus</Text>
                                 <Text style={[styles.kpiValue, styles.success]}>
                                     €{incomeTotal.toFixed(2)}
                                 </Text>
-                                <Text style={styles.kpiSub}>Total</Text>
                             </View>
 
                             <View style={styles.kpiCard}>
@@ -320,7 +331,6 @@ export default function TransactionScreen({ navigation }) {
                                 <Text style={[styles.kpiValue, styles.danger]}>
                                     €{expenseTotal.toFixed(2)}
                                 </Text>
-                                <Text style={styles.kpiSub}>Total</Text>
                             </View>
 
                             <View style={styles.kpiCard}>
@@ -328,20 +338,15 @@ export default function TransactionScreen({ navigation }) {
                                 <Text
                                     style={[
                                         styles.kpiValue,
-                                        balance >= 0
-                                            ? styles.success
-                                            : styles.danger,
+                                        balance >= 0 ? styles.success : styles.danger,
                                     ]}
                                 >
                                     €{balance.toFixed(2)}
                                 </Text>
-                                <Text style={styles.kpiSub}>
-                                    {balance >= 0 ? "Positif" : "Négatif"}
-                                </Text>
                             </View>
                         </View>
 
-                        {/* Search Bar */}
+                        {/* Search */}
                         <View style={styles.card}>
                             <TextInput
                                 style={styles.input}
@@ -352,13 +357,10 @@ export default function TransactionScreen({ navigation }) {
                             />
                         </View>
 
-                        {/* Empty */}
                         {filtered.length === 0 && (
                             <View style={styles.empty}>
                                 <Text style={styles.emptyIcon}>📄</Text>
-                                <Text style={styles.emptyText}>
-                                    Aucune transaction trouvée
-                                </Text>
+                                <Text style={styles.emptyText}>Aucune transaction trouvée</Text>
                             </View>
                         )}
                     </>
@@ -372,19 +374,10 @@ export default function TransactionScreen({ navigation }) {
                     <View style={styles.modalContainer}>
                         <View style={styles.header}>
                             <Text style={styles.title}>
-                                {editing
-                                    ? "Modifier la transaction"
-                                    : "Nouvelle transaction"}
+                                {editing ? "Modifier la transaction" : "Nouvelle transaction"}
                             </Text>
-                            <TouchableOpacity
-                                onPress={closeModal}
-                                style={styles.closeBtn}
-                            >
-                                <Ionicons
-                                    name="close"
-                                    size={22}
-                                    color={colors.textSoft}
-                                />
+                            <TouchableOpacity onPress={closeModal} style={styles.closeBtn}>
+                                <Ionicons name="close" size={22} color={colors.textSoft} />
                             </TouchableOpacity>
                         </View>
 
@@ -396,9 +389,7 @@ export default function TransactionScreen({ navigation }) {
                                     style={styles.input}
                                     keyboardType="numeric"
                                     value={form.amount}
-                                    onChangeText={(t) =>
-                                        setForm({ ...form, amount: t })
-                                    }
+                                    onChangeText={(t) => setForm({ ...form, amount: t })}
                                 />
                             </View>
 
@@ -408,9 +399,7 @@ export default function TransactionScreen({ navigation }) {
                                 <TextInput
                                     style={styles.input}
                                     value={form.date}
-                                    onChangeText={(t) =>
-                                        setForm({ ...form, date: t })
-                                    }
+                                    onChangeText={(t) => setForm({ ...form, date: t })}
                                 />
                             </View>
 
@@ -420,33 +409,20 @@ export default function TransactionScreen({ navigation }) {
                                 <TouchableOpacity
                                     style={[
                                         styles.input,
-                                        {
-                                            flexDirection: "row",
-                                            alignItems: "center",
-                                            justifyContent: "space-between",
-                                        },
+                                        { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
                                     ]}
                                     onPress={toggleCategoryDropdown}
                                 >
                                     <Text
                                         style={{
-                                            color: form.categoryId
-                                                ? colors.text
-                                                : colors.textSoft,
+                                            color: form.categoryId ? colors.text : colors.textSoft,
                                         }}
                                     >
-                                        {categories.find(
-                                            (c) =>
-                                                c.id === form.categoryId
-                                        )?.name ||
+                                        {categories.find((c) => c.id === form.categoryId)?.name ||
                                             "Sélectionnez une catégorie"}
                                     </Text>
                                     <Ionicons
-                                        name={
-                                            dropdownCategoryOpen
-                                                ? "chevron-up"
-                                                : "chevron-down"
-                                        }
+                                        name={dropdownCategoryOpen ? "chevron-up" : "chevron-down"}
                                         size={20}
                                         color={colors.textSoft}
                                     />
@@ -455,7 +431,10 @@ export default function TransactionScreen({ navigation }) {
                                 <Animated.View
                                     style={{
                                         overflow: "hidden",
-                                        height: dropdownHeight,
+                                        height: dropdownAnim.interpolate({
+                                            inputRange: [0, 1],
+                                            outputRange: [0, 150],
+                                        }),
                                     }}
                                 >
                                     <ScrollView>
@@ -466,24 +445,19 @@ export default function TransactionScreen({ navigation }) {
                                                     paddingVertical: 8,
                                                     paddingHorizontal: 12,
                                                     backgroundColor:
-                                                        form.categoryId ===
-                                                            cat.id
+                                                        form.categoryId === cat.id
                                                             ? `${colors.primary}15`
                                                             : "transparent",
                                                 }}
                                                 onPress={() => {
-                                                    setForm({
-                                                        ...form,
-                                                        categoryId: cat.id,
-                                                    });
+                                                    setForm({ ...form, categoryId: cat.id });
                                                     toggleCategoryDropdown();
                                                 }}
                                             >
                                                 <Text
                                                     style={{
                                                         color:
-                                                            form.categoryId ===
-                                                                cat.id
+                                                            form.categoryId === cat.id
                                                                 ? colors.primary
                                                                 : colors.text,
                                                     }}
@@ -502,79 +476,54 @@ export default function TransactionScreen({ navigation }) {
                                 <TouchableOpacity
                                     style={[
                                         styles.input,
-                                        {
-                                            flexDirection: "row",
-                                            alignItems: "center",
-                                            justifyContent: "space-between",
-                                        },
+                                        { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
                                     ]}
-                                    onPress={() =>
-                                        setDropdownTypeOpen(!dropdownTypeOpen)
-                                    }
+                                    onPress={() => setDropdownTypeOpen(!dropdownTypeOpen)}
                                 >
-                                    <Text
-                                        style={{
-                                            color: form.type
-                                                ? colors.text
-                                                : colors.textSoft,
-                                        }}
-                                    >
+                                    <Text style={{ color: colors.text }}>
                                         {form.type || "Sélectionnez un type"}
                                     </Text>
                                     <Ionicons
-                                        name={
-                                            dropdownTypeOpen
-                                                ? "chevron-up"
-                                                : "chevron-down"
-                                        }
+                                        name={dropdownTypeOpen ? "chevron-up" : "chevron-down"}
                                         size={20}
                                         color={colors.textSoft}
                                     />
                                 </TouchableOpacity>
 
                                 {dropdownTypeOpen && (
-                                    <View style={[styles.dropdownMenu]}>
-                                        {["Income", "Expense", "Transfer"].map(
-                                            (type) => (
-                                                <TouchableOpacity
-                                                    key={type}
+                                    <View style={styles.dropdownMenu}>
+                                        {["Income", "Expense", "Transfer"].map((type) => (
+                                            <TouchableOpacity
+                                                key={type}
+                                                style={{
+                                                    paddingVertical: 8,
+                                                    paddingHorizontal: 12,
+                                                    backgroundColor:
+                                                        form.type === type
+                                                            ? `${colors.primary}15`
+                                                            : "transparent",
+                                                }}
+                                                onPress={() => {
+                                                    setForm({ ...form, type });
+                                                    setDropdownTypeOpen(false);
+                                                }}
+                                            >
+                                                <Text
                                                     style={{
-                                                        paddingVertical: 8,
-                                                        paddingHorizontal: 12,
-                                                        backgroundColor:
+                                                        color:
                                                             form.type === type
-                                                                ? `${colors.primary}15`
-                                                                : "transparent",
-                                                    }}
-                                                    onPress={() => {
-                                                        setForm({
-                                                            ...form,
-                                                            type,
-                                                        });
-                                                        setDropdownTypeOpen(
-                                                            false
-                                                        );
+                                                                ? colors.primary
+                                                                : colors.text,
                                                     }}
                                                 >
-                                                    <Text
-                                                        style={{
-                                                            color:
-                                                                form.type ===
-                                                                    type
-                                                                    ? colors.primary
-                                                                    : colors.text,
-                                                        }}
-                                                    >
-                                                        {type === "Income"
-                                                            ? "💰 Income"
-                                                            : type ===
-                                                                "Expense"
-                                                                ? "💸 Expense"
-                                                                : "🔄 Transfer"}
-                                                    </Text>
-                                                </TouchableOpacity>
-                                            )
-                                        )}
+                                                    {type === "Income"
+                                                        ? "💰 Income"
+                                                        : type === "Expense"
+                                                            ? "💸 Expense"
+                                                            : "🔄 Transfer"}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        ))}
                                     </View>
                                 )}
                             </View>
@@ -586,37 +535,21 @@ export default function TransactionScreen({ navigation }) {
                                     style={styles.input}
                                     value={form.description}
                                     onChangeText={(t) =>
-                                        setForm({
-                                            ...form,
-                                            description: t,
-                                        })
+                                        setForm({ ...form, description: t })
                                     }
                                 />
                             </View>
 
-                            {formError ? (
-                                <Text style={styles.errorText}>
-                                    {formError}
-                                </Text>
-                            ) : null}
+                            {formError && <Text style={styles.errorText}>{formError}</Text>}
                         </ScrollView>
 
-                        {/* Footer */}
                         <View style={styles.footer}>
-                            <TouchableOpacity
-                                onPress={closeModal}
-                                style={styles.btnSecondary}
-                            >
-                                <Text style={styles.btnSecondaryText}>
-                                    Annuler
-                                </Text>
+                            <TouchableOpacity onPress={closeModal} style={styles.btnSecondary}>
+                                <Text style={styles.btnSecondaryText}>Annuler</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={saveTransaction}
-                                style={[
-                                    styles.btnPrimary,
-                                    saving && { opacity: 0.6 },
-                                ]}
+                                style={[styles.btnPrimary, saving && { opacity: 0.6 }]}
                                 disabled={saving}
                             >
                                 <Text style={styles.btnPrimaryText}>
@@ -628,7 +561,7 @@ export default function TransactionScreen({ navigation }) {
                 </View>
             </Modal>
 
-            {/* Floating Action Button */}
+            {/* Floating Button */}
             <TouchableOpacity style={styles.fab} onPress={openCreate}>
                 <Ionicons name="add" size={26} color="#fff" />
             </TouchableOpacity>

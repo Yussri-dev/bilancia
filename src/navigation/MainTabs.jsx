@@ -1,10 +1,7 @@
-// src/navigation/MainNavigator.jsx
+// src/navigation/MainTabs.jsx
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-
-//  DRY: use index.js barrel exports for screens
 import {
     HomeScreen,
     CategoriesScreen,
@@ -14,24 +11,21 @@ import {
     GoalsScreen,
     InvoiceScreen,
     TransactionScreen,
-    ProfileScreen
 } from "../screens";
 
 const Tab = createBottomTabNavigator();
-const Stack = createNativeStackNavigator();
 
-//  Centralized tab config for cleaner code
 const TAB_SCREENS = [
     { name: "Home", title: "Accueil", icon: "home", component: HomeScreen },
     { name: "Categories", title: "Catégories", icon: "folder", component: CategoriesScreen },
     { name: "Analytics", title: "Analytics", icon: "stats-chart", component: AnalyticsScreen },
-    { name: "Advices", title: "Conseils", icon: "bulb", component: AdviceScreen },
+    // { name: "Advices", title: "Conseils", icon: "bulb", component: AdviceScreen },
     { name: "Goals", title: "Objectifs", icon: "locate", component: GoalsScreen },
     { name: "Invoice", title: "Factures", icon: "newspaper", component: InvoiceScreen },
     { name: "Transaction", title: "Transactions", icon: "card", component: TransactionScreen },
 ];
 
-function Tabs() {
+export default function MainTabs() {
     return (
         <Tab.Navigator
             screenOptions={({ route }) => {
@@ -61,22 +55,5 @@ function Tabs() {
                 />
             ))}
         </Tab.Navigator>
-    );
-}
-
-//  Stack includes Tabs and modals
-export default function MainNavigator() {
-    return (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Tabs" component={Tabs} />
-            <Stack.Screen
-                name="CategoryModel"
-                component={CategoryModel}
-                options={{
-                    presentation: "modal",
-                    headerShown: false,
-                }}
-            />
-        </Stack.Navigator>
     );
 }

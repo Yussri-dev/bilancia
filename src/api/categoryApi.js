@@ -1,71 +1,34 @@
 // src/api/categoryApi.js
-import axios from "axios";
+import apiClient from "./apiClient";
 
-const API_BASE = "https://saasfinanceapp-v8zp.onrender.com/api/category";
-
-// Helper function to convert string booleans
-const convertBooleans = (obj) => {
-    const converted = { ...obj };
-    Object.keys(converted).forEach(key => {
-        if (converted[key] === 'true') converted[key] = true;
-        if (converted[key] === 'false') converted[key] = false;
-    });
-    return converted;
-};
-
-export const categoryApi = {
-    // POST /api/category
-    createCategory: async (token, dto) => {
-        const res = await axios.post(API_BASE, dto, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        return res.data;
-    },
-
-    // GET /api/category
-    getCategories: async (token) => {
-        const res = await axios.get(API_BASE, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        return res.data?.map(category => convertBooleans(category)) || [];
-    },
-
-    // GET /api/category (same as getCategories)
+const categoryApi = {
+    //  Get all categories of the current user
     getMyCategories: async (token) => {
-        const res = await axios.get(API_BASE, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        return res.data?.map(category => convertBooleans(category)) || [];
+        apiClient.setAuthToken(token);
+        const res = await apiClient.get("/category");
+        return res.data;
     },
 
-    // PUT /api/category/{id}
+    //  Create a new category
+    createCategory: async (token, dto) => {
+        apiClient.setAuthToken(token);
+        const res = await apiClient.post("/category", dto);
+        return res.data;
+    },
+
+    //  Update existing category
     updateCategory: async (token, id, dto) => {
-        const res = await axios.put(`${API_BASE}/${id}`, dto, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+        apiClient.setAuthToken(token);
+        const res = await apiClient.put(`/category/${id}`, dto);
         return res.data;
     },
 
-    // DELETE /api/category/{id}
+    //  Delete a category
     deleteCategory: async (token, id) => {
-        const res = await axios.delete(`${API_BASE}/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        return res.data;
-    },
-
-    // POST /api/Goal/{id}/contribute
-    contributeAsync: async (token, id, amount) => {
-        const res = await axios.post(
-            `https://saasfinanceapp-v8zp.onrender.com/api/Goal/${id}/contribute`,
-            amount,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            }
-        );
+        apiClient.setAuthToken(token);
+        const res = await apiClient.delete(`/category/${id}`);
         return res.data;
     },
 };
+
+export default categoryApi;

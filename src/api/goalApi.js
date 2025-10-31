@@ -1,44 +1,39 @@
-import axios from "axios";
-
-const API_BASE = "https://saasfinanceapp-v8zp.onrender.com/api/Goal";
+// src/api/goalApi.js
+import apiClient from "./apiClient";
 
 export const goalApi = {
-    getGoals: async (token, activeOnly) => {
-        const res = await axios.get(API_BASE, {
-            headers: { Authorization: `Bearer ${token}` },
-            params: { activeOnly },
-        });
+    // GET /api/Goal?activeOnly=true
+    getAll: async (token, activeOnly = false) => {
+        apiClient.setAuthToken(token);
+        const res = await apiClient.get("/Goal", { params: { activeOnly } });
         return res.data;
     },
 
-    createGoal: async (token, dto) => {
-        const res = await axios.post(API_BASE, dto, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+    // POST /api/Goal
+    create: async (token, dto) => {
+        apiClient.setAuthToken(token);
+        const res = await apiClient.post("/Goal", dto);
         return res.data;
     },
 
-    updateGoal: async (token, id, dto) => {
-        const res = await axios.put(`${API_BASE}/${id}`, dto, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+    // PUT /api/Goal/{id}
+    update: async (token, id, dto) => {
+        apiClient.setAuthToken(token);
+        const res = await apiClient.put(`/Goal/${id}`, dto);
         return res.data;
     },
 
-    deleteGoal: async (token, id) => {
-        const res = await axios.delete(`${API_BASE}/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+    // DELETE /api/Goal/{id}
+    delete: async (token, id) => {
+        apiClient.setAuthToken(token);
+        const res = await apiClient.delete(`/Goal/${id}`);
         return res.data;
     },
 
-    contributeAsync: async (token, id, amount) => {
-        const res = await axios.post(`${API_BASE}/${id}/contribute`, amount, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-            },
-        });
+    // POST /api/Goal/{id}/contribute
+    contribute: async (token, id, amount) => {
+        apiClient.setAuthToken(token);
+        const res = await apiClient.post(`/Goal/${id}/contribute`, amount);
         return res.data;
     },
 };

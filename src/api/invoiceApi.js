@@ -1,64 +1,54 @@
 // src/api/invoiceApi.js
-import axios from "axios";
+import apiClient from "./apiClient";
 
-const API_BASE = "https://saasfinanceapp-v8zp.onrender.com/api/invoice";
-
+// Helper pour convertir les booléens string → bool
 const convertBooleans = (obj) => {
     const converted = { ...obj };
-    Object.keys(converted).forEach(key => {
-        if (converted[key] === 'true') converted[key] = true;
-        if (converted[key] === 'false') converted[key] = false;
-    });
+    for (const key in converted) {
+        if (converted[key] === "true") converted[key] = true;
+        if (converted[key] === "false") converted[key] = false;
+    }
     return converted;
 };
 
 export const invoiceApi = {
-    createInvoice: async (token, dto) => {
-        const res = await axios.post(API_BASE, dto, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+    // POST /api/invoice
+    create: async (token, dto) => {
+        apiClient.setAuthToken(token);
+        const res = await apiClient.post("/invoice", dto);
         return res.data;
     },
 
-    getInvoices: async (token) => {
-        const res = await axios.get(API_BASE, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        return res.data?.map(invoice => convertBooleans(invoice)) || [];
-    },
-
+    // GET /api/invoice
     getAll: async (token) => {
-        const res = await axios.get(API_BASE, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        return res.data?.map(invoice => convertBooleans(invoice)) || [];
+        apiClient.setAuthToken(token);
+        const res = await apiClient.get("/invoice");
+        return res.data?.map(convertBooleans) || [];
     },
 
-    updateInvoice: async (token, id, dto) => {
-        const res = await axios.put(`${API_BASE}/${id}`, dto, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+    // Alias (si tu veux garder la compatibilité avec ton code actuel)
+    getInvoices: async (token) => {
+        return await invoiceApi.getAll(token);
+    },
+
+    // PUT /api/invoice/{id}
+    update: async (token, id, dto) => {
+        apiClient.setAuthToken(token);
+        const res = await apiClient.put(`/invoice/${id}`, dto);
         return res.data;
     },
 
-    deleteInvoice: async (token, id) => {
-        const res = await axios.delete(`${API_BASE}/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+    // DELETE /api/invoice/{id}
+    delete: async (token, id) => {
+        apiClient.setAuthToken(token);
+        const res = await apiClient.delete(`/invoice/${id}`);
         return res.data;
     },
 
+    // POST /api/invoice/{id}/validate-to-transaction
     validateToTransaction: async (token, id, dto) => {
-        const res = await axios.post(
-            `${API_BASE}/${id}/validate-to-transaction`,
-            dto,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-            }
-        );
+        apiClient.setAuthToken(token);
+        const res = await apiClient.post(`/invoice/${id}/validate-to-transaction`, dto);
         return res.data;
     },
 };

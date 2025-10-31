@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
     View,
     Text,
@@ -10,12 +10,12 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../contexts/authContext";
-import { goalApi } from "../../api/goalApi";
-import { useThemeColors } from "../../theme/color"; // ✅ dynamic theme
-import { getStyles } from "../../theme/styles"; // ✅ unified style system
-import { SafeAreaView } from "react-native-safe-area-context"; // ✅ safe area
+import apiClient from "../../api/apiClient";
+import { useThemeColors } from "../../theme/color";
+import { getStyles } from "../../theme/styles";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function GoalsScreen() {
+export default function GoalsScreen({ navigation }) {
     const { token } = useAuth();
     const colors = useThemeColors();
     const styles = getStyles(colors);
@@ -28,54 +28,64 @@ export default function GoalsScreen() {
     const [isSaving, setIsSaving] = useState(false);
     const [contrib, setContrib] = useState({});
 
-    // Load goals
-    const loadGoals = async () => {
+    // ✅ Load goals via API
+    const loadGoals = useCallback(async () => {
         setIsLoading(true);
         try {
-            const list = await goalApi.getGoals(token, activeOnly);
-            setGoals(list || []);
+            const endpoint = activeOnly ? "/goal?activeOnly=true" : "/goal";
+            const response = await apiClient.get(endpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setGoals(response.data || []);
         } catch (err) {
-            console.log("Offline or API error:", err);
+            console.error("Offline or API error:", err);
             Alert.alert("Erreur", "Impossible de charger les objectifs.");
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [token, activeOnly]);
 
     useEffect(() => {
         loadGoals();
-    }, [activeOnly]);
+    }, [loadGoals]);
 
+    // ✅ Save or update goal
     const saveGoal = async () => {
         if (!form.name || !form.targetAmount) {
             Alert.alert("Erreur", "Le nom et le montant sont obligatoires.");
             return;
         }
+
         setIsSaving(true);
         try {
+            const dto = {
+                name: form.name.trim(),
+                targetAmount: parseFloat(form.targetAmount),
+                deadline: form.deadline || null,
+            };
+
             if (editingId) {
-                await goalApi.updateGoal(token, editingId, {
-                    name: form.name,
-                    targetAmount: parseFloat(form.targetAmount),
-                    deadline: form.deadline || null,
+                await apiClient.put(`/goal/${editingId}`, dto, {
+                    headers: { Authorization: `Bearer ${token}` },
                 });
             } else {
-                await goalApi.createGoal(token, {
-                    name: form.name,
-                    targetAmount: parseFloat(form.targetAmount),
-                    deadline: form.deadline || null,
+                await apiClient.post("/goal", dto, {
+                    headers: { Authorization: `Bearer ${token}` },
                 });
             }
+
             await loadGoals();
             setForm({ name: "", targetAmount: "", deadline: "" });
             setEditingId(null);
-        } catch {
+        } catch (error) {
+            console.error("Save goal error:", error);
             Alert.alert("Erreur", "Impossible d’enregistrer l’objectif.");
         } finally {
             setIsSaving(false);
         }
     };
 
+    // ✅ Delete goal
     const deleteGoal = async (id) => {
         Alert.alert("Confirmation", "Supprimer cet objectif ?", [
             { text: "Annuler", style: "cancel" },
@@ -84,24 +94,34 @@ export default function GoalsScreen() {
                 style: "destructive",
                 onPress: async () => {
                     try {
-                        await goalApi.deleteGoal(token, id);
+                        await apiClient.delete(`/goal/${id}`, {
+                            headers: { Authorization: `Bearer ${token}` },
+                        });
                         await loadGoals();
-                    } catch {
-                        Alert.alert("Erreur", "Impossible de supprimer.");
+                    } catch (error) {
+                        console.error("Delete goal error:", error);
+                        Alert.alert("Erreur", "Impossible de supprimer l’objectif.");
                     }
                 },
             },
         ]);
     };
 
+    // ✅ Contribute to a goal
     const contribute = async (id) => {
         const amount = parseFloat(contrib[id] || 0);
         if (isNaN(amount) || amount <= 0) return;
+
         try {
-            await goalApi.contributeAsync(token, id, amount);
+            await apiClient.post(
+                `/goal/${id}/contribute`,
+                { amount },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
             setContrib((prev) => ({ ...prev, [id]: "" }));
             await loadGoals();
-        } catch {
+        } catch (error) {
+            console.error("Contribution error:", error);
             Alert.alert("Erreur", "Impossible d’ajouter une contribution.");
         }
     };
@@ -117,17 +137,41 @@ export default function GoalsScreen() {
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
-                <View style={styles.header}>
-                    <View>
-                        <Text style={styles.title}>🎯 Objectifs d’épargne</Text>
+            <ScrollView
+                contentContainerStyle={{ paddingBottom: 100 }}
+                keyboardShouldPersistTaps="handled"
+            >
+                {/* === HEADER === */}
+                <View
+                    style={[
+                        styles.header,
+                        {
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            marginBottom: 12,
+                        },
+                    ]}
+                >
+                    {/* Drawer Button */}
+                    <TouchableOpacity onPress={() => navigation.openDrawer()}>
+                        <Ionicons name="menu" size={26} color={colors.text} />
+                    </TouchableOpacity>
+
+                    <View style={{ flex: 1, alignItems: "center" }}>
+                        <Text style={[styles.headerTitle, { fontSize: 20 }]}>
+                            🎯 Objectifs d’épargne
+                        </Text>
                         <Text style={styles.subtitle}>
-                            Créez et suivez vos objectifs d’épargne.
+                            Créez et suivez vos objectifs financiers
                         </Text>
                     </View>
+
+                    {/* Placeholder for symmetry */}
+                    <View style={{ width: 26 }} />
                 </View>
 
-                {/* --- Formulaire --- */}
+                {/* === FORMULAIRE === */}
                 <View style={styles.filterCard}>
                     <TextInput
                         style={styles.input}
@@ -145,7 +189,7 @@ export default function GoalsScreen() {
                         onChangeText={(v) => setForm({ ...form, targetAmount: v })}
                     />
                     <TouchableOpacity
-                        style={styles.btnPrimary}
+                        style={[styles.btnPrimary, isSaving && { opacity: 0.6 }]}
                         onPress={saveGoal}
                         disabled={isSaving}
                     >
@@ -155,7 +199,7 @@ export default function GoalsScreen() {
                     </TouchableOpacity>
                 </View>
 
-                {/* --- Liste --- */}
+                {/* === LISTE DES OBJECTIFS === */}
                 {goals.length === 0 ? (
                     <View style={styles.empty}>
                         <Text style={styles.emptyText}>Aucun objectif enregistré</Text>
@@ -166,6 +210,8 @@ export default function GoalsScreen() {
                             Math.round((g.currentSaved / g.targetAmount) * 100),
                             100
                         );
+                        const remaining = (g.targetAmount - g.currentSaved).toFixed(2);
+
                         return (
                             <View key={g.id} style={styles.card}>
                                 <Text style={styles.clientName}>{g.name}</Text>
@@ -182,20 +228,17 @@ export default function GoalsScreen() {
                                             {
                                                 width: `${percent}%`,
                                                 backgroundColor:
-                                                    percent >= 100
-                                                        ? colors.success
-                                                        : colors.primary,
+                                                    percent >= 100 ? colors.success : colors.primary,
                                             },
                                         ]}
                                     />
                                 </View>
 
                                 <Text style={styles.detailText}>
-                                    {percent}% atteint — Reste: €
-                                    {(g.targetAmount - g.currentSaved).toFixed(2)}
+                                    {percent}% atteint — Reste: €{remaining}
                                 </Text>
 
-                                {/* Contribute */}
+                                {/* Contribution input */}
                                 <View style={styles.formRow}>
                                     <TextInput
                                         style={[styles.input, { flex: 1 }]}
@@ -230,6 +273,7 @@ export default function GoalsScreen() {
                                     >
                                         <Text style={styles.btnActionText}>✏️ Modifier</Text>
                                     </TouchableOpacity>
+
                                     <TouchableOpacity
                                         style={[styles.btn, styles.btnDanger, { flex: 1 }]}
                                         onPress={() => deleteGoal(g.id)}

@@ -12,8 +12,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
-import { invoiceApi } from "../../api/invoiceApi";
-import { categoryApi } from "../../api/categoryApi";
+import apiClient from "../../api/apiClient";
 import { useAuth } from "../../contexts/authContext";
 import { useThemeColors } from "../../theme/color";
 import { getStyles } from "../../theme/styles";
@@ -50,33 +49,24 @@ export default function InvoiceScreen({ navigation }) {
         paidDate: "",
     });
     const [saving, setSaving] = useState(false);
-    const [formError, setFormError] = useState("");
-
-    const [showValidate, setShowValidate] = useState(false);
-    const [validatingInvoice, setValidatingInvoice] = useState(null);
-    const [validateForm, setValidateForm] = useState({
-        paidDate: dayjs().format("YYYY-MM-DD"),
-        total: 0,
-        categoryId: "",
-        description: "",
-        direction: "Sales",
-    });
-    const [validating, setValidating] = useState(false);
-    const [validateError, setValidateError] = useState("");
 
     const [deleteInvoice, setDeleteInvoice] = useState(null);
 
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
-            const [invoicesData, categoriesData] = await Promise.all([
-                invoiceApi.getAll(token),
-                categoryApi.getCategories(token),
+            const [invoicesRes, categoriesRes] = await Promise.all([
+                apiClient.get("/invoice", {
+                    headers: { Authorization: `Bearer ${token}` },
+                }),
+                apiClient.get("/category", {
+                    headers: { Authorization: `Bearer ${token}` },
+                }),
             ]);
-            setInvoices(invoicesData || []);
-            setCategories(categoriesData || []);
+            setInvoices(invoicesRes.data || []);
+            setCategories(categoriesRes.data || []);
         } catch (error) {
-            console.error(error);
+            console.error("Load error:", error);
             Alert.alert("Erreur", "Impossible de charger les données");
         } finally {
             setLoading(false);
@@ -106,6 +96,7 @@ export default function InvoiceScreen({ navigation }) {
             result = result.filter(
                 (i) => dayjs(i.issueDate).format("YYYY-MM-DD") <= filterTo
             );
+
         result.sort((a, b) => new Date(b.issueDate) - new Date(a.issueDate));
         setFiltered(result);
         setPageIndex(0);
@@ -131,7 +122,6 @@ export default function InvoiceScreen({ navigation }) {
             issueDate: dayjs().format("YYYY-MM-DD"),
             paidDate: "",
         });
-        setFormError("");
         setShowModal(true);
     };
 
@@ -145,32 +135,78 @@ export default function InvoiceScreen({ navigation }) {
             issueDate: dayjs(invoice.issueDate).format("YYYY-MM-DD"),
             paidDate: invoice.paidDate ? dayjs(invoice.paidDate).format("YYYY-MM-DD") : "",
         });
-        setFormError("");
         setShowModal(true);
     };
 
     const closeModal = () => {
         setShowModal(false);
         setEditing(null);
-        setFormError("");
     };
 
-    const openValidateModal = (invoice) => {
-        setValidatingInvoice(invoice);
-        setValidateForm({
-            paidDate: dayjs().format("YYYY-MM-DD"),
-            total: invoice.amount + invoice.tax,
-            categoryId: "",
-            description: `Facture #${invoice.id} - ${invoice.client}`,
-            direction: "Sales",
-        });
-        setValidateError("");
-        setShowValidate(true);
+    const saveInvoice = async () => {
+        if (!form.client || !form.amount) {
+            Alert.alert("Erreur", "Le client et le montant sont obligatoires.");
+            return;
+        }
+
+        setSaving(true);
+        try {
+            const dto = {
+                client: form.client.trim(),
+                amount: parseFloat(form.amount),
+                tax: parseFloat(form.tax) || 0,
+                status: form.status,
+                issueDate: form.issueDate,
+                paidDate: form.paidDate || null,
+            };
+
+            if (editing) {
+                await apiClient.put(`/invoice/${editing.id}`, dto, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            } else {
+                await apiClient.post("/invoice", dto, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+            }
+
+            await loadData();
+            closeModal();
+        } catch (error) {
+            console.error("Save invoice error:", error);
+            Alert.alert("Erreur", "Impossible d'enregistrer la facture.");
+        } finally {
+            setSaving(false);
+        }
     };
 
-    const confirmDelete = (invoice) => {
-        setDeleteInvoice(invoice);
-    };
+    useEffect(() => {
+        if (!deleteInvoice) return;
+        Alert.alert(
+            "Confirmation",
+            `Supprimer la facture ${deleteInvoice.client} ?`,
+            [
+                { text: "Annuler", style: "cancel", onPress: () => setDeleteInvoice(null) },
+                {
+                    text: "Supprimer",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            await apiClient.delete(`/invoice/${deleteInvoice.id}`, {
+                                headers: { Authorization: `Bearer ${token}` },
+                            });
+                            await loadData();
+                        } catch (err) {
+                            console.error("Delete invoice error:", err);
+                            Alert.alert("Erreur", "Impossible de supprimer la facture.");
+                        } finally {
+                            setDeleteInvoice(null);
+                        }
+                    },
+                },
+            ]
+        );
+    }, [deleteInvoice]);
 
     const getStatusColor = (status) => {
         switch (status?.toLowerCase()) {
@@ -190,21 +226,33 @@ export default function InvoiceScreen({ navigation }) {
         const statusColor = getStatusColor(item.status);
 
         return (
-            <View style={[styles.card, { borderLeftColor: statusColor, borderLeftWidth: 3 }]}>
+            <View
+                style={[
+                    styles.card,
+                    { borderLeftColor: statusColor, borderLeftWidth: 3 },
+                ]}
+            >
                 <View style={styles.cardHeader}>
                     <View style={{ flex: 1 }}>
                         <Text style={styles.clientName}>{item.client}</Text>
                         <Text style={styles.meta}>
-                            {dayjs(item.issueDate).format("YYYY-MM-DD")} • €{total.toFixed(2)}
+                            {dayjs(item.issueDate).format("YYYY-MM-DD")} • €
+                            {total.toFixed(2)}
                         </Text>
                     </View>
-                    <View style={[styles.statusBadge, { backgroundColor: `${statusColor}22` }]}>
-                        <Text style={[styles.statusText, { color: statusColor }]}>{item.status}</Text>
+                    <View
+                        style={[styles.statusBadge, { backgroundColor: `${statusColor}22` }]}
+                    >
+                        <Text style={[styles.statusText, { color: statusColor }]}>
+                            {item.status}
+                        </Text>
                     </View>
                 </View>
 
                 <View style={styles.cardDetails}>
-                    <Text style={styles.detailText}>Montant HT: €{item.amount.toFixed(2)}</Text>
+                    <Text style={styles.detailText}>
+                        Montant HT: €{item.amount.toFixed(2)}
+                    </Text>
                     <Text style={styles.detailText}>TVA: €{item.tax.toFixed(2)}</Text>
                     {item.paidDate && (
                         <Text style={styles.detailText}>
@@ -214,15 +262,6 @@ export default function InvoiceScreen({ navigation }) {
                 </View>
 
                 <View style={styles.cardActions}>
-                    {item.status?.toLowerCase() !== "paid" && (
-                        <TouchableOpacity
-                            style={[styles.btnAction, styles.btnSuccess]}
-                            onPress={() => openValidateModal(item)}
-                        >
-                            <Ionicons name="checkmark-circle" size={16} color="#fff" />
-                            <Text style={styles.btnActionText}>Valider</Text>
-                        </TouchableOpacity>
-                    )}
                     <TouchableOpacity
                         style={[styles.btnAction, styles.btnPrimary]}
                         onPress={() => openEdit(item)}
@@ -232,7 +271,7 @@ export default function InvoiceScreen({ navigation }) {
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={[styles.btnAction, styles.btnDanger]}
-                        onPress={() => confirmDelete(item)}
+                        onPress={() => setDeleteInvoice(item)}
                     >
                         <Ionicons name="trash" size={16} color="#fff" />
                         <Text style={styles.btnActionText}>Supprimer</Text>
@@ -251,25 +290,45 @@ export default function InvoiceScreen({ navigation }) {
         );
     }
 
-
     return (
-
         <SafeAreaView style={styles.container}>
-            <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-                {/* Header */}
-                <View style={styles.header}>
-                    <View>
-                        <Text style={styles.title}>🧾 Factures</Text>
+            <ScrollView
+                contentContainerStyle={{ paddingBottom: 100 }}
+                keyboardShouldPersistTaps="handled"
+            >
+                {/* === HEADER WITH DRAWER === */}
+                <View
+                    style={[
+                        styles.header,
+                        {
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            marginBottom: 12,
+                        },
+                    ]}
+                >
+                    {/* Drawer Button */}
+                    <TouchableOpacity onPress={() => navigation.openDrawer()}>
+                        <Ionicons name="menu" size={26} color={colors.text} />
+                    </TouchableOpacity>
+
+                    <View style={{ flex: 1, alignItems: "center" }}>
+                        <Text style={[styles.headerTitle, { fontSize: 20 }]}>
+                            🧾 Factures
+                        </Text>
                         <Text style={styles.subtitle}>
                             Gérez vos factures et suivez les paiements
                         </Text>
                     </View>
 
+                    {/* Placeholder to balance layout */}
+                    <View style={{ width: 26 }} />
                 </View>
 
-                {/* Filters */}
+                {/* 🔍 Filters */}
                 <View style={styles.filterCard}>
-                    <Text style={styles.filterTitle}>🔍 Filtres</Text>
+                    <Text style={styles.filterTitle}>Filtres</Text>
                     <View style={styles.filterRow}>
                         <TextInput
                             style={[styles.input, { flex: 2 }]}
@@ -308,7 +367,7 @@ export default function InvoiceScreen({ navigation }) {
                     </TouchableOpacity>
                 </View>
 
-                {/* Stats */}
+                {/* 📊 Stats */}
                 <View style={styles.statsRow}>
                     <Text style={styles.statText}>
                         Total: <Text style={styles.statValue}>{filtered.length}</Text>
@@ -318,7 +377,7 @@ export default function InvoiceScreen({ navigation }) {
                     </Text>
                 </View>
 
-                {/* List */}
+                {/* 📋 List */}
                 {filtered.length === 0 ? (
                     <View style={styles.empty}>
                         <Text style={styles.emptyIcon}>📄</Text>
@@ -333,7 +392,7 @@ export default function InvoiceScreen({ navigation }) {
                 )}
             </ScrollView>
 
-            {/* ==================== Modal Créer / Éditer ==================== */}
+            {/* 💾 Modal Create / Edit */}
             <Modal visible={showModal} animationType="fade" transparent onRequestClose={closeModal}>
                 <View style={styles.overlay}>
                     <View style={styles.modalContainer}>
@@ -388,7 +447,7 @@ export default function InvoiceScreen({ navigation }) {
 
                             <View style={styles.formGroupRow}>
                                 <View style={[styles.formGroup, { flex: 1 }]}>
-                                    <Text style={styles.label}>Date d’émission</Text>
+                                    <Text style={styles.label}>Date d'émission</Text>
                                     <TextInput
                                         style={styles.input}
                                         placeholder="YYYY-MM-DD"
@@ -451,7 +510,7 @@ export default function InvoiceScreen({ navigation }) {
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                                onPress={() => Alert.alert("Save pressed (mock)")}
+                                onPress={saveInvoice}
                                 style={[styles.btnPrimary, saving && { opacity: 0.6 }]}
                                 disabled={saving}
                             >
@@ -464,14 +523,10 @@ export default function InvoiceScreen({ navigation }) {
                 </View>
             </Modal>
 
-            {/* Floating "New Invoice" Button */}
-            <TouchableOpacity
-                style={styles.fab}
-                onPress={openCreate}
-            >
+            {/* ➕ Floating Button */}
+            <TouchableOpacity style={styles.fab} onPress={openCreate}>
                 <Ionicons name="add" size={26} color="#fff" />
             </TouchableOpacity>
-
         </SafeAreaView>
     );
 }

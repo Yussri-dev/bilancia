@@ -1,56 +1,49 @@
 // src/api/recurringPaymentApi.js
-import axios from "axios";
+import apiClient from "./apiClient";
 
-const API_BASE = "https://saasfinanceapp-v8zp.onrender.com/api/RecurringPayment";
-
-// Helper function to convert string booleans
+// Helper : convertir les booléens string → bool
 const convertBooleans = (obj) => {
     const converted = { ...obj };
-    Object.keys(converted).forEach(key => {
-        if (converted[key] === 'true') converted[key] = true;
-        if (converted[key] === 'false') converted[key] = false;
-    });
+    for (const key in converted) {
+        if (converted[key] === "true") converted[key] = true;
+        if (converted[key] === "false") converted[key] = false;
+    }
     return converted;
 };
 
 export const recurringPaymentApi = {
     // GET /api/RecurringPayment
-    getAllAsync: async (token) => {
-        const res = await axios.get(API_BASE, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-        return res.data?.map(payment => convertBooleans(payment)) || [];
+    getAll: async (token) => {
+        apiClient.setAuthToken(token);
+        const res = await apiClient.get("/RecurringPayment");
+        return res.data?.map(convertBooleans) || [];
     },
 
     // POST /api/RecurringPayment
-    createAsync: async (token, dto) => {
-        const res = await axios.post(API_BASE, dto, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+    create: async (token, dto) => {
+        apiClient.setAuthToken(token);
+        const res = await apiClient.post("/RecurringPayment", dto);
         return res.data;
     },
 
     // PUT /api/RecurringPayment/{id}
-    updateAsync: async (token, id, dto) => {
-        const res = await axios.put(`${API_BASE}/${id}`, dto, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+    update: async (token, id, dto) => {
+        apiClient.setAuthToken(token);
+        const res = await apiClient.put(`/RecurringPayment/${id}`, dto);
         return res.data;
     },
 
     // DELETE /api/RecurringPayment/{id}
-    deleteAsync: async (token, id) => {
-        const res = await axios.delete(`${API_BASE}/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+    delete: async (token, id) => {
+        apiClient.setAuthToken(token);
+        const res = await apiClient.delete(`/RecurringPayment/${id}`);
         return res.data;
     },
 
     // POST /api/RecurringPayment/{id}/pay
-    markAsPaidAsync: async (token, id) => {
-        const res = await axios.post(`${API_BASE}/${id}/pay`, null, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+    markAsPaid: async (token, id) => {
+        apiClient.setAuthToken(token);
+        const res = await apiClient.post(`/RecurringPayment/${id}/pay`);
         return res.data;
     },
 };

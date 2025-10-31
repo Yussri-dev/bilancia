@@ -1,21 +1,25 @@
-//authApi
-import axios from "axios"
+import apiClient from "./apiClient";
 
-const API_BASE = "https://saasfinanceapp-v8zp.onrender.com/api/auth";
+export const authApi = {
+    login: async (data) => {
+        const res = await apiClient.post("/auth/login", data);
+        return res.data;
+    },
 
-export const loginUser = async (data) => {
-    const res = await axios.post(`${API_BASE}/login`, data);
-    return res.data;
-};
+    register:async (data)=>{
+        const res = await apiClient.post("/auth/register",data);
+        return res.data;
+    },
 
-export const registerUser = async (data) => {
-    const res = await axios.post(`${API_BASE}/register`, data);
-    return res.data;
-};
+    getProfile: async (token) => {
+        apiClient.setAuthToken(token);
+        const res = await apiClient.get("/auth/profile");
+        return res.data;
+    }
+}
+/*
 
-export const getProfile = async (token) => {
-    const res = await axios.get(`${API_BASE}/profile`, {
-        headers: { Authorization: `Bearer ${token}` },
-    });
-    return res.data;
-};
+je veux faire alias babel : 
+pour les apis et les screens on va débuteer avec les apis et apres on rajoute les screens : 
+
+*/

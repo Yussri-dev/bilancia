@@ -1,30 +1,31 @@
-// src/screens/main/DashboardScreen.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
     View,
     Text,
     ScrollView,
-    StyleSheet,
     ActivityIndicator,
     Dimensions,
     Alert,
+    RefreshControl,
+    TouchableOpacity,
 } from "react-native";
 import { LineChart, PieChart } from "react-native-chart-kit";
 import { useAuth } from "../../contexts/authContext";
-import { transactionApi, recurringPaymentApi, categoryApi } from "../../api";
+import apiClient from "../../api/apiClient";
 import { useThemeColors } from "../../theme/color";
 import { getStyles } from "../../theme/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 
 const screenWidth = Dimensions.get("window").width;
 
-export default function DashboardScreen() {
+export default function HomeScreen({ navigation }) {
     const { token } = useAuth();
     const colors = useThemeColors();
     const styles = getStyles(colors);
 
-    // State
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [isOnline, setIsOnline] = useState(true);
 
@@ -40,93 +41,88 @@ export default function DashboardScreen() {
     const [netBalance, setNetBalance] = useState(0);
     const [savingsRate, setSavingsRate] = useState(0);
 
-    // Charts data
+    // Charts
     const [revExpData, setRevExpData] = useState(null);
     const [pieData, setPieData] = useState([]);
 
-    useEffect(() => {
-        loadAll();
-    }, [currentMonth]);
-
-    const loadAll = async () => {
+    //  Load all dashboard data
+    const loadAll = useCallback(async () => {
         setLoading(true);
         try {
-            await loadCategories();
-            await loadTransactions();
-            await loadUpcomingPayments();
-            computeKPIs();
-            buildRevExpChart();
-            buildCategoryPie();
+            apiClient.setAuthToken(token);
+
+            const [catRes, txRes, payRes] = await Promise.all([
+                apiClient.get("/category"),
+                apiClient.get("/transaction"),
+                apiClient.get("/recurringpayment"),
+            ]);
+
+            setCategories(catRes.data || []);
+            setTransactions(txRes.data || []);
+            setUpcomingPayments(processUpcomingPayments(payRes.data || []));
         } catch (error) {
             console.error("Error loading dashboard:", error);
-            Alert.alert("Erreur", "Impossible de charger les données");
+            Alert.alert("Erreur", "Impossible de charger les données.");
         } finally {
             setLoading(false);
+            setRefreshing(false);
         }
+    }, [token]);
+
+    //  Refresh when screen focused or month changes
+    useEffect(() => {
+        const unsubscribe = navigation.addListener("focus", () => {
+            loadAll();
+        });
+        return unsubscribe;
+    }, [navigation, loadAll, currentMonth]);
+
+    //  Process payments due in next 14 days
+    const processUpcomingPayments = (all) => {
+        const now = new Date();
+        const end = new Date();
+        end.setDate(end.getDate() + 14);
+
+        return all
+            .filter((p) => p.isActive)
+            .filter((p) => {
+                const dueDate = new Date(p.nextDueDate);
+                return dueDate >= now && dueDate <= end;
+            })
+            .sort((a, b) => new Date(a.nextDueDate) - new Date(b.nextDueDate))
+            .slice(0, 10);
     };
 
-    const loadCategories = async () => {
-        try {
-            const data = await categoryApi.getCategories(token);
-            setCategories(data || []);
-        } catch (error) {
-            console.error("Error loading categories:", error);
-            setCategories([]);
-        }
-    };
+    //  Compute KPIs
+    useEffect(() => {
+        if (transactions.length === 0) return;
 
-    const loadTransactions = async () => {
-        try {
-            const data = await transactionApi.getMyTransactions(token);
-            setTransactions(data || []);
-        } catch (error) {
-            console.error("Error loading transactions:", error);
-            setTransactions([]);
-        }
-    };
+        const monthStart = new Date(
+            currentMonth.getFullYear(),
+            currentMonth.getMonth(),
+            1
+        );
+        const monthEnd = new Date(
+            currentMonth.getFullYear(),
+            currentMonth.getMonth() + 1,
+            0
+        );
 
-    const loadUpcomingPayments = async () => {
-        try {
-            const all = await recurringPaymentApi.getAllAsync(token);
-            const now = new Date();
-            const end = new Date();
-            end.setDate(end.getDate() + 14);
-
-            const filtered = (all || [])
-                .filter(p => {
-                    if (!p.isActive) return false;
-                    const dueDate = new Date(p.nextDueDate);
-                    return dueDate >= now && dueDate <= end;
-                })
-                .sort((a, b) => new Date(a.nextDueDate) - new Date(b.nextDueDate))
-                .slice(0, 10);
-
-            setUpcomingPayments(filtered);
-        } catch (error) {
-            console.error("Error loading upcoming payments:", error);
-            setUpcomingPayments([]);
-        }
-    };
-
-    const computeKPIs = () => {
-        const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-        const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
-
-        const monthTransactions = transactions.filter(t => {
+        const monthTransactions = transactions.filter((t) => {
             const date = new Date(t.date);
             return date >= monthStart && date <= monthEnd;
         });
 
         const income = monthTransactions
-            .filter(t => t.type === "income")
+            .filter((t) => t.type?.toLowerCase() === "income")
             .reduce((sum, t) => sum + t.amount, 0);
 
         const expense = monthTransactions
-            .filter(t => t.type === "expense")
+            .filter((t) => t.type?.toLowerCase() === "expense")
             .reduce((sum, t) => sum + t.amount, 0);
 
         const transfer = monthTransactions
-            .filter(t => t.type === "transfer")
+            .filter((t) => t.type?.toLowerCase() === "transfer")
             .reduce((sum, t) => sum + t.amount, 0);
 
         setTotalIncome(income);
@@ -135,10 +131,14 @@ export default function DashboardScreen() {
 
         const net = income - expense;
         setNetBalance(net);
-        setSavingsRate(income > 0 ? (net / income) : 0);
-    };
+        setSavingsRate(income > 0 ? net / income : 0);
 
-    const buildRevExpChart = () => {
+        buildRevExpChart(transactions);
+        buildCategoryPie(transactions);
+    }, [transactions, currentMonth]);
+
+    //  Chart - Revenus / Dépenses / Transferts
+    const buildRevExpChart = (transactions) => {
         const months = [];
         const revenues = [];
         const expenses = [];
@@ -148,52 +148,57 @@ export default function DashboardScreen() {
             const month = new Date(currentMonth);
             month.setMonth(month.getMonth() - i);
 
-            const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
-            const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+            const start = new Date(month.getFullYear(), month.getMonth(), 1);
+            const end = new Date(month.getFullYear(), month.getMonth() + 1, 0);
 
-            const monthTransactions = transactions.filter(t => {
-                const date = new Date(t.date);
-                return date >= monthStart && date <= monthEnd;
+            const monthTx = transactions.filter((t) => {
+                const d = new Date(t.date);
+                return d >= start && d <= end;
             });
 
-            months.push(`${String(month.getMonth() + 1).padStart(2, '0')}/${String(month.getFullYear()).slice(-2)}`);
+            months.push(
+                `${String(month.getMonth() + 1).padStart(2, "0")}/${String(
+                    month.getFullYear()
+                ).slice(-2)}`
+            );
 
             revenues.push(
-                monthTransactions
-                    .filter(t => t.type === "income")
-                    .reduce((sum, t) => sum + t.amount, 0)
+                monthTx
+                    .filter((t) => t.type?.toLowerCase() === "income")
+                    .reduce((s, t) => s + t.amount, 0)
             );
-
             expenses.push(
-                monthTransactions
-                    .filter(t => t.type === "expense")
-                    .reduce((sum, t) => sum + t.amount, 0)
+                monthTx
+                    .filter((t) => t.type?.toLowerCase() === "expense")
+                    .reduce((s, t) => s + t.amount, 0)
             );
-
             transfers.push(
-                monthTransactions
-                    .filter(t => t.type === "transfer")
-                    .reduce((sum, t) => sum + t.amount, 0)
+                monthTx
+                    .filter((t) => t.type?.toLowerCase() === "transfer")
+                    .reduce((s, t) => s + t.amount, 0)
             );
         }
 
-        // Only set data if there's something to show
-        if (revenues.some(v => v > 0) || expenses.some(v => v > 0) || transfers.some(v => v > 0)) {
+        if (
+            revenues.some((v) => v > 0) ||
+            expenses.some((v) => v > 0) ||
+            transfers.some((v) => v > 0)
+        ) {
             setRevExpData({
                 labels: months,
                 datasets: [
                     {
-                        data: revenues.length > 0 ? revenues : [0],
+                        data: revenues,
                         color: (opacity = 1) => `rgba(34, 197, 94, ${opacity})`,
                         strokeWidth: 2,
                     },
                     {
-                        data: expenses.length > 0 ? expenses : [0],
+                        data: expenses,
                         color: (opacity = 1) => `rgba(239, 68, 68, ${opacity})`,
                         strokeWidth: 2,
                     },
                     {
-                        data: transfers.length > 0 ? transfers : [0],
+                        data: transfers,
                         color: (opacity = 1) => `rgba(251, 191, 36, ${opacity})`,
                         strokeWidth: 2,
                     },
@@ -205,26 +210,44 @@ export default function DashboardScreen() {
         }
     };
 
-    const buildCategoryPie = () => {
-        const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-        const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+    //  Chart - Dépenses par catégorie
+    const buildCategoryPie = (transactions) => {
+        const monthStart = new Date(
+            currentMonth.getFullYear(),
+            currentMonth.getMonth(),
+            1
+        );
+        const monthEnd = new Date(
+            currentMonth.getFullYear(),
+            currentMonth.getMonth() + 1,
+            0
+        );
 
-        const monthTransactions = transactions.filter(t => {
+        const monthTransactions = transactions.filter((t) => {
             const date = new Date(t.date);
-            return date >= monthStart && date <= monthEnd && t.type === "Expense";
+            return (
+                date >= monthStart &&
+                date <= monthEnd &&
+                t.type?.toLowerCase() === "expense"
+            );
         });
 
-        const categoryTotals = {};
-        monthTransactions.forEach(t => {
+        const totals = {};
+        monthTransactions.forEach((t) => {
             const cat = t.categoryName || "Autre";
-            categoryTotals[cat] = (categoryTotals[cat] || 0) + t.amount;
+            totals[cat] = (totals[cat] || 0) + t.amount;
         });
 
         const colors = [
-            "#7C3AED", "#EC4899", "#F59E0B", "#10B981", "#3B82F6", "#EF4444",
+            "#7C3AED",
+            "#EC4899",
+            "#F59E0B",
+            "#10B981",
+            "#3B82F6",
+            "#EF4444",
         ];
 
-        const pieChartData = Object.entries(categoryTotals)
+        const data = Object.entries(totals)
             .map(([name, amount], index) => ({
                 name,
                 amount,
@@ -234,44 +257,84 @@ export default function DashboardScreen() {
             }))
             .sort((a, b) => b.amount - a.amount);
 
-        setPieData(pieChartData.length > 0 ? pieChartData : []);
+        setPieData(data.length > 0 ? data : []);
     };
 
     const formatCurrency = (amount) => `€ ${amount.toFixed(2)}`;
-
-    const formatDate = (date) => {
-        const d = new Date(date);
-        return d.toLocaleDateString('fr-FR');
-    };
-
-    const getMonthLabel = () => {
-        return `${String(currentMonth.getMonth() + 1).padStart(2, '0')}/${currentMonth.getFullYear()}`;
-    };
+    const formatDate = (date) => new Date(date).toLocaleDateString("fr-FR");
+    const getMonthLabel = () =>
+        `${String(currentMonth.getMonth() + 1).padStart(
+            2,
+            "0"
+        )}/${currentMonth.getFullYear()}`;
 
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#7C3AED" />
-                <Text style={styles.loadingText}>Chargement du tableau de bord...</Text>
+                <ActivityIndicator size="large" color={colors.primary} />
+                <Text style={styles.loadingText}>
+                    Chargement du tableau de bord...
+                </Text>
             </View>
         );
     }
 
     return (
         <SafeAreaView style={styles.container}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={() => {
+                            setRefreshing(true);
+                            loadAll();
+                        }}
+                        tintColor={colors.primary}
+                    />
+                }
+            >
+                {/* 🧾 Header with Drawer Button */}
+                <View
+                    style={[
+                        styles.header,
+                        {
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                        },
+                    ]}
+                >
+                    <View style={{ flexDirection: "row", alignItems: "center" }}>
+                        <TouchableOpacity
+                            onPress={() => navigation.openDrawer()}
+                            style={{ marginRight: 12 }}
+                        >
+                            <Ionicons name="menu" size={28} color={colors.text} />
+                        </TouchableOpacity>
+                        <Text style={styles.headerTitle}>📊 Tableau de bord</Text>
+                    </View>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
-                {/* Header */}
-                <View style={styles.header}>
-                    <Text style={styles.headerTitle}>📊 Tableau de bord</Text>
-                    <Text style={styles.monthLabel}>{getMonthLabel()}</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center" }}>
+                        <Text style={styles.monthLabel}>{getMonthLabel()}</Text>
+                        <TouchableOpacity
+                            onPress={loadAll}
+                            style={{ marginLeft: 8 }}
+                        >
+                            <Ionicons
+                                name="refresh"
+                                size={22}
+                                color={colors.textSoft}
+                            />
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
-                {/* Offline Warning */}
                 {!isOnline && (
                     <View style={styles.warningContainer}>
                         <Text style={styles.warningText}>
-                            Vous êtes hors-ligne. Les graphiques utilisent les données locales.
+                            Vous êtes hors ligne. Les graphiques utilisent les
+                            données locales.
                         </Text>
                     </View>
                 )}
@@ -283,7 +346,6 @@ export default function DashboardScreen() {
                         <Text style={[styles.kpiValue, styles.success]}>
                             {formatCurrency(totalIncome)}
                         </Text>
-                        <Text style={styles.kpiSub}>Mois {getMonthLabel()}</Text>
                     </View>
 
                     <View style={styles.kpiCard}>
@@ -291,7 +353,6 @@ export default function DashboardScreen() {
                         <Text style={[styles.kpiValue, styles.danger]}>
                             {formatCurrency(totalExpense)}
                         </Text>
-                        <Text style={styles.kpiSub}>Mois {getMonthLabel()}</Text>
                     </View>
 
                     <View style={styles.kpiCard}>
@@ -299,16 +360,19 @@ export default function DashboardScreen() {
                         <Text style={[styles.kpiValue, styles.warning]}>
                             {formatCurrency(totalTransfer)}
                         </Text>
-                        <Text style={styles.kpiSub}>Mois {getMonthLabel()}</Text>
                     </View>
 
                     <View style={styles.kpiCard}>
                         <Text style={styles.kpiTitle}>Solde net</Text>
-                        <Text style={[styles.kpiValue, netBalance >= 0 ? styles.success : styles.danger]}>
+                        <Text
+                            style={[
+                                styles.kpiValue,
+                                netBalance >= 0
+                                    ? styles.success
+                                    : styles.danger,
+                            ]}
+                        >
                             {formatCurrency(netBalance)}
-                        </Text>
-                        <Text style={styles.kpiSub}>
-                            {netBalance >= 0 ? "En bonne voie" : "⚠️ À surveiller"}
                         </Text>
                     </View>
 
@@ -317,16 +381,15 @@ export default function DashboardScreen() {
                         <Text style={styles.kpiValue}>
                             {(savingsRate * 100).toFixed(0)}%
                         </Text>
-                        <Text style={styles.kpiSub}>Revenus − Dépenses</Text>
                     </View>
                 </View>
 
-                {/* Revenue/Expense Chart */}
-                {revExpData ? (
-                    <View style={styles.card}>
-                        <Text style={styles.cardTitle}>
-                            Revenus / Dépenses / Transferts (6 derniers mois)
-                        </Text>
+                {/* Revenus / Dépenses Chart */}
+                <View style={styles.card}>
+                    <Text style={styles.cardTitle}>
+                        Revenus / Dépenses / Transferts
+                    </Text>
+                    {revExpData ? (
                         <LineChart
                             data={revExpData}
                             width={screenWidth - 48}
@@ -336,77 +399,73 @@ export default function DashboardScreen() {
                                 backgroundGradientFrom: "#1E293B",
                                 backgroundGradientTo: "#1E293B",
                                 decimalPlaces: 0,
-                                color: (opacity = 1) => `rgba(124, 58, 237, ${opacity})`,
-                                labelColor: (opacity = 1) => `rgba(229, 231, 235, ${opacity})`,
-                                style: { borderRadius: 16 },
-                                propsForDots: { r: "4", strokeWidth: "2" },
+                                color: (opacity = 1) =>
+                                    `rgba(124, 58, 237, ${opacity})`,
+                                labelColor: (opacity = 1) =>
+                                    `rgba(229, 231, 235, ${opacity})`,
                             }}
                             bezier
                             style={styles.chart}
                         />
-                    </View>
-                ) : (
-                    <View style={styles.card}>
-                        <Text style={styles.cardTitle}>
-                            Revenus / Dépenses / Transferts (6 derniers mois)
+                    ) : (
+                        <Text style={styles.emptyText}>
+                            Aucune donnée disponible.
                         </Text>
-                        <Text style={styles.emptyText}>Aucune donnée à afficher.</Text>
-                    </View>
-                )}
+                    )}
+                </View>
 
-                {/* Category Pie Chart */}
-                {pieData.length > 0 ? (
-                    <View style={styles.card}>
-                        <Text style={styles.cardTitle}>
-                            Dépenses par catégorie ({getMonthLabel()})
-                        </Text>
+                {/* Dépenses par catégorie */}
+                <View style={styles.card}>
+                    <Text style={styles.cardTitle}>
+                        Dépenses par catégorie ({getMonthLabel()})
+                    </Text>
+                    {pieData.length > 0 ? (
                         <PieChart
                             data={pieData}
                             width={screenWidth - 48}
                             height={220}
                             chartConfig={{
-                                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                                color: (opacity = 1) =>
+                                    `rgba(255,255,255,${opacity})`,
                             }}
                             accessor="amount"
                             backgroundColor="transparent"
-                            paddingLeft={15}
                             absolute
                         />
-                    </View>
-                ) : (
-                    <View style={styles.card}>
-                        <Text style={styles.cardTitle}>
-                            Dépenses par catégorie ({getMonthLabel()})
+                    ) : (
+                        <Text style={styles.emptyText}>
+                            Aucune dépense ce mois.
                         </Text>
-                        <Text style={styles.emptyText}>Aucune dépense ce mois.</Text>
-                    </View>
-                )}
+                    )}
+                </View>
 
-                {/* Upcoming Payments */}
+                {/* À venir */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>À venir (14 jours)</Text>
                     {upcomingPayments.length === 0 ? (
-                        <Text style={styles.emptyText}>Aucune échéance à venir 🎉</Text>
+                        <Text style={styles.emptyText}>
+                            Aucune échéance à venir 🎉
+                        </Text>
                     ) : (
-                        <View style={styles.upcomingList}>
-                            {upcomingPayments.map((payment) => (
-                                <View key={payment.id} style={styles.upcomingItem}>
-                                    <View style={styles.upcomingLeft}>
-                                        <Text style={styles.upcomingName}>{payment.name}</Text>
-                                        <Text style={styles.upcomingMeta}>
-                                            {payment.categoryName} · {formatDate(payment.nextDueDate)}
-                                        </Text>
-                                    </View>
-                                    <Text style={styles.upcomingAmount}>
-                                        {formatCurrency(payment.amount)}
+                        upcomingPayments.map((p) => (
+                            <View key={p.id} style={styles.upcomingItem}>
+                                <View style={styles.upcomingLeft}>
+                                    <Text style={styles.upcomingName}>
+                                        {p.name}
+                                    </Text>
+                                    <Text style={styles.upcomingMeta}>
+                                        {p.categoryName} ·{" "}
+                                        {formatDate(p.nextDueDate)}
                                     </Text>
                                 </View>
-                            ))}
-                        </View>
+                                <Text style={styles.upcomingAmount}>
+                                    {formatCurrency(p.amount)}
+                                </Text>
+                            </View>
+                        ))
                     )}
                 </View>
             </ScrollView>
         </SafeAreaView>
-
     );
 }
