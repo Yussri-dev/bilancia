@@ -56,6 +56,17 @@ export default function DrawerNavigator() {
             />
 
             <Drawer.Screen
+                name="Advices"
+                component={AdviceScreen}
+                options={{
+                    title: "Advices",
+                    drawerIcon: ({ color, size }) => (
+                        <Ionicons name="bulb" size={size} color={color} />
+                    ),
+                }}
+            />
+
+            <Drawer.Screen
                 name="Analytics"
                 component={AnalyticsScreen}
                 options={{
@@ -66,7 +77,6 @@ export default function DrawerNavigator() {
                 }}
             />
 
-            {/*  FIXED */}
             <Drawer.Screen
                 name="Category"
                 component={CategoryStack}
