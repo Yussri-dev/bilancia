@@ -12,14 +12,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useAuth } from "../../contexts/authContext";
-import { useThemeColors } from "../../theme/color";
+import { useTheme } from "../../contexts/ThemeContext";
 import { getStyles } from "../../theme/styles";
 // import apiClient from "../../api/apiClient";
 import apiClient from "@apiClient"
 
 export default function CategoriesScreen({ navigation }) {
     const { token } = useAuth();
-    const colors = useThemeColors();
+    const { colors } = useTheme();
     const styles = getStyles(colors);
 
     const [categories, setCategories] = useState([]);

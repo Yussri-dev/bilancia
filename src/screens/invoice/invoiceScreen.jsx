@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
 import apiClient from "../../api/apiClient";
 import { useAuth } from "../../contexts/authContext";
-import { useThemeColors } from "../../theme/color";
+import { useTheme } from "../../contexts/ThemeContext";
 import { getStyles } from "../../theme/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -22,7 +22,7 @@ const statusOptions = ["Pending", "Paid", "Overdue", "Cancelled"];
 
 export default function InvoiceScreen({ navigation }) {
     const { token } = useAuth();
-    const colors = useThemeColors();
+    const { colors } = useTheme();
     const styles = getStyles(colors);
 
     const [invoices, setInvoices] = useState([]);

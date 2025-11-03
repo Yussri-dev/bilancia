@@ -12,7 +12,7 @@ import {
 import { LineChart, PieChart } from "react-native-chart-kit";
 import { useAuth } from "../../contexts/authContext";
 import apiClient from "../../api/apiClient";
-import { useThemeColors } from "../../theme/color";
+import { useTheme } from "../../contexts/ThemeContext";
 import { getStyles } from "../../theme/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,7 +21,7 @@ const screenWidth = Dimensions.get("window").width;
 
 export default function HomeScreen({ navigation }) {
     const { token } = useAuth();
-    const colors = useThemeColors();
+    const { colors } = useTheme();
     const styles = getStyles(colors);
 
     const [loading, setLoading] = useState(true);

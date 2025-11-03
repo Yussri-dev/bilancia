@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../contexts/authContext";
-import { useThemeColors } from "../../theme/color";
+import { useTheme } from "../../contexts/ThemeContext";
 import { getStyles } from "../../theme/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 // import apiClient from "../../api/apiClient";
@@ -18,7 +18,7 @@ import apiClient from "@apiClient"
 
 export default function GoalsScreen({ navigation }) {
     const { token } = useAuth();
-    const colors = useThemeColors();
+    const { colors } = useTheme();
     const styles = getStyles(colors);
 
     const [goals, setGoals] = useState([]);

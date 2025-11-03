@@ -655,4 +655,77 @@ export const getStyles = (colors) =>
             shadowOffset: { width: 0, height: 3 },
         },
 
+        gradient: {
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+        },
+        container: {
+            width: "100%",
+            paddingHorizontal: 24,
+        },
+        cardLogin: {
+            backgroundColor: colors.card,
+            borderRadius: 20,
+            padding: 24,
+            shadowColor: "#000",
+            shadowOpacity: 0.25,
+            shadowRadius: 12,
+            elevation: 10,
+        },
+        title: {
+            fontSize: 32,
+            fontWeight: "bold",
+            color: "#A78BFA",
+            textAlign: "center",
+            marginBottom: 6,
+        },
+        subtitle: {
+            fontSize: 14,
+            color: "#94A3B8",
+            textAlign: "center",
+            marginBottom: 28,
+        },
+        input: {
+            backgroundColor: "rgba(255,255,255,0.05)",
+            borderColor: "rgba(255,255,255,0.1)",
+            borderWidth: 1,
+            color: "#fff",
+            padding: 14,
+            borderRadius: 12,
+            marginBottom: 16,
+            fontSize: 16,
+        },
+        eyeButton: {
+            position: "absolute",
+            right: 10,
+            top: 14,
+        },
+        button: {
+            borderRadius: 12,
+            overflow: "hidden",
+        },
+        buttonGradient: {
+            paddingVertical: 16,
+            borderRadius: 12,
+            alignItems: "center",
+        },
+        buttonText: {
+            color: "#fff",
+            textAlign: "center",
+            fontWeight: "600",
+            fontSize: 16,
+        },
+        linkRow: {
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginTop: 16,
+        },
+        linkHighlight: {
+            color: "#A78BFA",
+            fontWeight: "600",
+        },
+        linkSecondary: {
+            color: "#CBD5E1",
+        },
     });

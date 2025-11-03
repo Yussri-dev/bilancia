@@ -13,12 +13,12 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../contexts/authContext";
 import { categoryApi } from "../../api/categoryApi";
-import { useThemeColors } from "../../theme/color";
+import { useTheme } from "../../contexts/ThemeContext";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CategoryModel({ route, navigation }) {
     const { token } = useAuth();
-    const colors = useThemeColors();
+    const { colors } = useTheme();
     const styles = getStyles(colors);
 
     const { mode, category } = route.params || {};

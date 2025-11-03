@@ -7,7 +7,7 @@ import {
     ActivityIndicator,
     Alert,
 } from "react-native";
-import { useThemeColors } from "../../theme/color";
+import { useTheme } from "../../contexts/ThemeContext";
 import { getStyles } from "../../theme/styles";
 import AnalyticsApi from "../../api/analyticsApi";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,7 +16,7 @@ import * as FileSystem from "expo-file-system";
 import { Buffer } from "buffer";
 
 export default function AnalyticsScreen({ navigation }) {
-    const colors = useThemeColors();
+    const { colors } = useTheme();
     const styles = getStyles(colors);
 
     const [loading, setLoading] = useState(true);

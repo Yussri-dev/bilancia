@@ -1,37 +1,29 @@
-import { useColorScheme } from "react-native";
-
-// light Theme
-const lightColors = {
+export const lightColors = {
     background: "#F9FAFB",
+    text: "#111827",
+    textSoft: "#6B7280",
+    primary: "#7C3AED",
     surface: "#FFFFFF",
-    surface2: "#F1F5F9",
-    border: "#E2E8F0",
-    text: "#0F172A",
-    textSoft: "#475569",
-    primary: "#7C3AED",
-    success: "#16A34A",
-    danger: "#DC2626",
-    warning: "#D97706",
-};
-
-// Dark theme
-const darkColors = {
-    background: "#0B1221",
-    surface: "#1E293B",
-    surface2: "#0E1726",
-    border: "#334155",
-    text: "#E5E7EB",
-    textSoft: "#94A3B8",
-    primary: "#7C3AED",
-    success: "#16A34A",
+    surface2: "#F3F4F6",
+    border: "#E5E7EB",
+    card: "#FFFFFF",
+    input: "#FFFFFF",
+    success: "#10B981",
     danger: "#EF4444",
     warning: "#F59E0B",
 };
 
-export const useThemeColors = () => {
-    const scheme = useColorScheme();
-    return scheme === "light" ? lightColors : darkColors;
+export const darkColors = {
+    background: "#0B1221",
+    text: "#F9FAFB",
+    textSoft: "#94A3B8",
+    primary: "#7C3AED",
+    surface: "#1E293B",
+    surface2: "#334155",
+    border: "#475569",
+    card: "#1E293B",
+    input: "#1E293B",
+    success: "#10B981",
+    danger: "#EF4444",
+    warning: "#FACC15",
 };
-
-// export par défaut (dark pour compat)
-export const colors = lightColors;

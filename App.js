@@ -3,8 +3,9 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { AuthProvider } from "./src/contexts/authContext";
+import { AuthProvider } from "@contexts/authContext";
 import AppNavigator from "./src/navigation/appNavigator";
+import { ThemeProvider } from "@contexts/ThemeContext";
 
 import { Buffer } from "buffer";
 global.Buffer = Buffer;
@@ -12,11 +13,13 @@ global.Buffer = Buffer;
 export default function App() {
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <NavigationContainer>
-          <AppNavigator />
-        </NavigationContainer>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <NavigationContainer>
+            <AppNavigator />
+          </NavigationContainer>
+        </AuthProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

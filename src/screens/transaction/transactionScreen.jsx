@@ -15,14 +15,14 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
 import { useAuth } from "../../contexts/authContext";
-import { useThemeColors } from "../../theme/color";
+import { useTheme } from "../../contexts/ThemeContext";
 import { getStyles } from "../../theme/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "../../api/apiClient";
 
 export default function TransactionScreen({ navigation }) {
     const { token } = useAuth();
-    const colors = useThemeColors();
+    const { colors } = useTheme();
     const styles = getStyles(colors);
 
     const [transactions, setTransactions] = useState([]);
