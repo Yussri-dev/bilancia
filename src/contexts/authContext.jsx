@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { View, ActivityIndicator } from "react-native";
 import { saveToken, getToken, removeToken } from "../services/authStorage";
-import { authApi } from "../api/authApi";
+import { authApi } from "@api/authApi";
 import apiClient from "@apiClient"
 const AuthContext = createContext(null);
 

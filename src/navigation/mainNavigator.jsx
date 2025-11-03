@@ -15,7 +15,7 @@ import {
     InvoiceScreen,
     TransactionScreen,
     ProfileScreen
-} from "../screens";
+} from "@screens";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();

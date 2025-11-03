@@ -1,12 +1,12 @@
 // src/navigation/AppNavigator.jsx
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useAuth } from "../contexts/authContext";
+import { useAuth } from "@contexts/authContext";
 
 // Auth screens
-import LoginScreen from "../screens/auth/loginScreen";
-import RegisterScreen from "../screens/auth/RegisterScreen";
-import ForgotPasswordScreen from "../screens/auth/ForgotPasswordScreen";
+import LoginScreen from "@screens/auth/loginScreen";
+import RegisterScreen from "@screens/auth/RegisterScreen";
+import ForgotPasswordScreen from "@screens/auth/ForgotPasswordScreen";
 
 // Main app
 import DrawerNavigator from "./DrawerNavigator";

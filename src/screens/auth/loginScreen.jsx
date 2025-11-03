@@ -14,7 +14,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "@contexts/authContext";
 import { useTheme } from "@contexts/ThemeContext";
-import { getStyles } from "../../theme/styles";
+import { getStyles } from "@theme/styles";
 
 export default function LoginScreen({ navigation }) {
     const { login } = useAuth();

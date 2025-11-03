@@ -1,7 +1,7 @@
 // src/navigation/CategoryStack.jsx
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { CategoriesScreen, CategoryModel } from "../screens";
+import { CategoriesScreen, CategoryModel } from "@screens";
 
 const Stack = createNativeStackNavigator();
 

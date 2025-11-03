@@ -11,10 +11,9 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useAuth } from "../../contexts/authContext";
-import { useTheme } from "../../contexts/ThemeContext";
-import { getStyles } from "../../theme/styles";
-// import apiClient from "../../api/apiClient";
+import { useAuth } from "@contexts/authContext";
+import { useTheme } from "@contexts/ThemeContext";
+import { getStyles } from "@theme/styles";
 import apiClient from "@apiClient"
 
 export default function CategoriesScreen({ navigation }) {

@@ -14,11 +14,11 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
-import { useAuth } from "../../contexts/authContext";
-import { useTheme } from "../../contexts/ThemeContext";
-import { getStyles } from "../../theme/styles";
+import { useAuth } from "@contexts/authContext";
+import { useTheme } from "@contexts/ThemeContext";
+import { getStyles } from "@theme/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
-import apiClient from "../../api/apiClient";
+import apiClient from "@apiClient";
 
 export default function TransactionScreen({ navigation }) {
     const { token } = useAuth();

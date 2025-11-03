@@ -11,7 +11,7 @@ import {
     GoalsScreen,
     InvoiceScreen,
     TransactionScreen,
-} from "../screens";
+} from "@screens";
 
 const Tab = createBottomTabNavigator();
 

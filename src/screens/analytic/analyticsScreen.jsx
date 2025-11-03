@@ -7,9 +7,9 @@ import {
     ActivityIndicator,
     Alert,
 } from "react-native";
-import { useTheme } from "../../contexts/ThemeContext";
-import { getStyles } from "../../theme/styles";
-import AnalyticsApi from "../../api/analyticsApi";
+import { useTheme } from "@contexts/ThemeContext";
+import { getStyles } from "@theme/styles";
+import AnalyticsApi from "@api/analyticsApi";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as FileSystem from "expo-file-system";

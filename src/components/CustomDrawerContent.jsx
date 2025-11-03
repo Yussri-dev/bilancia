@@ -3,7 +3,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { DrawerContentScrollView, DrawerItemList } from "@react-navigation/drawer";
 import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "../contexts/authContext";
+import { useAuth } from "@contexts/authContext";
 
 export default function CustomDrawerContent(props) {
     const { user, logout } = useAuth();

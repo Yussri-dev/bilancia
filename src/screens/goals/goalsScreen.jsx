@@ -9,11 +9,10 @@ import {
     Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "../../contexts/authContext";
-import { useTheme } from "../../contexts/ThemeContext";
-import { getStyles } from "../../theme/styles";
+import { useAuth } from "@contexts/authContext";
+import { useTheme } from "@contexts/ThemeContext";
+import { getStyles } from "@theme/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
-// import apiClient from "../../api/apiClient";
 import apiClient from "@apiClient"
 
 export default function GoalsScreen({ navigation }) {

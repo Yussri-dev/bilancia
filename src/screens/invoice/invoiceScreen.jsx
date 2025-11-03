@@ -12,10 +12,10 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
-import apiClient from "../../api/apiClient";
-import { useAuth } from "../../contexts/authContext";
-import { useTheme } from "../../contexts/ThemeContext";
-import { getStyles } from "../../theme/styles";
+import apiClient from "@apiClient";
+import { useAuth } from "@contexts/authContext";
+import { useTheme } from "@contexts/ThemeContext";
+import { getStyles } from "@theme/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const statusOptions = ["Pending", "Paid", "Overdue", "Cancelled"];

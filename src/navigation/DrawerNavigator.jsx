@@ -1,7 +1,7 @@
 import React from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { Ionicons } from "@expo/vector-icons";
-import CustomDrawerContent from "../components/CustomDrawerContent";
+import CustomDrawerContent from "@components/CustomDrawerContent";
 import Tabs from "./MainTabs";
 
 import {
@@ -11,9 +11,9 @@ import {
     InvoiceScreen,
     TransactionScreen,
     ProfileScreen,
-} from "../screens";
+} from "@screens";
 
-import CategoryStack from "../navigation/CategoryStack"; //  Correct path
+import CategoryStack from "@navigation/CategoryStack"; //  Correct path
 
 const Drawer = createDrawerNavigator();
 

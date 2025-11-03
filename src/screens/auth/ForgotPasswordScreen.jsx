@@ -10,7 +10,7 @@ import {
     KeyboardAvoidingView,
     Platform,
 } from "react-native";
-import { authApi } from "../../api/authApi";
+import { authApi } from "@api/authApi";
 
 export default function ForgotPasswordScreen({ navigation }) {
     const [email, setEmail] = useState("");

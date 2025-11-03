@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image, ActivityIndicator, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuth } from "../../contexts/authContext";
+import { useAuth } from "@contexts/authContext";
 import { Ionicons } from "@expo/vector-icons";
-import apiClient from "../../api/apiClient";
+import apiClient from "@apiClient";
 
 export default function ProfileScreen({ navigation }) {
     const { user, setUser, logout, fetchUser, token } = useAuth();

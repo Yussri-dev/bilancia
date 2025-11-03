@@ -11,8 +11,8 @@ import {
     Platform,
     ScrollView,
 } from "react-native";
-import { authApi } from "../../api/authApi"; // futur alias : @apis/authApi
-import { useAuth } from "../../contexts/authContext";
+import { authApi } from "@api/authApi"; // futur alias : @apis/authApi
+import { useAuth } from "@contexts/authContext";
 
 export default function RegisterScreen({ navigation }) {
     const { setUser } = useAuth();

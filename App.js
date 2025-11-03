@@ -4,7 +4,7 @@ import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider } from "@contexts/authContext";
-import AppNavigator from "./src/navigation/appNavigator";
+import AppNavigator from "@navigation/appNavigator";
 import { ThemeProvider } from "@contexts/ThemeContext";
 
 import { Buffer } from "buffer";

@@ -10,10 +10,10 @@ import {
     TouchableOpacity,
 } from "react-native";
 import { LineChart, PieChart } from "react-native-chart-kit";
-import { useAuth } from "../../contexts/authContext";
-import apiClient from "../../api/apiClient";
-import { useTheme } from "../../contexts/ThemeContext";
-import { getStyles } from "../../theme/styles";
+import { useAuth } from "@contexts/authContext";
+import apiClient from "@apiClient";
+import { useTheme } from "@contexts/ThemeContext";
+import { getStyles } from "@theme/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 

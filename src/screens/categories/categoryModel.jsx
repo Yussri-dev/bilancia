@@ -11,9 +11,9 @@ import {
     Switch,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "../../contexts/authContext";
-import { categoryApi } from "../../api/categoryApi";
-import { useTheme } from "../../contexts/ThemeContext";
+import { useAuth } from "@contexts/authContext";
+import { categoryApi } from "@api/categoryApi";
+import { useTheme } from "@contexts/ThemeContext";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CategoryModel({ route, navigation }) {
