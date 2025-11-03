@@ -256,6 +256,33 @@ export const getStyles = (colors) =>
             fontSize: 12,
             color: colors.textSoft,
         },
+        // === DASHBOARD DATE SELECTOR ===
+        dateCard: {
+            flex: 1,
+            minWidth: "45%",
+            borderRadius: 14,
+            backgroundColor: colors.primary,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            paddingVertical: 14,
+            paddingHorizontal: 16,
+            shadowColor: "#000",
+            shadowOpacity: 0.2,
+            shadowOffset: { width: 0, height: 3 },
+            shadowRadius: 4,
+            elevation: 5,
+        },
+        dateText: {
+            color: "#fff",
+            fontSize: 18,
+            fontWeight: "700",
+            letterSpacing: 0.4,
+        },
+        dateIcon: {
+            marginRight: 8,
+        },
+
         success: {
             color: colors.success,
         },

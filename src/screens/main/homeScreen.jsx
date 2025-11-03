@@ -16,6 +16,7 @@ import { useTheme } from "@contexts/ThemeContext";
 import { getStyles } from "@theme/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -44,6 +45,9 @@ export default function HomeScreen({ navigation }) {
     // Charts
     const [revExpData, setRevExpData] = useState(null);
     const [pieData, setPieData] = useState([]);
+
+    // Date Picker 
+    const [showDatePicker, setShowDatePicker] = useState(false);
 
     //  Load all dashboard data
     const loadAll = useCallback(async () => {
@@ -260,6 +264,20 @@ export default function HomeScreen({ navigation }) {
         setPieData(data.length > 0 ? data : []);
     };
 
+    const onChangeDate = (event, selectedDate) => {
+        setShowDatePicker(false);
+        if (selectedDate) {
+            // On change le mois entier selon la date choisie
+            const newMonth = new Date(
+                selectedDate.getFullYear(),
+                selectedDate.getMonth(),
+                1
+            );
+            setCurrentMonth(newMonth);
+            loadAll();
+        }
+    };
+
     const formatCurrency = (amount) => `€ ${amount.toFixed(2)}`;
     const formatDate = (date) => new Date(date).toLocaleDateString("fr-FR");
     const getMonthLabel = () =>
@@ -294,7 +312,7 @@ export default function HomeScreen({ navigation }) {
                     />
                 }
             >
-                {/* 🧾 Header with Drawer Button */}
+                {/* Header with Drawer Button */}
                 <View
                     style={[
                         styles.header,
@@ -313,22 +331,24 @@ export default function HomeScreen({ navigation }) {
                             <Ionicons name="menu" size={28} color={colors.text} />
                         </TouchableOpacity>
                         <Text style={styles.headerTitle}>📊 Tableau de bord</Text>
-                    </View>
-
-                    <View style={{ flexDirection: "row", alignItems: "center" }}>
-                        <Text style={styles.monthLabel}>{getMonthLabel()}</Text>
-                        <TouchableOpacity
-                            onPress={loadAll}
-                            style={{ marginLeft: 8 }}
-                        >
-                            <Ionicons
-                                name="refresh"
-                                size={22}
-                                color={colors.textSoft}
-                            />
+                        <TouchableOpacity onPress={loadAll} style={{ marginLeft: 8 }}>
+                            <Ionicons name="refresh" size={22} color={colors.textSoft} />
                         </TouchableOpacity>
                     </View>
+
+
                 </View>
+
+                {/* Date */}
+                {showDatePicker && (
+                    <DateTimePicker
+                        value={currentMonth}
+                        mode="date"
+                        display="calendar"
+                        onChange={onChangeDate}
+                    />
+                )}
+
 
                 {!isOnline && (
                     <View style={styles.warningContainer}>
@@ -341,6 +361,17 @@ export default function HomeScreen({ navigation }) {
 
                 {/* KPIs */}
                 <View style={styles.kpiGrid}>
+                    {/* Date Selector Card */}
+                    <TouchableOpacity
+                        onPress={() => setShowDatePicker(true)}
+                        activeOpacity={0.85}
+                        style={styles.dateCard}
+                    >
+                        <Ionicons name="calendar" size={22} color="#fff" style={styles.dateIcon} />
+                        <Text style={styles.dateText}>{getMonthLabel()}</Text>
+                    </TouchableOpacity>
+
+                    {/* KPI Cards */}
                     <View style={styles.kpiCard}>
                         <Text style={styles.kpiTitle}>Revenus</Text>
                         <Text style={[styles.kpiValue, styles.success]}>
@@ -367,9 +398,7 @@ export default function HomeScreen({ navigation }) {
                         <Text
                             style={[
                                 styles.kpiValue,
-                                netBalance >= 0
-                                    ? styles.success
-                                    : styles.danger,
+                                netBalance >= 0 ? styles.success : styles.danger,
                             ]}
                         >
                             {formatCurrency(netBalance)}
@@ -383,6 +412,7 @@ export default function HomeScreen({ navigation }) {
                         </Text>
                     </View>
                 </View>
+
 
                 {/* Revenus / Dépenses Chart */}
                 <View style={styles.card}>
