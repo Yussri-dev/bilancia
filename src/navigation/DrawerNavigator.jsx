@@ -77,6 +77,39 @@ export default function DrawerNavigator() {
                     ),
                 }}
             />
+
+            <Drawer.Screen
+                name="Goal"
+                component={GoalsScreen}
+                options={{
+                    title: "Objectif",
+                    drawerIcon: ({ color, size }) => (
+                        <Ionicons name="football" size={size} color={color} />
+                    )
+                }}
+            />
+
+            <Drawer.Screen
+                name="Invoice"
+                component={InvoiceScreen}
+                options={{
+                    title: "Factures",
+                    drawerIcon: ({ color, size }) => (
+                        <Ionicons name="newspaper" size={size} color={color} />
+                    )
+                }}
+            />
+
+            <Drawer.Screen
+                name="Transaction"
+                component={TransactionScreen}
+                options={{
+                    title: "Transactions",
+                    drawerIcon: ({ color, size }) => (
+                        <Ionicons name="card" size={size} color={color} />
+                    )
+                }}
+            />
         </Drawer.Navigator>
     );
 }
