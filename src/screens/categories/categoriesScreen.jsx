@@ -14,7 +14,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../contexts/authContext";
 import { useThemeColors } from "../../theme/color";
 import { getStyles } from "../../theme/styles";
-import apiClient from "../../api/apiClient";
+// import apiClient from "../../api/apiClient";
+import apiClient from "@apiClient"
 
 export default function CategoriesScreen({ navigation }) {
     const { token } = useAuth();

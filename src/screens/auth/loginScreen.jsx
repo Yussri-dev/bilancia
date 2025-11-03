@@ -13,11 +13,12 @@ import {
 } from "react-native";
 import { useAuth } from "../../contexts/authContext";
 
-export default function LoginScreen() {
+export default function LoginScreen({ navigation }) {
     const { login } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleLogin = async () => {
         if (!email || !password) {
@@ -29,6 +30,7 @@ export default function LoginScreen() {
             setLoading(true);
             await login(email.trim(), password);
             Alert.alert("Succès", "Connexion réussie !");
+            navigation.replace("Dashboard");
         } catch (err) {
             console.error("Login error:", err);
             Alert.alert("Erreur", err.message || "Email ou mot de passe invalide.");
@@ -55,14 +57,25 @@ export default function LoginScreen() {
                     style={styles.input}
                 />
 
-                <TextInput
-                    placeholder="Mot de passe"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry
-                    placeholderTextColor="#94A3B8"
-                    style={styles.input}
-                />
+                <View style={{ position: "relative" }}>
+                    <TextInput
+                        placeholder="Mot de passe"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry={!showPassword}
+                        placeholderTextColor="#94A3B8"
+                        style={[styles.input, { paddingRight: 40 }]}
+                    />
+
+                    <TouchableOpacity
+                        onPress={() => setShowPassword((prev) => !prev)}
+                        style={styles.eyeButton}
+                    >
+                        <Text style={{ color: "#94A3B8" }}>
+                            {showPassword ? "🙈" : "👁️"}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
 
                 <TouchableOpacity
                     style={[styles.button, loading && { opacity: 0.7 }]}
@@ -75,6 +88,17 @@ export default function LoginScreen() {
                         <Text style={styles.buttonText}>Se connecter</Text>
                     )}
                 </TouchableOpacity>
+
+                {/* Liens register + forgot password */}
+                <View style={styles.linkRow}>
+                    <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+                        <Text style={styles.linkHighlight}>Créer un compte</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
+                        <Text style={styles.linkSecondary}>Mot de passe oublié ?</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </KeyboardAvoidingView>
     );
@@ -104,6 +128,11 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         fontSize: 16,
     },
+    eyeButton: {
+        position: "absolute",
+        right: 10,
+        top: 14,
+    },
     button: {
         backgroundColor: "#7C3AED",
         padding: 16,
@@ -115,5 +144,17 @@ const styles = StyleSheet.create({
         textAlign: "center",
         fontWeight: "600",
         fontSize: 16,
+    },
+    linkRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginTop: 16,
+    },
+    linkHighlight: {
+        color: "#7C3AED",
+        fontWeight: "600",
+    },
+    linkSecondary: {
+        color: "#94A3B8",
     },
 });

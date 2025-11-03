@@ -3,8 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { View, ActivityIndicator } from "react-native";
 import { saveToken, getToken, removeToken } from "../services/authStorage";
 import { authApi } from "../api/authApi";
-import apiClient from "../api/apiClient";
-
+import apiClient from "@apiClient"
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -12,7 +11,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // 🔹 Charger token + profil au démarrage
+    //  Charger token + profil au démarrage
     useEffect(() => {
         (async () => {
             try {
@@ -31,7 +30,7 @@ export const AuthProvider = ({ children }) => {
         })();
     }, []);
 
-    // 🔹 Connexion
+    //  Connexion
     const login = async (email, password) => {
         try {
             const res = await authApi.login({ email, password });
@@ -54,7 +53,7 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // 🔹 Déconnexion
+    //  Déconnexion
     const logout = async () => {
         await removeToken();
         setToken(null);
@@ -62,7 +61,7 @@ export const AuthProvider = ({ children }) => {
         apiClient.setAuthToken(null);
     };
 
-    // 🔹 Recharger manuellement le profil
+    //  Recharger manuellement le profil
     const fetchUser = async () => {
         if (!token) return null;
         try {

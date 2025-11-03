@@ -114,16 +114,21 @@ export default function ProfileScreen({ navigation }) {
             {/* 🔹 Profile info */}
             <View style={{ alignItems: "center", marginBottom: 24 }}>
                 <Image
-                    source={{
-                        uri: user.avatarUrl || "https://i.pravatar.cc/200",
-                    }}
+                    source={
+                        user.avatarUrl
+                            ? { uri: user.avatarUrl }
+                            : require("../../../assets/default-avatar.jpg")
+                    }
+                    defaultSource={require("../../../assets/default-avatar.jpg")}
                     style={{
                         width: 100,
                         height: 100,
                         borderRadius: 50,
                         marginBottom: 16,
                     }}
+                    onError={() => console.warn("Image failed to load")}
                 />
+
                 <Text
                     style={{
                         color: "#fff",

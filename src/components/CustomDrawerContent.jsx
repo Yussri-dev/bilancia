@@ -15,19 +15,23 @@ export default function CustomDrawerContent(props) {
                     {user ? (
                         <View style={{ flexDirection: "row", alignItems: "center" }}>
                             <Image
-                                source={{
-                                    uri: user.avatarUrl || "https://i.pravatar.cc/100",
-                                }}
+                                source={
+                                    user.avatarUrl
+                                        ? { uri: user.avatarUrl }
+                                        : require("../../assets/default-avatar.jpg")
+                                }
+                                defaultSource={require("../../assets/default-avatar.jpg")}
                                 style={{
-                                    width: 50,
-                                    height: 50,
-                                    borderRadius: 25,
-                                    marginRight: 12,
+                                    width: 60,
+                                    height: 60,
+                                    borderRadius: 50,
+                                    marginBottom: 16,
                                 }}
+                                onError={() => console.warn("Image failed to load")}
                             />
                             <View>
                                 <Text style={{ color: "#fff", fontWeight: "600", fontSize: 16 }}>
-                                    {user.username || "Utilisateur"}
+                                    {user.username || "Youssri"}
                                 </Text>
                                 <Text style={{ color: "#7C3AED" }}>En ligne</Text>
                             </View>

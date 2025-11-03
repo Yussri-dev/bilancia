@@ -15,11 +15,10 @@ export const authApi = {
         apiClient.setAuthToken(token);
         const res = await apiClient.get("/auth/profile");
         return res.data;
-    }
+    },
+    
+    forgotPassword: async (data) => {
+        const res = await apiClient.post("/auth/forgot-password", data);
+        return res.data;
+    },
 }
-/*
-
-je veux faire alias babel : 
-pour les apis et les screens on va débuteer avec les apis et apres on rajoute les screens : 
-
-*/

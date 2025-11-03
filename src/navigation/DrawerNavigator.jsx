@@ -1,13 +1,19 @@
-// src/navigation/DrawerNavigator.jsx
 import React from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { Ionicons } from "@expo/vector-icons";
 import CustomDrawerContent from "../components/CustomDrawerContent";
-import Tabs from "./MainTabs"; // extracted from your current MainNavigator
-import AnalyticsScreen from "../screens/analytic/analyticsScreen";
+import Tabs from "./MainTabs";
 
-// Optional: add other standalone screens (Profile, Settings)
-import ProfileScreen from "../screens/profile/ProfileScreen";
+import {
+    AnalyticsScreen,
+    AdviceScreen,
+    GoalsScreen,
+    InvoiceScreen,
+    TransactionScreen,
+    ProfileScreen,
+} from "../screens";
+
+import CategoryStack from "../navigation/CategoryStack"; //  Correct path
 
 const Drawer = createDrawerNavigator();
 
@@ -56,6 +62,18 @@ export default function DrawerNavigator() {
                     title: "Analytics",
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="stats-chart" size={size} color={color} />
+                    ),
+                }}
+            />
+
+            {/*  FIXED */}
+            <Drawer.Screen
+                name="Category"
+                component={CategoryStack}
+                options={{
+                    title: "Catégories",
+                    drawerIcon: ({ color, size }) => (
+                        <Ionicons name="apps" size={size} color={color} />
                     ),
                 }}
             />
