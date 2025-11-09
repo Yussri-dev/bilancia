@@ -1,0 +1,30 @@
+{
+    "login": {
+        "title": "Aanmelden",
+        "email": "E-mailadres",
+        "password": "Wachtwoord",
+        "button": "Inloggen"
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "loading": "Dashboard wordt geladen...",
+        "loadError": "Gegevens kunnen niet worden geladen.",
+        "offlineWarning": "Je bent offline. Grafieken gebruiken lokale gegevens.",
+        "income": "Inkomsten",
+        "expense": "Uitgaven",
+        "transfer": "Overschrijvingen",
+        "netBalance": "Netto saldo",
+        "savingsRate": "Spaarratio",
+        "noData": "Geen gegevens beschikbaar.",
+        "expenseByCategory": "Uitgaven per categorie",
+        "noExpenseThisMonth": "Geen uitgaven deze maand.",
+        "upcoming": "Binnenkort (14 dagen)",
+        "noUpcoming": "Geen aankomende betalingen 🎉"
+    },
+    "common": {
+        "language": "Taal",
+        "logout": "Afmelden",
+        "online": "Online",
+        "offline": "Offline"
+    }
+}

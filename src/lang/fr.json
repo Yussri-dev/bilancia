@@ -1,0 +1,30 @@
+{
+    "login": {
+        "title": "Connexion",
+        "email": "Adresse e-mail",
+        "password": "Mot de passe",
+        "button": "Se connecter"
+    },
+    "dashboard": {
+        "title": "Tableau de bord",
+        "loading": "Chargement du tableau de bord...",
+        "loadError": "Impossible de charger les données.",
+        "offlineWarning": "Vous êtes hors ligne. Les graphiques utilisent les données locales.",
+        "income": "Revenus",
+        "expense": "Dépenses",
+        "transfer": "Transferts",
+        "netBalance": "Solde net",
+        "savingsRate": "Taux d'épargne",
+        "noData": "Aucune donnée disponible.",
+        "expenseByCategory": "Dépenses par catégorie",
+        "noExpenseThisMonth": "Aucune dépense ce mois.",
+        "upcoming": "À venir (14 jours)",
+        "noUpcoming": "Aucune échéance à venir 🎉"
+    },
+    "common": {
+        "language": "Langue",
+        "logout": "Déconnexion",
+        "online": "En ligne",
+        "offline": "Hors ligne"
+    }
+}

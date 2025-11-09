@@ -1,0 +1,30 @@
+{
+    "login": {
+        "title": "Login",
+        "email": "Email address",
+        "password": "Password",
+        "button": "Sign in"
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "loading": "Loading dashboard...",
+        "loadError": "Unable to load data.",
+        "offlineWarning": "You are offline. Charts use local data.",
+        "income": "Income",
+        "expense": "Expenses",
+        "transfer": "Transfers",
+        "netBalance": "Net balance",
+        "savingsRate": "Savings rate",
+        "noData": "No data available.",
+        "expenseByCategory": "Expenses by category",
+        "noExpenseThisMonth": "No expenses this month.",
+        "upcoming": "Upcoming (14 days)",
+        "noUpcoming": "No upcoming payments 🎉"
+    },
+    "common": {
+        "language": "Language",
+        "logout": "Logout",
+        "online": "Online",
+        "offline": "Offline"
+    }
+}

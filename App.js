@@ -6,6 +6,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider } from "@contexts/authContext";
 import AppNavigator from "@navigation/appNavigator";
 import { ThemeProvider } from "@contexts/ThemeContext";
+import "./src/lang";
 
 import { Buffer } from "buffer";
 global.Buffer = Buffer;

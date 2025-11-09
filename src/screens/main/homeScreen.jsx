@@ -9,6 +9,7 @@ import {
     RefreshControl,
     TouchableOpacity,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { LineChart, PieChart } from "react-native-chart-kit";
 import { useAuth } from "@contexts/authContext";
 import apiClient from "@apiClient";
@@ -23,6 +24,7 @@ const screenWidth = Dimensions.get("window").width;
 export default function HomeScreen({ navigation }) {
     const { token } = useAuth();
     const { colors } = useTheme();
+    const { t, i18n } = useTranslation();
     const styles = getStyles(colors);
 
     const [loading, setLoading] = useState(true);
@@ -291,7 +293,7 @@ export default function HomeScreen({ navigation }) {
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={colors.primary} />
                 <Text style={styles.loadingText}>
-                    Chargement du tableau de bord...
+                    {t('dashboard.loading')}
                 </Text>
             </View>
         );
@@ -330,7 +332,7 @@ export default function HomeScreen({ navigation }) {
                         >
                             <Ionicons name="menu" size={28} color={colors.text} />
                         </TouchableOpacity>
-                        <Text style={styles.headerTitle}>📊 Tableau de bord</Text>
+                        <Text style={styles.headerTitle}>📊 {t('dashboard.title')}</Text>
                         <TouchableOpacity onPress={loadAll} style={{ marginLeft: 8 }}>
                             <Ionicons name="refresh" size={22} color={colors.textSoft} />
                         </TouchableOpacity>
@@ -353,8 +355,7 @@ export default function HomeScreen({ navigation }) {
                 {!isOnline && (
                     <View style={styles.warningContainer}>
                         <Text style={styles.warningText}>
-                            Vous êtes hors ligne. Les graphiques utilisent les
-                            données locales.
+                            {t('dashboard.offlineWarning')}
                         </Text>
                     </View>
                 )}
@@ -373,28 +374,28 @@ export default function HomeScreen({ navigation }) {
 
                     {/* KPI Cards */}
                     <View style={styles.kpiCard}>
-                        <Text style={styles.kpiTitle}>Revenus</Text>
+                        <Text style={styles.kpiTitle}>{t('dashboard.income')}</Text>
                         <Text style={[styles.kpiValue, styles.success]}>
                             {formatCurrency(totalIncome)}
                         </Text>
                     </View>
 
                     <View style={styles.kpiCard}>
-                        <Text style={styles.kpiTitle}>Dépenses</Text>
+                        <Text style={styles.kpiTitle}>{t('dashboard.expense')}</Text>
                         <Text style={[styles.kpiValue, styles.danger]}>
                             {formatCurrency(totalExpense)}
                         </Text>
                     </View>
 
                     <View style={styles.kpiCard}>
-                        <Text style={styles.kpiTitle}>Transferts</Text>
+                        <Text style={styles.kpiTitle}>{t('dashboard.transfer')}</Text>
                         <Text style={[styles.kpiValue, styles.warning]}>
                             {formatCurrency(totalTransfer)}
                         </Text>
                     </View>
 
                     <View style={styles.kpiCard}>
-                        <Text style={styles.kpiTitle}>Solde net</Text>
+                        <Text style={styles.kpiTitle}>{t('dashboard.netBalance')}</Text>
                         <Text
                             style={[
                                 styles.kpiValue,
@@ -406,7 +407,7 @@ export default function HomeScreen({ navigation }) {
                     </View>
 
                     <View style={styles.kpiCard}>
-                        <Text style={styles.kpiTitle}>Taux d'épargne</Text>
+                        <Text style={styles.kpiTitle}>{t('dashboard.savingsRate')}</Text>
                         <Text style={styles.kpiValue}>
                             {(savingsRate * 100).toFixed(0)}%
                         </Text>
@@ -417,7 +418,7 @@ export default function HomeScreen({ navigation }) {
                 {/* Revenus / Dépenses Chart */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>
-                        Revenus / Dépenses / Transferts
+                        {t('dashboard.income')} / {t('dashboard.expense')} / {t('dashboard.transfer')}
                     </Text>
                     {revExpData ? (
                         <LineChart
@@ -439,7 +440,7 @@ export default function HomeScreen({ navigation }) {
                         />
                     ) : (
                         <Text style={styles.emptyText}>
-                            Aucune donnée disponible.
+                            {t('dashboard.noData')}.
                         </Text>
                     )}
                 </View>
@@ -447,7 +448,7 @@ export default function HomeScreen({ navigation }) {
                 {/* Dépenses par catégorie */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>
-                        Dépenses par catégorie ({getMonthLabel()})
+                        {t('dashboard.expenseByCategory')} ({getMonthLabel()})
                     </Text>
                     {pieData.length > 0 ? (
                         <PieChart
@@ -464,17 +465,17 @@ export default function HomeScreen({ navigation }) {
                         />
                     ) : (
                         <Text style={styles.emptyText}>
-                            Aucune dépense ce mois.
+                            {t('dashboard.noExpenseThisMonth')}
                         </Text>
                     )}
                 </View>
 
                 {/* À venir */}
                 <View style={styles.card}>
-                    <Text style={styles.cardTitle}>À venir (14 jours)</Text>
+                    <Text style={styles.cardTitle}>{t('dashboard.upcoming')} </Text>
                     {upcomingPayments.length === 0 ? (
                         <Text style={styles.emptyText}>
-                            Aucune échéance à venir 🎉
+                            {t('dashboard.noUpcoming')} 🎉
                         </Text>
                     ) : (
                         upcomingPayments.map((p) => (
