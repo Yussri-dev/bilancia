@@ -1,5 +1,5 @@
 // src/api/recurringPaymentApi.js
-import apiClient from "./apiClient";
+import apiClient from "@apiClient";
 
 // Helper : convertir les booléens string → bool
 const convertBooleans = (obj) => {

@@ -288,6 +288,20 @@ export default function HomeScreen({ navigation }) {
             "0"
         )}/${currentMonth.getFullYear()}`;
 
+
+    const chartConfig = {
+        backgroundColor: colors.chartBg,
+        backgroundGradientFrom: colors.chartBg,
+        backgroundGradientTo: colors.chartBg,
+        decimalPlaces: 0,
+        color: (opacity = 1) => colors.chartLine + (opacity === 1 ? "" : `${Math.round(opacity * 255).toString(16)}`),
+        labelColor: (opacity = 1) => colors.chartLabel,
+        propsForDots: {
+            r: "4",
+            strokeWidth: "2",
+            stroke: colors.primary,
+        },
+    };
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
@@ -425,23 +439,12 @@ export default function HomeScreen({ navigation }) {
                             data={revExpData}
                             width={screenWidth - 48}
                             height={220}
-                            chartConfig={{
-                                backgroundColor: "#1E293B",
-                                backgroundGradientFrom: "#1E293B",
-                                backgroundGradientTo: "#1E293B",
-                                decimalPlaces: 0,
-                                color: (opacity = 1) =>
-                                    `rgba(124, 58, 237, ${opacity})`,
-                                labelColor: (opacity = 1) =>
-                                    `rgba(229, 231, 235, ${opacity})`,
-                            }}
+                            chartConfig={chartConfig}
                             bezier
                             style={styles.chart}
                         />
                     ) : (
-                        <Text style={styles.emptyText}>
-                            {t('dashboard.noData')}.
-                        </Text>
+                        <Text style={styles.emptyText}>{t('dashboard.noData')}.</Text>
                     )}
                 </View>
 
@@ -456,13 +459,15 @@ export default function HomeScreen({ navigation }) {
                             width={screenWidth - 48}
                             height={220}
                             chartConfig={{
-                                color: (opacity = 1) =>
-                                    `rgba(255,255,255,${opacity})`,
+                                backgroundColor: colors.chartBg,
+                                color: (opacity = 1) => colors.text,
+                                labelColor: () => colors.chartLabel,
                             }}
                             accessor="amount"
                             backgroundColor="transparent"
                             absolute
                         />
+
                     ) : (
                         <Text style={styles.emptyText}>
                             {t('dashboard.noExpenseThisMonth')}

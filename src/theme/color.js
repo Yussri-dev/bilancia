@@ -11,6 +11,9 @@ export const lightColors = {
     success: "#10B981",
     danger: "#EF4444",
     warning: "#F59E0B",
+    chartBg: "#FFFFFF",
+    chartLabel: "#111827",
+    chartLine: "#7C3AED",
 };
 
 export const darkColors = {
@@ -26,4 +29,7 @@ export const darkColors = {
     success: "#10B981",
     danger: "#EF4444",
     warning: "#FACC15",
+    chartBg: "#1E293B",
+    chartLabel: "#E5E7EB",
+    chartLine: "#7C3AED",
 };

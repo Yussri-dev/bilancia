@@ -65,7 +65,7 @@ export default function AnalyticsScreen({ navigation }) {
         loadData();
     }, []);
 
-    // ✅ Export to PDF / Excel (Expo-safe)
+    //  Export to PDF / Excel (Expo-safe)
     const exportFile = async (format) => {
         try {
             const res = await AnalyticsApi.exportReport(format);
@@ -83,7 +83,7 @@ export default function AnalyticsScreen({ navigation }) {
                 encoding: FileSystem.EncodingType.Base64,
             });
 
-            Alert.alert("✅ Export réussi", `Fichier enregistré :\n${path}`);
+            Alert.alert(" Export réussi", `Fichier enregistré :\n${path}`);
         } catch (err) {
             console.error("Export error:", err);
             Alert.alert("Erreur", `Échec de l'export ${format.toUpperCase()}`);
