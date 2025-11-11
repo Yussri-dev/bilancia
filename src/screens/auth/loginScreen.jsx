@@ -38,7 +38,7 @@ export default function LoginScreen({ navigation }) {
             setLoading(true);
             await login(email.trim(), password);
             Alert.alert(t("common.success"), t("login.success"));
-            navigation.replace("Home");
+            navigation.replace("Main");
         } catch (err) {
             console.error("Login error:", err);
             Alert.alert(t("common.error"), t("login.invalid"));

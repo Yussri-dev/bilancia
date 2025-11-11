@@ -28,7 +28,7 @@ export const goalApi = {
 
     contribute: async (token, id, amount) => {
         apiClient.setAuthToken(token);
-        const res = await apiClient.post(`/Goal/${id}/contribute`, { amount }); // ✅ fixed
+        const res = await apiClient.post(`/Goal/${id}/contribute`, { amount });
         return res.data;
     },
 };

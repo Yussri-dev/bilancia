@@ -1,7 +1,7 @@
 // src/api/invoiceApi.js
 import apiClient from "./apiClient";
 
-// Helper pour convertir les booléens string → bool
+// Helper pour convertir les booléens string -> bool
 const convertBooleans = (obj) => {
     const converted = { ...obj };
     for (const key in converted) {
@@ -26,7 +26,6 @@ export const invoiceApi = {
         return res.data?.map(convertBooleans) || [];
     },
 
-    // Alias (si tu veux garder la compatibilité avec ton code actuel)
     getInvoices: async (token) => {
         return await invoiceApi.getAll(token);
     },

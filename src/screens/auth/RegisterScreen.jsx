@@ -54,7 +54,7 @@ export default function RegisterScreen({ navigation }) {
             if (token) {
                 await setUser(token);
                 Alert.alert("Succès", "Compte créé avec succès !");
-                navigation.replace("Home");
+                navigation.replace("Main");
             } else {
                 Alert.alert("Info", "Inscription réussie mais token manquant.");
             }

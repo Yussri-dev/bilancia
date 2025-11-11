@@ -1,7 +1,7 @@
 // src/api/recurringPaymentApi.js
 import apiClient from "@apiClient";
 
-// Helper : convertir les booléens string → bool
+// Helper : convertir les booléens string -> bool
 const convertBooleans = (obj) => {
     const converted = { ...obj };
     for (const key in converted) {

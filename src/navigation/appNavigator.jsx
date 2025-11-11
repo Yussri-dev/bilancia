@@ -24,10 +24,8 @@ export default function AppNavigator() {
             }}
         >
             {token ? (
-                // Connecté → on ouvre le Drawer principal
                 <Stack.Screen name="Main" component={DrawerNavigator} />
             ) : (
-                // Non connecté → Auth flow
                 <>
                     <Stack.Screen name="Login" component={LoginScreen} />
                     <Stack.Screen name="Register" component={RegisterScreen} />
