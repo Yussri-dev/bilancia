@@ -14,18 +14,19 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@contexts/authContext";
 import { useTheme } from "@contexts/ThemeContext";
 import { getStyles } from "@theme/styles";
-import apiClient from "@apiClient"
+import apiClient from "@apiClient";
+import { useTranslation } from "react-i18next";
 
 export default function CategoriesScreen({ navigation }) {
     const { token } = useAuth();
     const { colors } = useTheme();
     const styles = getStyles(colors);
+    const { t } = useTranslation();
 
     const [categories, setCategories] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showArchived, setShowArchived] = useState(false);
 
-    // ✅ Load categories
     const loadData = useCallback(async () => {
         setIsLoading(true);
         try {
@@ -34,13 +35,12 @@ export default function CategoriesScreen({ navigation }) {
             setCategories(res.data || []);
         } catch (error) {
             console.error("Error fetching categories:", error);
-            Alert.alert("Erreur", "Impossible de charger les catégories.");
+            Alert.alert(t("common.error"), t("categories.loadError"));
         } finally {
             setIsLoading(false);
         }
-    }, [token]);
+    }, [token, t]);
 
-    // ✅ Re-fetch when screen comes into focus
     useEffect(() => {
         const unsubscribe = navigation.addListener("focus", loadData);
         return unsubscribe;
@@ -49,10 +49,10 @@ export default function CategoriesScreen({ navigation }) {
     const filtered = categories.filter((c) => showArchived || !c.isArchived);
 
     const deleteCategory = async (id) => {
-        Alert.alert("Confirmation", "Supprimer cette catégorie ?", [
-            { text: "Annuler", style: "cancel" },
+        Alert.alert(t("common.confirm"), t("categories.deleteConfirm"), [
+            { text: t("common.cancel"), style: "cancel" },
             {
-                text: "Supprimer",
+                text: t("common.delete"),
                 style: "destructive",
                 onPress: async () => {
                     try {
@@ -61,7 +61,7 @@ export default function CategoriesScreen({ navigation }) {
                         await loadData();
                     } catch (error) {
                         console.error("Delete failed:", error);
-                        Alert.alert("Erreur", "Suppression impossible.");
+                        Alert.alert(t("common.error"), t("categories.deleteFailed"));
                     }
                 },
             },
@@ -72,7 +72,7 @@ export default function CategoriesScreen({ navigation }) {
         return (
             <SafeAreaView style={styles.centered}>
                 <ActivityIndicator size="large" color={colors.primary} />
-                <Text style={styles.loadingText}>Chargement des catégories...</Text>
+                <Text style={styles.loadingText}>{t("categories.loading")}</Text>
             </SafeAreaView>
         );
     }
@@ -91,21 +91,17 @@ export default function CategoriesScreen({ navigation }) {
                     },
                 ]}
             >
-                {/* Drawer Button */}
                 <TouchableOpacity onPress={() => navigation.openDrawer()}>
                     <Ionicons name="menu" size={26} color={colors.text} />
                 </TouchableOpacity>
 
                 <View style={{ flex: 1, alignItems: "center" }}>
                     <Text style={[styles.headerTitle, { fontSize: 20 }]}>
-                        📂 Mes Catégories
+                        📂 {t("categories.title")}
                     </Text>
-                    <Text style={styles.subtitle}>
-                        Organisez et gérez vos catégories
-                    </Text>
+                    <Text style={styles.subtitle}>{t("categories.subtitle")}</Text>
                 </View>
 
-                {/* Placeholder to balance layout */}
                 <View style={{ width: 26 }} />
             </View>
 
@@ -117,25 +113,23 @@ export default function CategoriesScreen({ navigation }) {
                     trackColor={{ false: colors.border, true: colors.primary }}
                     thumbColor={showArchived ? colors.primary : colors.surface2}
                 />
-                <Text style={styles.toggleText}>
-                    Afficher les catégories archivées
-                </Text>
+                <Text style={styles.toggleText}>{t("categories.showArchived")}</Text>
             </View>
 
             {/* === STATS === */}
             <View style={styles.statsGrid}>
                 {[
-                    { label: "Revenus", icon: "arrow-up", color: colors.success },
-                    { label: "Dépenses", icon: "arrow-down", color: colors.danger },
-                    { label: "Transferts", icon: "swap-horizontal", color: colors.textSoft },
-                    { label: "Total", icon: "folder", color: colors.primary },
+                    { label: t("categories.income"), icon: "arrow-up", color: colors.success },
+                    { label: t("categories.expense"), icon: "arrow-down", color: colors.danger },
+                    { label: t("categories.transfer"), icon: "swap-horizontal", color: colors.textSoft },
+                    { label: t("categories.total"), icon: "folder", color: colors.primary },
                 ].map((stat) => {
                     const count =
-                        stat.label === "Revenus"
+                        stat.label === t("categories.income")
                             ? filtered.filter((c) => c.type === "Income").length
-                            : stat.label === "Dépenses"
+                            : stat.label === t("categories.expense")
                                 ? filtered.filter((c) => c.type === "Expense").length
-                                : stat.label === "Transferts"
+                                : stat.label === t("categories.transfer")
                                     ? filtered.filter((c) => c.type === "Transfer").length
                                     : filtered.length;
 
@@ -165,7 +159,7 @@ export default function CategoriesScreen({ navigation }) {
             {filtered.length === 0 ? (
                 <View style={styles.empty}>
                     <Text style={styles.emptyIcon}>📂</Text>
-                    <Text style={styles.emptyText}>Aucune catégorie trouvée</Text>
+                    <Text style={styles.emptyText}>{t("categories.empty")}</Text>
                 </View>
             ) : (
                 <FlatList
@@ -212,7 +206,6 @@ export default function CategoriesScreen({ navigation }) {
                 />
             )}
 
-            {/* === FLOATING ACTION BUTTON === */}
             <TouchableOpacity
                 style={styles.fab}
                 onPress={() =>

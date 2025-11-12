@@ -15,10 +15,12 @@ import { useAuth } from "@contexts/authContext";
 import { categoryApi } from "@api/categoryApi";
 import { useTheme } from "@contexts/ThemeContext";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 
 export default function CategoryModel({ route, navigation }) {
     const { token } = useAuth();
     const { colors } = useTheme();
+    const { t } = useTranslation();
     const styles = getStyles(colors);
 
     const { mode, category } = route.params || {};
@@ -40,7 +42,7 @@ export default function CategoryModel({ route, navigation }) {
 
     const saveCategory = async () => {
         if (!form.name.trim()) {
-            Alert.alert("Nom requis", "Veuillez entrer un nom de catégorie");
+            Alert.alert(t("common.error"), t("categoryModel.nameRequired"));
             return;
         }
 
@@ -54,7 +56,7 @@ export default function CategoryModel({ route, navigation }) {
             navigation.goBack();
         } catch (err) {
             console.error("Save error:", err);
-            Alert.alert("Erreur", "Impossible d’enregistrer la catégorie");
+            Alert.alert(t("common.error"), t("categoryModel.saveError"));
         } finally {
             setIsSaving(false);
         }
@@ -66,7 +68,7 @@ export default function CategoryModel({ route, navigation }) {
                 {/* Header */}
                 <View style={styles.header}>
                     <Text style={styles.title}>
-                        {isEditing ? "Modifier la catégorie" : "Nouvelle catégorie"}
+                        {isEditing ? t("categoryModel.editTitle") : t("categoryModel.newTitle")}
                     </Text>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeBtn}>
                         <Ionicons name="close" size={22} color={colors.textSoft} />
@@ -76,30 +78,30 @@ export default function CategoryModel({ route, navigation }) {
                 {/* Body */}
                 <ScrollView style={styles.body} keyboardShouldPersistTaps="handled">
                     <FormInput
-                        label="Nom"
+                        label={t("categoryModel.name")}
                         value={form.name}
-                        placeholder="Nom de la catégorie"
+                        placeholder={t("categoryModel.namePlaceholder")}
                         onChange={(t) => setForm({ ...form, name: t })}
                         colors={colors}
                     />
 
                     <View style={styles.formGroup}>
-                        <Text style={styles.label}>Type</Text>
+                        <Text style={styles.label}>{t("categoryModel.type")}</Text>
                         <View style={styles.typeSelector}>
-                            {["Income", "Expense"].map((t) => (
+                            {["Income", "Expense"].map((tType) => (
                                 <TouchableOpacity
-                                    key={t}
-                                    onPress={() => setForm({ ...form, type: t })}
+                                    key={tType}
+                                    onPress={() => setForm({ ...form, type: tType })}
                                     style={[
                                         styles.typeOption,
-                                        form.type === t && styles.typeSelected,
+                                        form.type === tType && styles.typeSelected,
                                     ]}
                                 >
                                     <Ionicons
-                                        name={t === "Income" ? "arrow-up" : "arrow-down"}
+                                        name={tType === "Income" ? "arrow-up" : "arrow-down"}
                                         size={18}
                                         color={
-                                            form.type === t ? colors.primary : colors.textSoft
+                                            form.type === tType ? colors.primary : colors.textSoft
                                         }
                                     />
                                     <Text
@@ -107,11 +109,15 @@ export default function CategoryModel({ route, navigation }) {
                                             styles.typeText,
                                             {
                                                 color:
-                                                    form.type === t ? colors.primary : colors.textSoft,
+                                                    form.type === tType
+                                                        ? colors.primary
+                                                        : colors.textSoft,
                                             },
                                         ]}
                                     >
-                                        {t === "Income" ? "Revenu" : "Dépense"}
+                                        {tType === "Income"
+                                            ? t("categoryModel.income")
+                                            : t("categoryModel.expense")}
                                     </Text>
                                 </TouchableOpacity>
                             ))}
@@ -119,31 +125,31 @@ export default function CategoryModel({ route, navigation }) {
                     </View>
 
                     <FormInput
-                        label="Icône"
+                        label={t("categoryModel.icon")}
                         value={form.icon}
-                        placeholder="Ex: 📂, 🛒"
+                        placeholder={t("categoryModel.iconPlaceholder")}
                         onChange={(t) => setForm({ ...form, icon: t })}
                         colors={colors}
                     />
 
                     <FormInput
-                        label="Couleur"
+                        label={t("categoryModel.color")}
                         value={form.colorHex}
-                        placeholder="#16a34a"
+                        placeholder={t("categoryModel.colorPlaceholder")}
                         onChange={(t) => setForm({ ...form, colorHex: t })}
                         colors={colors}
                     />
 
                     <FormInput
-                        label="Groupe"
+                        label={t("categoryModel.group")}
                         value={form.groupName}
-                        placeholder="Ex: Logement, Loisirs…"
+                        placeholder={t("categoryModel.groupPlaceholder")}
                         onChange={(t) => setForm({ ...form, groupName: t })}
                         colors={colors}
                     />
 
                     <View style={styles.formGroup}>
-                        <Text style={styles.label}>Ordre</Text>
+                        <Text style={styles.label}>{t("categoryModel.order")}</Text>
                         <TextInput
                             style={styles.input}
                             keyboardType="numeric"
@@ -153,12 +159,12 @@ export default function CategoryModel({ route, navigation }) {
                             onChangeText={(t) => setForm({ ...form, order: parseInt(t) || 0 })}
                         />
                         <Text style={styles.helperText}>
-                            Plus petit = affiché en premier
+                            {t("categoryModel.orderHint")}
                         </Text>
                     </View>
 
                     <View style={styles.formGroupRow}>
-                        <Text style={styles.label}>Archiver</Text>
+                        <Text style={styles.label}>{t("categoryModel.archive")}</Text>
                         <Switch
                             value={form.isArchived}
                             onValueChange={(v) => setForm({ ...form, isArchived: v })}
@@ -171,7 +177,7 @@ export default function CategoryModel({ route, navigation }) {
                 {/* Footer */}
                 <View style={styles.footer}>
                     <TouchableOpacity onPress={() => navigation.goBack()} style={styles.btnSecondary}>
-                        <Text style={styles.btnSecondaryText}>Annuler</Text>
+                        <Text style={styles.btnSecondaryText}>{t("common.cancel")}</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -180,7 +186,7 @@ export default function CategoryModel({ route, navigation }) {
                         disabled={isSaving}
                     >
                         <Text style={styles.btnPrimaryText}>
-                            {isEditing ? "Enregistrer" : "Créer"}
+                            {isEditing ? t("common.save") : t("common.create")}
                         </Text>
                     </TouchableOpacity>
                 </View>
@@ -189,9 +195,6 @@ export default function CategoryModel({ route, navigation }) {
     );
 }
 
-/**
- * Small reusable input component to reduce duplication
- */
 const FormInput = ({ label, placeholder, value, onChange, colors }) => (
     <View style={{ marginBottom: 14 }}>
         <Text style={{ color: colors.textSoft, fontWeight: "600", marginBottom: 6 }}>
@@ -214,9 +217,6 @@ const FormInput = ({ label, placeholder, value, onChange, colors }) => (
     </View>
 );
 
-/**
- * Styles generator (uses theme)
- */
 const getStyles = (colors) =>
     StyleSheet.create({
         overlay: {

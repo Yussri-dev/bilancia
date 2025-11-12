@@ -102,5 +102,40 @@
         "missingToken": "Inscription réussie mais token manquant.",
         "failed": "Échec de l'inscription.",
         "info": "Info"
+    },
+    "categories": {
+        "title": "Mes Catégories",
+        "subtitle": "Organisez et gérez vos catégories",
+        "loading": "Chargement des catégories...",
+        "showArchived": "Afficher les catégories archivées",
+        "income": "Revenus",
+        "expense": "Dépenses",
+        "transfer": "Transferts",
+        "total": "Total",
+        "empty": "Aucune catégorie trouvée",
+        "loadError": "Impossible de charger les catégories.",
+        "deleteConfirm": "Supprimer cette catégorie ?",
+        "deleteFailed": "Suppression impossible.",
+        "success": "Succès"
+    },
+    "categoryModel": {
+        "editTitle": "Modifier la catégorie",
+        "newTitle": "Nouvelle catégorie",
+        "name": "Nom",
+        "namePlaceholder": "Nom de la catégorie",
+        "nameRequired": "Veuillez entrer un nom de catégorie",
+        "type": "Type",
+        "income": "Revenu",
+        "expense": "Dépense",
+        "icon": "Icône",
+        "iconPlaceholder": "Ex: 📂, 🛒",
+        "color": "Couleur",
+        "colorPlaceholder": "#16a34a",
+        "group": "Groupe",
+        "groupPlaceholder": "Ex: Logement, Loisirs…",
+        "order": "Ordre",
+        "orderHint": "Plus petit = affiché en premier",
+        "archive": "Archiver",
+        "saveError": "Impossible d’enregistrer la catégorie"
     }
 }

@@ -102,5 +102,40 @@
         "missingToken": "Registratie voltooid maar geen token ontvangen.",
         "failed": "Registratie mislukt.",
         "info": "Info"
+    },
+    "categories": {
+        "title": "Mijn categorieën",
+        "subtitle": "Beheer en organiseer je categorieën",
+        "loading": "Categorieën worden geladen...",
+        "showArchived": "Gearchiveerde categorieën weergeven",
+        "income": "Inkomsten",
+        "expense": "Uitgaven",
+        "transfer": "Overschrijvingen",
+        "total": "Totaal",
+        "empty": "Geen categorieën gevonden",
+        "loadError": "Categorieën konden niet worden geladen.",
+        "deleteConfirm": "Deze categorie verwijderen?",
+        "deleteFailed": "Verwijderen mislukt.",
+        "success": "Succes"
+    },
+    "categoryModel": {
+        "editTitle": "Categorie bewerken",
+        "newTitle": "Nieuwe categorie",
+        "name": "Naam",
+        "namePlaceholder": "Naam van de categorie",
+        "nameRequired": "Voer een categorienaam in",
+        "type": "Type",
+        "income": "Inkomen",
+        "expense": "Uitgave",
+        "icon": "Icoon",
+        "iconPlaceholder": "Bijv: 📂, 🛒",
+        "color": "Kleur",
+        "colorPlaceholder": "#16a34a",
+        "group": "Groep",
+        "groupPlaceholder": "Bijv: Wonen, Vrije tijd…",
+        "order": "Volgorde",
+        "orderHint": "Kleiner = eerst weergegeven",
+        "archive": "Archiveren",
+        "saveError": "Kan categorie niet opslaan"
     }
 }

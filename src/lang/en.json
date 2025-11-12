@@ -102,5 +102,40 @@
         "missingToken": "Registration succeeded but no token was returned.",
         "failed": "Registration failed.",
         "info": "Info"
+    },
+    "categories": {
+        "title": "My Categories",
+        "subtitle": "Organize and manage your categories",
+        "loading": "Loading categories...",
+        "showArchived": "Show archived categories",
+        "income": "Income",
+        "expense": "Expenses",
+        "transfer": "Transfers",
+        "total": "Total",
+        "empty": "No categories found",
+        "loadError": "Unable to load categories.",
+        "deleteConfirm": "Delete this category?",
+        "deleteFailed": "Unable to delete.",
+        "success": "Success"
+    },
+    "categoryModel": {
+        "editTitle": "Edit Category",
+        "newTitle": "New Category",
+        "name": "Name",
+        "namePlaceholder": "Category name",
+        "nameRequired": "Please enter a category name",
+        "type": "Type",
+        "income": "Income",
+        "expense": "Expense",
+        "icon": "Icon",
+        "iconPlaceholder": "Ex: 📂, 🛒",
+        "color": "Color",
+        "colorPlaceholder": "#16a34a",
+        "group": "Group",
+        "groupPlaceholder": "Ex: Housing, Leisure…",
+        "order": "Order",
+        "orderHint": "Smaller = shown first",
+        "archive": "Archive",
+        "saveError": "Unable to save category"
     }
 }
