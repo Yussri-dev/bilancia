@@ -51,5 +51,28 @@
         "saveButton": "Opslaan",
         "questionLabel": "Advies {{months}}m ({{targetPct}}%)",
         "history": "Geschiedenis"
+    },
+    "analytics": {
+        "title": "Analytics",
+        "loading": "Analytics worden geladen...",
+        "loadError": "Fout bij het laden van analytische gegevens.",
+        "errorTitle": "Fout",
+        "exportError": "Exporteren van {{format}} bestand mislukt.",
+        "exportSuccessTitle": "Export succesvol",
+        "exportSuccessMessage": "Bestand opgeslagen op:\n{{path}}",
+        "reportPdf": "analytics_rapport.pdf",
+        "reportExcel": "analytics_rapport.xlsx",
+        "income": "Inkomsten",
+        "expenses": "Uitgaven",
+        "netBalance": "Netto saldo",
+        "transactions": "Transacties",
+        "pendingInvoices": "Openstaande facturen",
+        "incomeExpenseRatio": "Inkomen / Uitgaven verhouding",
+        "avgMonthlyExpense": "Gemiddelde maandelijkse uitgave",
+        "nextMonthPrediction": "Voorspelling volgende maand",
+        "topExpenseCategories": "Top uitgavencategorieën",
+        "noExpenses": "Geen uitgaven beschikbaar.",
+        "monthlyHistory": "Maandelijkse geschiedenis",
+        "exportReports": "Rapporten exporteren"
     }
 }

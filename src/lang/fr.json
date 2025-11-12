@@ -51,5 +51,28 @@
         "saveButton": "Enregistrer",
         "questionLabel": "Conseil {{months}}m ({{targetPct}}%)",
         "history": "Historique"
+    },
+    "analytics": {
+        "title": "Analytics",
+        "loading": "Chargement des analytics...",
+        "loadError": "Erreur lors du chargement des données analytics.",
+        "errorTitle": "Erreur",
+        "exportError": "Échec de l'export du fichier {{format}}.",
+        "exportSuccessTitle": "Export réussi",
+        "exportSuccessMessage": "Fichier enregistré à :\n{{path}}",
+        "reportPdf": "rapport_analytics.pdf",
+        "reportExcel": "rapport_analytics.xlsx",
+        "income": "Revenus",
+        "expenses": "Dépenses",
+        "netBalance": "Solde net",
+        "transactions": "Transactions",
+        "pendingInvoices": "Factures en attente",
+        "incomeExpenseRatio": "Ratio Revenus / Dépenses",
+        "avgMonthlyExpense": "Dépense mensuelle moyenne",
+        "nextMonthPrediction": "Prévision mois prochain",
+        "topExpenseCategories": "Top catégories de dépenses",
+        "noExpenses": "Aucune dépense.",
+        "monthlyHistory": "Historique mensuel",
+        "exportReports": "Exporter vos rapports"
     }
 }
