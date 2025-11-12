@@ -26,5 +26,30 @@
         "logout": "Afmelden",
         "online": "Online",
         "offline": "Offline"
+    },
+    "advice": {
+        "headerTitle": "Financieel advies",
+        "subtitle": "Analyseert je uitgaven en stelt optimalisaties voor",
+        "loadingText": "Bezig met analyseren...",
+        "errorTitle": "Fout",
+        "errorLoad": "Kan advies niet laden.",
+        "errorDelete": "Kan item niet verwijderen.",
+        "summaryHeader": "Samenvatting over {{months}} maanden (doel {{targetPct}}%)",
+        "income": "Inkomsten",
+        "expense": "Uitgaven",
+        "currentSavings": "Huidige besparingen",
+        "goal": "Doel",
+        "gap": "Verschil",
+        "impact": "Impact",
+        "impactEstimate": "Geschatte impact",
+        "noSpecificAdvice": "Geen specifiek advies op dit moment.",
+        "deleteButton": "Verwijderen",
+        "paramsTitle": "Analyseparameters",
+        "monthsLabel": "Over (maanden)",
+        "goalLabel": "Doel (%)",
+        "analyzeButton": "Analyseren",
+        "saveButton": "Opslaan",
+        "questionLabel": "Advies {{months}}m ({{targetPct}}%)",
+        "history": "Geschiedenis"
     }
 }

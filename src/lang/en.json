@@ -26,5 +26,30 @@
         "logout": "Logout",
         "online": "Online",
         "offline": "Offline"
+    },
+    "advice": {
+        "headerTitle": "Financial Advice",
+        "subtitle": "Analyzes your expenses and offers optimizations",
+        "loadingText": "Analyzing data...",
+        "errorTitle": "Error",
+        "errorLoad": "Unable to load advice.",
+        "errorDelete": "Unable to delete entry.",
+        "summaryHeader": "Summary over {{months}} months (target {{targetPct}}%)",
+        "income": "Income",
+        "expense": "Expenses",
+        "currentSavings": "Current savings",
+        "goal": "Goal",
+        "gap": "Gap",
+        "impact": "Impact",
+        "impactEstimate": "Estimated impact",
+        "noSpecificAdvice": "No specific advice for now.",
+        "deleteButton": "Delete",
+        "paramsTitle": "Analysis parameters",
+        "monthsLabel": "Over (months)",
+        "goalLabel": "Goal (%)",
+        "analyzeButton": "Analyze",
+        "saveButton": "Save",
+        "questionLabel": "Advice {{months}}m ({{targetPct}}%)",
+        "history": "History"
     }
 }

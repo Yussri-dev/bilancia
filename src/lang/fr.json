@@ -26,5 +26,30 @@
         "logout": "Déconnexion",
         "online": "En ligne",
         "offline": "Hors ligne"
+    },
+    "advice": {
+        "headerTitle": "Conseils financiers",
+        "subtitle": "Analyse vos dépenses et propose des optimisations",
+        "loadingText": "Analyse en cours...",
+        "errorTitle": "Erreur",
+        "errorLoad": "Impossible de charger les conseils.",
+        "errorDelete": "Impossible de supprimer l'entrée.",
+        "summaryHeader": "Résumé sur {{months}} mois (objectif {{targetPct}}%)",
+        "income": "Revenus",
+        "expense": "Dépenses",
+        "currentSavings": "Épargne actuelle",
+        "goal": "Objectif",
+        "gap": "Écart",
+        "impact": "Impact",
+        "impactEstimate": "Impact estimé",
+        "noSpecificAdvice": "Aucun conseil spécifique pour le moment.",
+        "deleteButton": "Supprimer",
+        "paramsTitle": "Paramètres d'analyse",
+        "monthsLabel": "Sur (mois)",
+        "goalLabel": "Objectif (%)",
+        "analyzeButton": "Analyser",
+        "saveButton": "Enregistrer",
+        "questionLabel": "Conseil {{months}}m ({{targetPct}}%)",
+        "history": "Historique"
     }
 }

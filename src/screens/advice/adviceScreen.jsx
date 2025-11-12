@@ -15,11 +15,13 @@ import { useAuth } from "@contexts/authContext";
 import { useTheme } from "@contexts/ThemeContext";
 import { getStyles } from "@theme/styles";
 import adviceApi from "@api/AdviceApi";
+import { useTranslation } from "react-i18next";
 
 export default function AdviceScreen({ navigation }) {
     const { token } = useAuth();
     const { colors } = useTheme();
     const styles = getStyles(colors);
+    const { t } = useTranslation();
 
     const [months, setMonths] = useState(3);
     const [targetPct, setTargetPct] = useState(20);
@@ -40,7 +42,7 @@ export default function AdviceScreen({ navigation }) {
             setLogs(l);
         } catch (e) {
             console.error(e);
-            Alert.alert("Erreur", "Impossible de charger les conseils.");
+            Alert.alert(t("advice.errorTitle"), t("advice.errorLoad"));
         } finally {
             setLoading(false);
         }
@@ -57,30 +59,30 @@ export default function AdviceScreen({ navigation }) {
         try {
             // Crée une version texte propre du résumé
             const summary =
-                `Résumé sur ${months} mois (objectif ${targetPct}%)\n` +
-                `Revenus: €${advice.currentMonthlyIncome?.toFixed(2)}\n` +
-                `Dépenses: €${advice.currentMonthlyExpenses?.toFixed(2)}\n` +
-                `Épargne actuelle: €${advice.currentSavingsPerMonth?.toFixed(2)}\n` +
-                `Objectif: €${advice.targetSavingsPerMonth?.toFixed(2)}\n` +
-                `Écart: €${advice.gapToTarget?.toFixed(2)}\n\n` +
+                `${t("advice.summaryHeader", { months, targetPct })}\n` +
+                `${t("advice.income")}: €${advice.currentMonthlyIncome?.toFixed(2)}\n` +
+                `${t("advice.expense")}: €${advice.currentMonthlyExpenses?.toFixed(2)}\n` +
+                `${t("advice.currentSavings")}: €${advice.currentSavingsPerMonth?.toFixed(2)}\n` +
+                `${t("advice.goal")}: €${advice.targetSavingsPerMonth?.toFixed(2)}\n` +
+                `${t("advice.gap")}: €${advice.gapToTarget?.toFixed(2)}\n\n` +
                 (advice.items?.length
                     ? advice.items
                         .map(
                             (it) =>
-                                `• ${it.title} (${it.severity}) – Impact: €${it.estimatedMonthlyImpact.toFixed(2)}`
+                                `• ${it.title} (${it.severity}) – ${t("advice.impact")}: €${it.estimatedMonthlyImpact.toFixed(2)}`
                         )
                         .join("\n")
-                    : "Aucun conseil spécifique.");
+                    : t("advice.noSpecificAdvice"));
 
             const dto = {
-                question: `Conseil ${months}m (${targetPct}%)`,
+                question: `${t("advice.questionLabel", { months, targetPct })}`,
                 answer: summary,
             };
 
             await adviceApi.createLog(token, dto);
             await loadAll();
         } catch (err) {
-            Alert.alert("Erreur", err.message);
+            Alert.alert(t("advice.errorTitle"), err.message);
         } finally {
             setSaving(false);
         }
@@ -93,7 +95,7 @@ export default function AdviceScreen({ navigation }) {
             await adviceApi.deleteLog(token, id);
             await loadAll();
         } catch {
-            Alert.alert("Erreur", "Impossible de supprimer.");
+            Alert.alert(t("advice.errorTitle"), t("advice.errorDelete"));
         } finally {
             setLogsBusy(false);
         }
@@ -148,7 +150,7 @@ export default function AdviceScreen({ navigation }) {
                     disabled={logsBusy}
                 >
                     <Ionicons name="trash" size={16} color="#fff" />
-                    <Text style={styles.btnActionText}>Supprimer</Text>
+                    <Text style={styles.btnActionText}>{t("advice.deleteButton")}</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -158,7 +160,7 @@ export default function AdviceScreen({ navigation }) {
         return (
             <SafeAreaView style={styles.centered}>
                 <ActivityIndicator size="large" color={colors.primary} />
-                <Text style={styles.loadingText}>Analyse en cours...</Text>
+                <Text style={styles.loadingText}>{t("advice.loadingText")}</Text>
             </SafeAreaView>
         );
     }
@@ -189,10 +191,10 @@ export default function AdviceScreen({ navigation }) {
 
                             <View style={{ flex: 1, alignItems: "center" }}>
                                 <Text style={[styles.headerTitle, { fontSize: 20 }]}>
-                                    💡 Conseils financiers
+                                    💡 {t("advice.headerTitle")}
                                 </Text>
                                 <Text style={styles.subtitle}>
-                                    Analyse vos dépenses et propose des optimisations
+                                    {t("advice.subtitle")}
                                 </Text>
                             </View>
 
@@ -203,31 +205,31 @@ export default function AdviceScreen({ navigation }) {
                         {advice && (
                             <View style={styles.kpiGrid}>
                                 <View style={styles.kpiCard}>
-                                    <Text style={styles.kpiTitle}>Revenus</Text>
+                                    <Text style={styles.kpiTitle}>{t("advice.income")}</Text>
                                     <Text style={[styles.kpiValue, styles.success]}>
                                         €{advice.currentMonthlyIncome?.toFixed(2) || "0.00"}
                                     </Text>
                                 </View>
                                 <View style={styles.kpiCard}>
-                                    <Text style={styles.kpiTitle}>Dépenses</Text>
+                                    <Text style={styles.kpiTitle}>{t("advice.expense")}</Text>
                                     <Text style={[styles.kpiValue, styles.danger]}>
                                         €{advice.currentMonthlyExpenses?.toFixed(2) || "0.00"}
                                     </Text>
                                 </View>
                                 <View style={styles.kpiCard}>
-                                    <Text style={styles.kpiTitle}>Épargne actuelle</Text>
+                                    <Text style={styles.kpiTitle}>{t("advice.currentSavings")}</Text>
                                     <Text style={styles.kpiValue}>
                                         €{advice.currentSavingsPerMonth?.toFixed(2) || "0.00"}
                                     </Text>
                                 </View>
                                 <View style={styles.kpiCard}>
-                                    <Text style={styles.kpiTitle}>Objectif</Text>
+                                    <Text style={styles.kpiTitle}>{t("advice.goal")}</Text>
                                     <Text style={styles.kpiValue}>
                                         €{advice.targetSavingsPerMonth?.toFixed(2) || "0.00"}
                                     </Text>
                                 </View>
                                 <View style={styles.kpiCard}>
-                                    <Text style={styles.kpiTitle}>Écart</Text>
+                                    <Text style={styles.kpiTitle}>{t("advice.gap")}</Text>
                                     <Text
                                         style={[
                                             styles.kpiValue,
@@ -244,10 +246,10 @@ export default function AdviceScreen({ navigation }) {
 
                         {/* === PARAMÈTRES === */}
                         <View style={styles.card}>
-                            <Text style={styles.kpiTitle}>Paramètres d’analyse</Text>
+                            <Text style={styles.kpiTitle}>{t("advice.paramsTitle")}</Text>
                             <View style={styles.formRow}>
                                 <View style={{ flex: 1 }}>
-                                    <Text style={styles.label}>Sur (mois)</Text>
+                                    <Text style={styles.label}>{t("advice.monthsLabel")}</Text>
                                     <TextInput
                                         style={styles.input}
                                         keyboardType="numeric"
@@ -258,7 +260,7 @@ export default function AdviceScreen({ navigation }) {
                                     />
                                 </View>
                                 <View style={{ flex: 1 }}>
-                                    <Text style={styles.label}>Objectif (%)</Text>
+                                    <Text style={styles.label}>{t("advice.goalLabel")}</Text>
                                     <TextInput
                                         style={styles.input}
                                         keyboardType="numeric"
@@ -275,7 +277,7 @@ export default function AdviceScreen({ navigation }) {
                                     style={[styles.btnPrimary, { flex: 1 }]}
                                     onPress={loadAll}
                                 >
-                                    <Text style={styles.btnPrimaryText}>Analyser</Text>
+                                    <Text style={styles.btnPrimaryText}>{t("advice.analyzeButton")}</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     style={[styles.btnSecondary, { flex: 1 }]}
@@ -283,7 +285,7 @@ export default function AdviceScreen({ navigation }) {
                                     disabled={saving}
                                 >
                                     <Text style={styles.btnSecondaryText}>
-                                        {saving ? "..." : "💾 Enregistrer"}
+                                        {saving ? "..." : `💾 ${t("advice.saveButton")}`}
                                     </Text>
                                 </TouchableOpacity>
                             </View>
@@ -301,7 +303,7 @@ export default function AdviceScreen({ navigation }) {
                                     </Text>
                                     <Text style={styles.detailText}>{it.detail}</Text>
                                     <Text style={styles.meta}>
-                                        Impact estimé : €{it.estimatedMonthlyImpact?.toFixed(2)}
+                                        {t("advice.impactEstimate")} : €{it.estimatedMonthlyImpact?.toFixed(2)}
                                     </Text>
                                 </View>
                             ))
@@ -309,14 +311,14 @@ export default function AdviceScreen({ navigation }) {
                             <View style={styles.empty}>
                                 <Text style={styles.emptyIcon}>✨</Text>
                                 <Text style={styles.emptyText}>
-                                    Aucun conseil spécifique pour le moment
+                                    {t("advice.noSpecificAdvice")}
                                 </Text>
                             </View>
                         )}
 
                         {/* === HISTORIQUE === */}
                         <Text style={[styles.headerTitle, { fontSize: 18, marginTop: 24 }]}>
-                            📜 Historique
+                            📜 {t("advice.history")}
                         </Text>
                     </>
                 }
