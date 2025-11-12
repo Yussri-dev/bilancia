@@ -137,5 +137,24 @@
         "orderHint": "Smaller = shown first",
         "archive": "Archive",
         "saveError": "Unable to save category"
+    },
+    "goals": {
+        "title": "Savings Goals",
+        "subtitle": "Create and track your financial goals",
+        "loading": "Loading goals...",
+        "namePlaceholder": "Goal name",
+        "targetPlaceholder": "Target amount (€)",
+        "nameAndAmountRequired": "Name and target amount are required.",
+        "saveError": "Unable to save goal.",
+        "deleteConfirm": "Delete this goal?",
+        "deleteError": "Unable to delete goal.",
+        "contribError": "Unable to add contribution.",
+        "empty": "No goals found",
+        "target": "Target",
+        "saved": "Saved",
+        "achieved": "achieved",
+        "remaining": "remaining",
+        "addAmount": "Add (€)",
+        "loadError": "Unable to load goals."
     }
 }

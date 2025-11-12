@@ -137,5 +137,24 @@
         "orderHint": "Kleiner = eerst weergegeven",
         "archive": "Archiveren",
         "saveError": "Kan categorie niet opslaan"
+    },
+    "goals": {
+        "title": "Spaar Doelen",
+        "subtitle": "Maak en volg je financiële doelen",
+        "loading": "Doelen worden geladen...",
+        "namePlaceholder": "Naam van doel",
+        "targetPlaceholder": "Doelbedrag (€)",
+        "nameAndAmountRequired": "Naam en bedrag zijn verplicht.",
+        "saveError": "Doel kon niet worden opgeslagen.",
+        "deleteConfirm": "Dit doel verwijderen?",
+        "deleteError": "Doel kon niet worden verwijderd.",
+        "contribError": "Bijdrage kon niet worden toegevoegd.",
+        "empty": "Geen doelen gevonden",
+        "target": "Doel",
+        "saved": "Gespaard",
+        "achieved": "bereikt",
+        "remaining": "resterend",
+        "addAmount": "Toevoegen (€)",
+        "loadError": "Doelen konden niet worden geladen."
     }
 }

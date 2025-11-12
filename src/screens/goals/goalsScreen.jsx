@@ -13,12 +13,14 @@ import { useAuth } from "@contexts/authContext";
 import { useTheme } from "@contexts/ThemeContext";
 import { getStyles } from "@theme/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
-import apiClient from "@apiClient"
+import apiClient from "@apiClient";
+import { useTranslation } from "react-i18next";
 
 export default function GoalsScreen({ navigation }) {
     const { token } = useAuth();
     const { colors } = useTheme();
     const styles = getStyles(colors);
+    const { t } = useTranslation();
 
     const [goals, setGoals] = useState([]);
     const [activeOnly, setActiveOnly] = useState(true);
@@ -28,7 +30,6 @@ export default function GoalsScreen({ navigation }) {
     const [isSaving, setIsSaving] = useState(false);
     const [contrib, setContrib] = useState({});
 
-    // ✅ Load goals via API
     const loadGoals = useCallback(async () => {
         setIsLoading(true);
         try {
@@ -39,20 +40,19 @@ export default function GoalsScreen({ navigation }) {
             setGoals(response.data || []);
         } catch (err) {
             console.error("Offline or API error:", err);
-            Alert.alert("Erreur", "Impossible de charger les objectifs.");
+            Alert.alert(t("common.error"), t("goals.loadError"));
         } finally {
             setIsLoading(false);
         }
-    }, [token, activeOnly]);
+    }, [token, activeOnly, t]);
 
     useEffect(() => {
         loadGoals();
     }, [loadGoals]);
 
-    // ✅ Save or update goal
     const saveGoal = async () => {
         if (!form.name || !form.targetAmount) {
-            Alert.alert("Erreur", "Le nom et le montant sont obligatoires.");
+            Alert.alert(t("common.error"), t("goals.nameAndAmountRequired"));
             return;
         }
 
@@ -79,18 +79,17 @@ export default function GoalsScreen({ navigation }) {
             setEditingId(null);
         } catch (error) {
             console.error("Save goal error:", error);
-            Alert.alert("Erreur", "Impossible d’enregistrer l’objectif.");
+            Alert.alert(t("common.error"), t("goals.saveError"));
         } finally {
             setIsSaving(false);
         }
     };
 
-    // ✅ Delete goal
     const deleteGoal = async (id) => {
-        Alert.alert("Confirmation", "Supprimer cet objectif ?", [
-            { text: "Annuler", style: "cancel" },
+        Alert.alert(t("common.confirm"), t("goals.deleteConfirm"), [
+            { text: t("common.cancel"), style: "cancel" },
             {
-                text: "Supprimer",
+                text: t("common.delete"),
                 style: "destructive",
                 onPress: async () => {
                     try {
@@ -100,14 +99,13 @@ export default function GoalsScreen({ navigation }) {
                         await loadGoals();
                     } catch (error) {
                         console.error("Delete goal error:", error);
-                        Alert.alert("Erreur", "Impossible de supprimer l’objectif.");
+                        Alert.alert(t("common.error"), t("goals.deleteError"));
                     }
                 },
             },
         ]);
     };
 
-    // ✅ Contribute to a goal
     const contribute = async (id) => {
         const amount = parseFloat(contrib[id] || 0);
         if (isNaN(amount) || amount <= 0) return;
@@ -122,7 +120,7 @@ export default function GoalsScreen({ navigation }) {
             await loadGoals();
         } catch (error) {
             console.error("Contribution error:", error);
-            Alert.alert("Erreur", "Impossible d’ajouter une contribution.");
+            Alert.alert(t("common.error"), t("goals.contribError"));
         }
     };
 
@@ -130,7 +128,7 @@ export default function GoalsScreen({ navigation }) {
         return (
             <SafeAreaView style={styles.centered}>
                 <ActivityIndicator color={colors.primary} size="large" />
-                <Text style={styles.loadingText}>Chargement des objectifs...</Text>
+                <Text style={styles.loadingText}>{t("goals.loading")}</Text>
             </SafeAreaView>
         );
     }
@@ -160,29 +158,26 @@ export default function GoalsScreen({ navigation }) {
 
                     <View style={{ flex: 1, alignItems: "center" }}>
                         <Text style={[styles.headerTitle, { fontSize: 20 }]}>
-                            🎯 Objectifs d’épargne
+                            🎯 {t("goals.title")}
                         </Text>
-                        <Text style={styles.subtitle}>
-                            Créez et suivez vos objectifs financiers
-                        </Text>
+                        <Text style={styles.subtitle}>{t("goals.subtitle")}</Text>
                     </View>
 
-                    {/* Placeholder for symmetry */}
                     <View style={{ width: 26 }} />
                 </View>
 
-                {/* === FORMULAIRE === */}
+                {/* === FORM === */}
                 <View style={styles.filterCard}>
                     <TextInput
                         style={styles.input}
-                        placeholder="Nom"
+                        placeholder={t("goals.namePlaceholder")}
                         placeholderTextColor={colors.textSoft}
                         value={form.name}
                         onChangeText={(v) => setForm({ ...form, name: v })}
                     />
                     <TextInput
                         style={styles.input}
-                        placeholder="Montant cible (€)"
+                        placeholder={t("goals.targetPlaceholder")}
                         placeholderTextColor={colors.textSoft}
                         keyboardType="numeric"
                         value={form.targetAmount}
@@ -194,15 +189,15 @@ export default function GoalsScreen({ navigation }) {
                         disabled={isSaving}
                     >
                         <Text style={styles.btnText}>
-                            {editingId ? "💾 Enregistrer" : "➕ Ajouter"}
+                            {editingId ? t("common.saveWithIcon") : t("common.addWithIcon")}
                         </Text>
                     </TouchableOpacity>
                 </View>
 
-                {/* === LISTE DES OBJECTIFS === */}
+                {/* === LIST === */}
                 {goals.length === 0 ? (
                     <View style={styles.empty}>
-                        <Text style={styles.emptyText}>Aucun objectif enregistré</Text>
+                        <Text style={styles.emptyText}>{t("goals.empty")}</Text>
                     </View>
                 ) : (
                     goals.map((g) => {
@@ -216,11 +211,10 @@ export default function GoalsScreen({ navigation }) {
                             <View key={g.id} style={styles.card}>
                                 <Text style={styles.clientName}>{g.name}</Text>
                                 <Text style={styles.meta}>
-                                    Cible: €{g.targetAmount.toFixed(2)} — Épargné: €
-                                    {g.currentSaved.toFixed(2)}
+                                    {t("goals.target")}: €{g.targetAmount.toFixed(2)} —{" "}
+                                    {t("goals.saved")}: €{g.currentSaved.toFixed(2)}
                                 </Text>
 
-                                {/* Progress bar */}
                                 <View style={styles.progressBarContainer}>
                                     <View
                                         style={[
@@ -235,14 +229,15 @@ export default function GoalsScreen({ navigation }) {
                                 </View>
 
                                 <Text style={styles.detailText}>
-                                    {percent}% atteint — Reste: €{remaining}
+                                    {percent}% {t("goals.achieved")} — {t("goals.remaining")}: €
+                                    {remaining}
                                 </Text>
 
                                 {/* Contribution input */}
                                 <View style={styles.formRow}>
                                     <TextInput
                                         style={[styles.input, { flex: 1 }]}
-                                        placeholder="Ajouter (€)"
+                                        placeholder={t("goals.addAmount")}
                                         placeholderTextColor={colors.textSoft}
                                         keyboardType="numeric"
                                         value={contrib[g.id] || ""}
@@ -271,14 +266,18 @@ export default function GoalsScreen({ navigation }) {
                                             });
                                         }}
                                     >
-                                        <Text style={styles.btnActionText}>✏️ Modifier</Text>
+                                        <Text style={styles.btnActionText}>
+                                            ✏️ {t("common.edit")}
+                                        </Text>
                                     </TouchableOpacity>
 
                                     <TouchableOpacity
                                         style={[styles.btn, styles.btnDanger, { flex: 1 }]}
                                         onPress={() => deleteGoal(g.id)}
                                     >
-                                        <Text style={styles.btnActionText}>🗑️ Supprimer</Text>
+                                        <Text style={styles.btnActionText}>
+                                            🗑️ {t("common.delete")}
+                                        </Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>

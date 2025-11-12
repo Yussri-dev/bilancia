@@ -137,5 +137,24 @@
         "orderHint": "Plus petit = affiché en premier",
         "archive": "Archiver",
         "saveError": "Impossible d’enregistrer la catégorie"
+    },
+    "goals": {
+        "title": "Objectifs d'épargne",
+        "subtitle": "Créez et suivez vos objectifs financiers",
+        "loading": "Chargement des objectifs...",
+        "namePlaceholder": "Nom",
+        "targetPlaceholder": "Montant cible (€)",
+        "nameAndAmountRequired": "Le nom et le montant sont obligatoires.",
+        "saveError": "Impossible d'enregistrer l'objectif.",
+        "deleteConfirm": "Supprimer cet objectif ?",
+        "deleteError": "Impossible de supprimer l'objectif.",
+        "contribError": "Impossible d'ajouter une contribution.",
+        "empty": "Aucun objectif enregistré",
+        "target": "Cible",
+        "saved": "Épargné",
+        "achieved": "atteint",
+        "remaining": "reste",
+        "addAmount": "Ajouter (€)",
+        "loadError": "Impossible de charger les objectifs."
     }
 }
