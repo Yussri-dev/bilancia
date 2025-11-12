@@ -19,11 +19,13 @@ import { useTheme } from "@contexts/ThemeContext";
 import { getStyles } from "@theme/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "@apiClient";
+import { useTranslation } from "react-i18next";
 
 export default function TransactionScreen({ navigation }) {
     const { token } = useAuth();
     const { colors } = useTheme();
     const styles = getStyles(colors);
+    const { t } = useTranslation();
 
     const [transactions, setTransactions] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -78,7 +80,7 @@ export default function TransactionScreen({ navigation }) {
             setCategories(catRes.data || []);
         } catch (e) {
             console.error("Error loading data:", e.message);
-            Alert.alert("Erreur", "Impossible de charger les transactions ou catégories.");
+            Alert.alert(t("transactions.error", "Erreur"), t("transactions.loadError", "Impossible de charger les transactions ou catégories."));
         } finally {
             setLoading(false);
         }
@@ -152,7 +154,7 @@ export default function TransactionScreen({ navigation }) {
 
     const saveTransaction = async () => {
         if (!form.amount || !form.categoryId) {
-            setFormError("Veuillez remplir tous les champs obligatoires");
+            setFormError(t("transactions.requiredFields", "Veuillez remplir tous les champs obligatoires"));
             return;
         }
 
@@ -176,29 +178,33 @@ export default function TransactionScreen({ navigation }) {
             await loadData();
         } catch (e) {
             console.error("Save error:", e);
-            Alert.alert("Erreur", "Impossible d'enregistrer la transaction");
+            Alert.alert(t("transactions.error", "Erreur"), t("transactions.saveError", "Impossible d'enregistrer la transaction"));
         } finally {
             setSaving(false);
         }
     };
 
     const deleteTransaction = async (id) => {
-        Alert.alert("Confirmer", "Supprimer cette transaction ?", [
-            { text: "Annuler", style: "cancel" },
-            {
-                text: "Supprimer",
-                style: "destructive",
-                onPress: async () => {
-                    try {
-                        apiClient.setAuthToken(token);
-                        await apiClient.delete(`/transaction/${id}`);
-                        await loadData();
-                    } catch {
-                        Alert.alert("Erreur", "Impossible de supprimer");
-                    }
+        Alert.alert(
+            t("transactions.confirm", "Confirmer"),
+            t("transactions.deleteConfirm", "Supprimer cette transaction ?"),
+            [
+                { text: t("transactions.cancel", "Annuler"), style: "cancel" },
+                {
+                    text: t("transactions.delete", "Supprimer"),
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            apiClient.setAuthToken(token);
+                            await apiClient.delete(`/transaction/${id}`);
+                            await loadData();
+                        } catch {
+                            Alert.alert(t("transactions.error", "Erreur"), t("transactions.deleteError", "Impossible de supprimer"));
+                        }
+                    },
                 },
-            },
-        ]);
+            ]
+        );
     };
 
     const dropdownHeight = dropdownAnim.interpolate({
@@ -212,7 +218,7 @@ export default function TransactionScreen({ navigation }) {
             <View style={[styles.card, { marginHorizontal: 4, marginBottom: 12 }]}>
                 <View style={styles.cardHeader}>
                     <View style={{ flex: 1 }}>
-                        <Text style={styles.clientName}>{category?.name || "Sans catégorie"}</Text>
+                        <Text style={styles.clientName}>{category?.name || t("transactions.noCategory", "Sans catégorie")}</Text>
                         <Text style={styles.meta}>
                             {dayjs(item.date).format("DD/MM/YYYY")} · {item.categoryName || "—"}
                         </Text>
@@ -256,14 +262,14 @@ export default function TransactionScreen({ navigation }) {
                         onPress={() => openEdit(item)}
                     >
                         <Ionicons name="pencil" size={16} color="#fff" />
-                        <Text style={styles.btnActionText}>Éditer</Text>
+                        <Text style={styles.btnActionText}>{t("transactions.edit", "Éditer")}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={[styles.btnAction, styles.btnDanger]}
                         onPress={() => deleteTransaction(item.id)}
                     >
                         <Ionicons name="trash" size={16} color="#fff" />
-                        <Text style={styles.btnActionText}>Supprimer</Text>
+                        <Text style={styles.btnActionText}>{t("transactions.delete", "Supprimer")}</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -274,7 +280,7 @@ export default function TransactionScreen({ navigation }) {
         return (
             <SafeAreaView style={styles.centered}>
                 <ActivityIndicator size="large" color={colors.primary} />
-                <Text style={styles.loadingText}>Chargement des transactions...</Text>
+                <Text style={styles.loadingText}>{t("transactions.loading", "Chargement des transactions...")}</Text>
             </SafeAreaView>
         );
     }
@@ -306,10 +312,10 @@ export default function TransactionScreen({ navigation }) {
 
                             <View style={{ flex: 1, alignItems: "center" }}>
                                 <Text style={[styles.headerTitle, { fontSize: 20 }]}>
-                                    💳 Transactions
+                                    {t("transactions.title", "Transactions")}
                                 </Text>
                                 <Text style={styles.subtitle}>
-                                    Suivez vos revenus et dépenses
+                                    {t("transactions.subtitle", "Suivez vos revenus et dépenses")}
                                 </Text>
                             </View>
 
@@ -320,21 +326,21 @@ export default function TransactionScreen({ navigation }) {
                         {/* KPIs */}
                         <View style={styles.kpiGrid}>
                             <View style={styles.kpiCard}>
-                                <Text style={styles.kpiTitle}>Revenus</Text>
+                                <Text style={styles.kpiTitle}>{t("transactions.income", "Revenus")}</Text>
                                 <Text style={[styles.kpiValue, styles.success]}>
                                     €{incomeTotal.toFixed(2)}
                                 </Text>
                             </View>
 
                             <View style={styles.kpiCard}>
-                                <Text style={styles.kpiTitle}>Dépenses</Text>
+                                <Text style={styles.kpiTitle}>{t("transactions.expense", "Dépenses")}</Text>
                                 <Text style={[styles.kpiValue, styles.danger]}>
                                     €{expenseTotal.toFixed(2)}
                                 </Text>
                             </View>
 
                             <View style={styles.kpiCard}>
-                                <Text style={styles.kpiTitle}>Solde</Text>
+                                <Text style={styles.kpiTitle}>{t("transactions.balance", "Solde")}</Text>
                                 <Text
                                     style={[
                                         styles.kpiValue,
@@ -350,7 +356,7 @@ export default function TransactionScreen({ navigation }) {
                         <View style={styles.card}>
                             <TextInput
                                 style={styles.input}
-                                placeholder="Rechercher une description..."
+                                placeholder={t("transactions.searchPlaceholder", "Rechercher une description...")}
                                 placeholderTextColor={colors.textSoft}
                                 value={searchText}
                                 onChangeText={setSearchText}
@@ -360,7 +366,7 @@ export default function TransactionScreen({ navigation }) {
                         {filtered.length === 0 && (
                             <View style={styles.empty}>
                                 <Text style={styles.emptyIcon}>📄</Text>
-                                <Text style={styles.emptyText}>Aucune transaction trouvée</Text>
+                                <Text style={styles.emptyText}>{t("transactions.noResults", "Aucune transaction trouvée")}</Text>
                             </View>
                         )}
                     </>
@@ -374,7 +380,9 @@ export default function TransactionScreen({ navigation }) {
                     <View style={styles.modalContainer}>
                         <View style={styles.header}>
                             <Text style={styles.title}>
-                                {editing ? "Modifier la transaction" : "Nouvelle transaction"}
+                                {editing
+                                    ? t("transactions.editTitle", "Modifier la transaction")
+                                    : t("transactions.newTitle", "Nouvelle transaction")}
                             </Text>
                             <TouchableOpacity onPress={closeModal} style={styles.closeBtn}>
                                 <Ionicons name="close" size={22} color={colors.textSoft} />
@@ -384,28 +392,28 @@ export default function TransactionScreen({ navigation }) {
                         <ScrollView style={styles.body}>
                             {/* Amount */}
                             <View style={styles.formGroup}>
-                                <Text style={styles.label}>Montant (€)</Text>
+                                <Text style={styles.label}>{t("transactions.amount", "Montant (€)")}</Text>
                                 <TextInput
                                     style={styles.input}
                                     keyboardType="numeric"
                                     value={form.amount}
-                                    onChangeText={(t) => setForm({ ...form, amount: t })}
+                                    onChangeText={(tVal) => setForm({ ...form, amount: tVal })}
                                 />
                             </View>
 
                             {/* Date */}
                             <View style={styles.formGroup}>
-                                <Text style={styles.label}>Date</Text>
+                                <Text style={styles.label}>{t("transactions.date", "Date")}</Text>
                                 <TextInput
                                     style={styles.input}
                                     value={form.date}
-                                    onChangeText={(t) => setForm({ ...form, date: t })}
+                                    onChangeText={(tVal) => setForm({ ...form, date: tVal })}
                                 />
                             </View>
 
                             {/* Category */}
                             <View style={styles.formGroup}>
-                                <Text style={styles.label}>Catégorie</Text>
+                                <Text style={styles.label}>{t("transactions.category", "Catégorie")}</Text>
                                 <TouchableOpacity
                                     style={[
                                         styles.input,
@@ -419,7 +427,7 @@ export default function TransactionScreen({ navigation }) {
                                         }}
                                     >
                                         {categories.find((c) => c.id === form.categoryId)?.name ||
-                                            "Sélectionnez une catégorie"}
+                                            t("transactions.selectCategory", "Sélectionnez une catégorie")}
                                     </Text>
                                     <Ionicons
                                         name={dropdownCategoryOpen ? "chevron-up" : "chevron-down"}
@@ -472,7 +480,7 @@ export default function TransactionScreen({ navigation }) {
 
                             {/* Type */}
                             <View style={styles.formGroup}>
-                                <Text style={styles.label}>Type</Text>
+                                <Text style={styles.label}>{t("transactions.type", "Type")}</Text>
                                 <TouchableOpacity
                                     style={[
                                         styles.input,
@@ -481,7 +489,7 @@ export default function TransactionScreen({ navigation }) {
                                     onPress={() => setDropdownTypeOpen(!dropdownTypeOpen)}
                                 >
                                     <Text style={{ color: colors.text }}>
-                                        {form.type || "Sélectionnez un type"}
+                                        {form.type || t("transactions.selectType", "Sélectionnez un type")}
                                     </Text>
                                     <Ionicons
                                         name={dropdownTypeOpen ? "chevron-up" : "chevron-down"}
@@ -517,10 +525,10 @@ export default function TransactionScreen({ navigation }) {
                                                     }}
                                                 >
                                                     {type === "Income"
-                                                        ? "💰 Income"
+                                                        ? "💰 " + t("transactions.income", "Income")
                                                         : type === "Expense"
-                                                            ? "💸 Expense"
-                                                            : "🔄 Transfer"}
+                                                            ? "💸 " + t("transactions.expense", "Expense")
+                                                            : "🔄 " + t("transactions.transfer", "Transfer")}
                                                 </Text>
                                             </TouchableOpacity>
                                         ))}
@@ -530,12 +538,12 @@ export default function TransactionScreen({ navigation }) {
 
                             {/* Description */}
                             <View style={styles.formGroup}>
-                                <Text style={styles.label}>Description</Text>
+                                <Text style={styles.label}>{t("transactions.description", "Description")}</Text>
                                 <TextInput
                                     style={styles.input}
                                     value={form.description}
-                                    onChangeText={(t) =>
-                                        setForm({ ...form, description: t })
+                                    onChangeText={(tVal) =>
+                                        setForm({ ...form, description: tVal })
                                     }
                                 />
                             </View>
@@ -545,7 +553,7 @@ export default function TransactionScreen({ navigation }) {
 
                         <View style={styles.footer}>
                             <TouchableOpacity onPress={closeModal} style={styles.btnSecondary}>
-                                <Text style={styles.btnSecondaryText}>Annuler</Text>
+                                <Text style={styles.btnSecondaryText}>{t("transactions.cancel", "Annuler")}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={saveTransaction}
@@ -553,7 +561,9 @@ export default function TransactionScreen({ navigation }) {
                                 disabled={saving}
                             >
                                 <Text style={styles.btnPrimaryText}>
-                                    {editing ? "Enregistrer" : "Créer"}
+                                    {editing
+                                        ? t("transactions.save", "Enregistrer")
+                                        : t("transactions.create", "Créer")}
                                 </Text>
                             </TouchableOpacity>
                         </View>
