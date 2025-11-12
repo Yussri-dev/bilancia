@@ -195,5 +195,21 @@
         "htAmount": "Bedrag excl. btw: €{{amount}}",
         "vatAmount": "BTW: €{{tax}}",
         "paidOn": "Betaald op: {{date}}"
+    },
+    "profile": {
+        "loading": "Profiel laden...",
+        "loadError": "Kan je profiel niet laden.",
+        "noUser": "Geen gebruiker aangemeld.",
+        "return": "Terug",
+        "defaultUser": "Gebruiker",
+        "noEmail": "Geen e-mail opgegeven",
+        "resendEmail": "Bevestigingsmail opnieuw verzenden",
+        "logout": "Afmelden",
+        "accountDetails": "Accountgegevens",
+        "id": "ID",
+        "name": "Naam",
+        "email": "E-mail",
+        "comingSoon": "Functie binnenkort beschikbaar",
+        "confirmationTitle": "📧 Bevestiging"
     }
 }

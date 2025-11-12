@@ -195,5 +195,21 @@
         "htAmount": "Montant HT : €{{amount}}",
         "vatAmount": "TVA : €{{tax}}",
         "paidOn": "Payée le : {{date}}"
+    },
+    "profile": {
+        "loading": "Chargement du profil...",
+        "loadError": "Impossible de charger votre profil.",
+        "noUser": "Aucun utilisateur connecté.",
+        "return": "Retour",
+        "defaultUser": "Utilisateur",
+        "noEmail": "Email non renseigné",
+        "resendEmail": "Renvoyer l'email de confirmation",
+        "logout": "Déconnexion",
+        "accountDetails": "Détails du compte",
+        "id": "ID",
+        "name": "Nom",
+        "email": "Email",
+        "comingSoon": "Fonction à venir",
+        "confirmationTitle": "📧 Confirmation"
     }
 }

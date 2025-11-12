@@ -4,9 +4,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@contexts/authContext";
 import { Ionicons } from "@expo/vector-icons";
 import apiClient from "@apiClient";
+import { useTranslation } from "react-i18next";
 
 export default function ProfileScreen({ navigation }) {
     const { user, setUser, logout, fetchUser, token } = useAuth();
+    const { t } = useTranslation();
 
     const [loading, setLoading] = useState(!user);
     const [error, setError] = useState("");
@@ -20,7 +22,7 @@ export default function ProfileScreen({ navigation }) {
                 setUser(res.data);
             } catch (err) {
                 console.error("Error loading profile:", err);
-                setError("Impossible de charger votre profil.");
+                setError(t("profile.loadError"));
             } finally {
                 setLoading(false);
             }
@@ -39,7 +41,9 @@ export default function ProfileScreen({ navigation }) {
                 }}
             >
                 <ActivityIndicator color="#7C3AED" size="large" />
-                <Text style={{ color: "#94A3B8", marginTop: 10 }}>Chargement du profil...</Text>
+                <Text style={{ color: "#94A3B8", marginTop: 10 }}>
+                    {t("profile.loading")}
+                </Text>
             </View>
         );
     }
@@ -64,7 +68,7 @@ export default function ProfileScreen({ navigation }) {
                         borderRadius: 10,
                     }}
                 >
-                    <Text style={{ color: "#fff" }}>Retour</Text>
+                    <Text style={{ color: "#fff" }}>{t("profile.return")}</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -80,7 +84,7 @@ export default function ProfileScreen({ navigation }) {
                     alignItems: "center",
                 }}
             >
-                <Text style={{ color: "#94A3B8" }}>Aucun utilisateur connecté.</Text>
+                <Text style={{ color: "#94A3B8" }}>{t("profile.noUser")}</Text>
             </SafeAreaView>
         );
     }
@@ -137,17 +141,19 @@ export default function ProfileScreen({ navigation }) {
                         marginBottom: 8,
                     }}
                 >
-                    {user.fullName || user.username || "Utilisateur"}
+                    {user.fullName || user.username || t("profile.defaultUser")}
                 </Text>
                 <Text style={{ color: "#94A3B8", marginBottom: 24 }}>
-                    {user.email || "Email non renseigné"}
+                    {user.email || t("profile.noEmail")}
                 </Text>
             </View>
 
             {/* 🔹 Buttons */}
             <View style={{ gap: 12 }}>
                 <TouchableOpacity
-                    onPress={() => Alert.alert("📧 Confirmation", "Fonction à venir")}
+                    onPress={() =>
+                        Alert.alert(t("profile.confirmationTitle"), t("profile.comingSoon"))
+                    }
                     style={{
                         flexDirection: "row",
                         alignItems: "center",
@@ -160,7 +166,7 @@ export default function ProfileScreen({ navigation }) {
                 >
                     <Ionicons name="mail-outline" size={20} color="#7C3AED" />
                     <Text style={{ color: "#fff", fontWeight: "600" }}>
-                        Renvoyer l’email de confirmation
+                        {t("profile.resendEmail")}
                     </Text>
                 </TouchableOpacity>
 
@@ -177,7 +183,9 @@ export default function ProfileScreen({ navigation }) {
                     }}
                 >
                     <Ionicons name="log-out-outline" size={20} color="#fff" />
-                    <Text style={{ color: "#fff", fontWeight: "600" }}>Déconnexion</Text>
+                    <Text style={{ color: "#fff", fontWeight: "600" }}>
+                        {t("profile.logout")}
+                    </Text>
                 </TouchableOpacity>
             </View>
 
@@ -200,12 +208,18 @@ export default function ProfileScreen({ navigation }) {
                         marginBottom: 12,
                     }}
                 >
-                    Détails du compte
+                    {t("profile.accountDetails")}
                 </Text>
                 <View style={{ gap: 8 }}>
-                    <Text style={{ color: "#94A3B8" }}>ID: {user.id}</Text>
-                    <Text style={{ color: "#94A3B8" }}>Nom: {user.fullName ?? user.username}</Text>
-                    <Text style={{ color: "#94A3B8" }}>Email: {user.email}</Text>
+                    <Text style={{ color: "#94A3B8" }}>
+                        {t("profile.id")}: {user.id}
+                    </Text>
+                    <Text style={{ color: "#94A3B8" }}>
+                        {t("profile.name")}: {user.fullName ?? user.username}
+                    </Text>
+                    <Text style={{ color: "#94A3B8" }}>
+                        {t("profile.email")}: {user.email}
+                    </Text>
                 </View>
             </View>
         </SafeAreaView>

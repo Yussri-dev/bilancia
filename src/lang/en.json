@@ -195,5 +195,21 @@
         "htAmount": "Amount (excl. tax): €{{amount}}",
         "vatAmount": "VAT: €{{tax}}",
         "paidOn": "Paid on: {{date}}"
+    },
+    "profile": {
+        "loading": "Loading profile...",
+        "loadError": "Unable to load your profile.",
+        "noUser": "No user connected.",
+        "return": "Back",
+        "defaultUser": "User",
+        "noEmail": "Email not provided",
+        "resendEmail": "Resend confirmation email",
+        "logout": "Logout",
+        "accountDetails": "Account details",
+        "id": "ID",
+        "name": "Name",
+        "email": "Email",
+        "comingSoon": "Feature coming soon",
+        "confirmationTitle": "📧 Confirmation"
     }
 }
