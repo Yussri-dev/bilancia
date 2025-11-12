@@ -74,5 +74,16 @@
         "noExpenses": "No expenses available.",
         "monthlyHistory": "Monthly history",
         "exportReports": "Export your reports"
+    },
+    "forgot": {
+        "title": "Forgot your password?",
+        "subtitle": "Enter your email address and we'll send you a link to reset your password.",
+        "emailPlaceholder": "Email",
+        "sendLink": "Send link",
+        "successMessage": "If this account exists, a reset email has been sent.",
+        "errorTitle": "Error",
+        "enterEmail": "Please enter your email address.",
+        "errorGeneral": "An error occurred while sending the email.",
+        "backToLogin": "Back to login"
     }
 }

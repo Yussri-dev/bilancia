@@ -74,5 +74,16 @@
         "noExpenses": "Aucune dépense.",
         "monthlyHistory": "Historique mensuel",
         "exportReports": "Exporter vos rapports"
+    },
+    "forgot": {
+        "title": "Mot de passe oublié ?",
+        "subtitle": "Entrez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+        "emailPlaceholder": "Email",
+        "sendLink": "Envoyer le lien",
+        "successMessage": "Si ce compte existe, un email de réinitialisation vous a été envoyé.",
+        "errorTitle": "Erreur",
+        "enterEmail": "Veuillez entrer votre adresse e-mail.",
+        "errorGeneral": "Une erreur est survenue lors de l'envoi de l'email.",
+        "backToLogin": "Retour à la connexion"
     }
 }

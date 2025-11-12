@@ -11,15 +11,17 @@ import {
     Platform,
 } from "react-native";
 import { authApi } from "@api/authApi";
+import { useTranslation } from "react-i18next";
 
 export default function ForgotPasswordScreen({ navigation }) {
+    const { t } = useTranslation();
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
 
     const handleForgotPassword = async () => {
         if (!email) {
-            Alert.alert("Erreur", "Veuillez entrer votre adresse e-mail.");
+            Alert.alert(t("forgot.errorTitle"), t("forgot.enterEmail"));
             return;
         }
 
@@ -28,14 +30,12 @@ export default function ForgotPasswordScreen({ navigation }) {
             setSuccessMessage("");
             await authApi.forgotPassword({ email: email.trim() });
 
-            setSuccessMessage(
-                "Si ce compte existe, un email de réinitialisation vous a été envoyé."
-            );
+            setSuccessMessage(t("forgot.successMessage"));
         } catch (err) {
             console.error("Forgot password error:", err);
             Alert.alert(
-                "Erreur",
-                err.message || "Une erreur est survenue lors de l’envoi de l’email."
+                t("forgot.errorTitle"),
+                err.message || t("forgot.errorGeneral")
             );
         } finally {
             setLoading(false);
@@ -48,14 +48,11 @@ export default function ForgotPasswordScreen({ navigation }) {
             behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
             <View style={styles.inner}>
-                <Text style={styles.title}>Mot de passe oublié ?</Text>
-                <Text style={styles.subtitle}>
-                    Entrez votre adresse e-mail et nous vous enverrons un lien pour
-                    réinitialiser votre mot de passe.
-                </Text>
+                <Text style={styles.title}>{t("forgot.title")}</Text>
+                <Text style={styles.subtitle}>{t("forgot.subtitle")}</Text>
 
                 <TextInput
-                    placeholder="Email"
+                    placeholder={t("forgot.emailPlaceholder")}
                     value={email}
                     onChangeText={setEmail}
                     autoCapitalize="none"
@@ -72,7 +69,7 @@ export default function ForgotPasswordScreen({ navigation }) {
                     {loading ? (
                         <ActivityIndicator color="#fff" />
                     ) : (
-                        <Text style={styles.buttonText}>Envoyer le lien</Text>
+                        <Text style={styles.buttonText}>{t("forgot.sendLink")}</Text>
                     )}
                 </TouchableOpacity>
 
@@ -84,7 +81,7 @@ export default function ForgotPasswordScreen({ navigation }) {
                     onPress={() => navigation.navigate("Login")}
                     style={{ marginTop: 24 }}
                 >
-                    <Text style={styles.linkText}>← Retour à la connexion</Text>
+                    <Text style={styles.linkText}>{t("forgot.backToLogin")}</Text>
                 </TouchableOpacity>
             </View>
         </KeyboardAvoidingView>

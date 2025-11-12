@@ -74,5 +74,16 @@
         "noExpenses": "Geen uitgaven beschikbaar.",
         "monthlyHistory": "Maandelijkse geschiedenis",
         "exportReports": "Rapporten exporteren"
+    },
+    "forgot": {
+        "title": "Wachtwoord vergeten?",
+        "subtitle": "Voer je e-mailadres in en we sturen je een link om je wachtwoord te resetten.",
+        "emailPlaceholder": "E-mailadres",
+        "sendLink": "Link verzenden",
+        "successMessage": "Als dit account bestaat, is er een resetmail verzonden.",
+        "errorTitle": "Fout",
+        "enterEmail": "Voer je e-mailadres in.",
+        "errorGeneral": "Er is een fout opgetreden bij het verzenden van de e-mail.",
+        "backToLogin": "Terug naar inloggen"
     }
 }
