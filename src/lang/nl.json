@@ -3,7 +3,14 @@
         "title": "Aanmelden",
         "email": "E-mailadres",
         "password": "Wachtwoord",
-        "button": "Inloggen"
+        "button": "Inloggen",
+        "subtitle" : "Welkom terug" ,
+        "createAccount" : "Maak een account aan", 
+        "forgotPassword" :"Wachtwoord vergeten?"
+    },
+    "theme": {
+        "dark": "Donker",
+        "light": "Licht"
     },
     "dashboard": {
         "title": "Dashboard",

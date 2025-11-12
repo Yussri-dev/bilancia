@@ -3,7 +3,14 @@
         "title": "Login",
         "email": "Email address",
         "password": "Password",
-        "button": "Sign in"
+        "button": "Sign in",
+        "subtitle" : "Welcome Back" ,
+        "createAccount" : "Create Account", 
+        "forgotPassword" :"Forgot Password?"
+    },
+    "theme": {
+        "dark": "Dark",
+        "light": "Light"
     },
     "dashboard": {
         "title": "Dashboard",

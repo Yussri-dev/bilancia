@@ -3,7 +3,14 @@
         "title": "Connexion",
         "email": "Adresse e-mail",
         "password": "Mot de passe",
-        "button": "Se connecter"
+        "button": "Se connecter",
+        "subtitle" : "Bon Retour" ,
+        "createAccount" : "Créer un compte", 
+        "forgotPassword" :"Mot de passe oublié?"
+    },
+    "theme": {
+        "dark": "Sombre",
+        "light": "Clair"
     },
     "dashboard": {
         "title": "Tableau de bord",
