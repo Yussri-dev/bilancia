@@ -11,11 +11,13 @@ import {
     Platform,
     ScrollView,
 } from "react-native";
-import { authApi } from "@api/authApi"; // futur alias : @apis/authApi
+import { authApi } from "@api/authApi";
 import { useAuth } from "@contexts/authContext";
+import { useTranslation } from "react-i18next"; // ✅ Added
 
 export default function RegisterScreen({ navigation }) {
     const { setUser } = useAuth();
+    const { t } = useTranslation(); // ✅ Added
 
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
@@ -33,8 +35,8 @@ export default function RegisterScreen({ navigation }) {
     const handleRegister = async () => {
         if (!isFormValid()) {
             Alert.alert(
-                "Erreur",
-                "Veuillez vérifier les champs (mots de passe identiques et ≥ 6 caractères)."
+                t("common.error"),
+                t("register.invalidForm")
             );
             return;
         }
@@ -53,14 +55,14 @@ export default function RegisterScreen({ navigation }) {
 
             if (token) {
                 await setUser(token);
-                Alert.alert("Succès", "Compte créé avec succès !");
+                Alert.alert(t("common.success"), t("register.success"));
                 navigation.replace("Main");
             } else {
-                Alert.alert("Info", "Inscription réussie mais token manquant.");
+                Alert.alert(t("common.info"), t("register.missingToken"));
             }
         } catch (err) {
             console.error("Register error:", err);
-            Alert.alert("Erreur", err.message || "Échec de l’inscription.");
+            Alert.alert(t("common.error"), err.message || t("register.failed"));
         } finally {
             setLoading(false);
         }
@@ -76,10 +78,10 @@ export default function RegisterScreen({ navigation }) {
                 keyboardShouldPersistTaps="handled"
             >
                 <View style={styles.inner}>
-                    <Text style={styles.title}>Créer un compte</Text>
+                    <Text style={styles.title}>{t("register.title")}</Text>
 
                     <TextInput
-                        placeholder="Nom complet"
+                        placeholder={t("register.fullName")}
                         value={fullName}
                         onChangeText={setFullName}
                         placeholderTextColor="#94A3B8"
@@ -87,7 +89,7 @@ export default function RegisterScreen({ navigation }) {
                     />
 
                     <TextInput
-                        placeholder="Email"
+                        placeholder={t("register.email")}
                         value={email}
                         onChangeText={setEmail}
                         autoCapitalize="none"
@@ -97,7 +99,7 @@ export default function RegisterScreen({ navigation }) {
                     />
 
                     <TextInput
-                        placeholder="Mot de passe"
+                        placeholder={t("register.password")}
                         value={password}
                         onChangeText={setPassword}
                         secureTextEntry
@@ -106,7 +108,7 @@ export default function RegisterScreen({ navigation }) {
                     />
 
                     <TextInput
-                        placeholder="Confirmer le mot de passe"
+                        placeholder={t("register.confirmPassword")}
                         value={confirmPassword}
                         onChangeText={setConfirmPassword}
                         secureTextEntry
@@ -117,11 +119,11 @@ export default function RegisterScreen({ navigation }) {
                     {password && confirmPassword ? (
                         password === confirmPassword ? (
                             <Text style={styles.successText}>
-                                ✅ Les mots de passe correspondent.
+                                ✅ {t("register.passwordsMatch")}
                             </Text>
                         ) : (
                             <Text style={styles.errorText}>
-                                ❌ Les mots de passe ne correspondent pas.
+                                ❌ {t("register.passwordsMismatch")}
                             </Text>
                         )
                     ) : null}
@@ -134,7 +136,7 @@ export default function RegisterScreen({ navigation }) {
                         {loading ? (
                             <ActivityIndicator color="#fff" />
                         ) : (
-                            <Text style={styles.buttonText}>S’inscrire</Text>
+                            <Text style={styles.buttonText}>{t("register.button")}</Text>
                         )}
                     </TouchableOpacity>
 
@@ -143,8 +145,8 @@ export default function RegisterScreen({ navigation }) {
                         style={{ marginTop: 16 }}
                     >
                         <Text style={styles.linkText}>
-                            Vous avez déjà un compte ?{" "}
-                            <Text style={styles.linkHighlight}>Se connecter</Text>
+                            {t("register.haveAccount")}{" "}
+                            <Text style={styles.linkHighlight}>{t("register.loginLink")}</Text>
                         </Text>
                     </TouchableOpacity>
                 </View>

@@ -85,5 +85,22 @@
         "enterEmail": "Veuillez entrer votre adresse e-mail.",
         "errorGeneral": "Une erreur est survenue lors de l'envoi de l'email.",
         "backToLogin": "Retour à la connexion"
+    },
+    "register": {
+        "title": "Créer un compte",
+        "fullName": "Nom complet",
+        "email": "Email",
+        "password": "Mot de passe",
+        "confirmPassword": "Confirmer le mot de passe",
+        "passwordsMatch": "Les mots de passe correspondent.",
+        "passwordsMismatch": "Les mots de passe ne correspondent pas.",
+        "button": "S'inscrire",
+        "haveAccount": "Vous avez déjà un compte ?",
+        "loginLink": "Se connecter",
+        "invalidForm": "Veuillez vérifier les champs (mots de passe identiques et ≥ 6 caractères).",
+        "success": "Compte créé avec succès !",
+        "missingToken": "Inscription réussie mais token manquant.",
+        "failed": "Échec de l'inscription.",
+        "info": "Info"
     }
 }

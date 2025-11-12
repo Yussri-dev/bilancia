@@ -85,5 +85,22 @@
         "enterEmail": "Voer je e-mailadres in.",
         "errorGeneral": "Er is een fout opgetreden bij het verzenden van de e-mail.",
         "backToLogin": "Terug naar inloggen"
+    },
+    "register": {
+        "title": "Account aanmaken",
+        "fullName": "Volledige naam",
+        "email": "E-mailadres",
+        "password": "Wachtwoord",
+        "confirmPassword": "Bevestig wachtwoord",
+        "passwordsMatch": "Wachtwoorden komen overeen.",
+        "passwordsMismatch": "Wachtwoorden komen niet overeen.",
+        "button": "Registreren",
+        "haveAccount": "Heb je al een account?",
+        "loginLink": "Inloggen",
+        "invalidForm": "Controleer de velden (wachtwoorden moeten overeenkomen en minimaal 6 tekens zijn).",
+        "success": "Account succesvol aangemaakt!",
+        "missingToken": "Registratie voltooid maar geen token ontvangen.",
+        "failed": "Registratie mislukt.",
+        "info": "Info"
     }
 }
