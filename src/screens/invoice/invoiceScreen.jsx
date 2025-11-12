@@ -17,6 +17,7 @@ import { useAuth } from "@contexts/authContext";
 import { useTheme } from "@contexts/ThemeContext";
 import { getStyles } from "@theme/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next"; // ✅ Added
 
 const statusOptions = ["Pending", "Paid", "Overdue", "Cancelled"];
 
@@ -24,6 +25,7 @@ export default function InvoiceScreen({ navigation }) {
     const { token } = useAuth();
     const { colors } = useTheme();
     const styles = getStyles(colors);
+    const { t } = useTranslation(); // ✅ Added
 
     const [invoices, setInvoices] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -67,11 +69,11 @@ export default function InvoiceScreen({ navigation }) {
             setCategories(categoriesRes.data || []);
         } catch (error) {
             console.error("Load error:", error);
-            Alert.alert("Erreur", "Impossible de charger les données");
+            Alert.alert(t("common.error"), t("invoices.loadError"));
         } finally {
             setLoading(false);
         }
-    }, [token]);
+    }, [token, t]);
 
     useEffect(() => {
         const unsubscribe = navigation.addListener("focus", loadData);
@@ -145,7 +147,7 @@ export default function InvoiceScreen({ navigation }) {
 
     const saveInvoice = async () => {
         if (!form.client || !form.amount) {
-            Alert.alert("Erreur", "Le client et le montant sont obligatoires.");
+            Alert.alert(t("common.error"), t("invoices.requiredFields"));
             return;
         }
 
@@ -174,7 +176,7 @@ export default function InvoiceScreen({ navigation }) {
             closeModal();
         } catch (error) {
             console.error("Save invoice error:", error);
-            Alert.alert("Erreur", "Impossible d'enregistrer la facture.");
+            Alert.alert(t("common.error"), t("invoices.saveError"));
         } finally {
             setSaving(false);
         }
@@ -183,12 +185,12 @@ export default function InvoiceScreen({ navigation }) {
     useEffect(() => {
         if (!deleteInvoice) return;
         Alert.alert(
-            "Confirmation",
-            `Supprimer la facture ${deleteInvoice.client} ?`,
+            t("common.confirm"),
+            `${t("invoices.deleteConfirm")} ${deleteInvoice.client} ?`,
             [
-                { text: "Annuler", style: "cancel", onPress: () => setDeleteInvoice(null) },
+                { text: t("common.cancel"), style: "cancel", onPress: () => setDeleteInvoice(null) },
                 {
-                    text: "Supprimer",
+                    text: t("common.delete"),
                     style: "destructive",
                     onPress: async () => {
                         try {
@@ -198,7 +200,7 @@ export default function InvoiceScreen({ navigation }) {
                             await loadData();
                         } catch (err) {
                             console.error("Delete invoice error:", err);
-                            Alert.alert("Erreur", "Impossible de supprimer la facture.");
+                            Alert.alert(t("common.error"), t("invoices.deleteError"));
                         } finally {
                             setDeleteInvoice(null);
                         }
@@ -206,7 +208,7 @@ export default function InvoiceScreen({ navigation }) {
                 },
             ]
         );
-    }, [deleteInvoice]);
+    }, [deleteInvoice, t]);
 
     const getStatusColor = (status) => {
         switch (status?.toLowerCase()) {
@@ -236,27 +238,24 @@ export default function InvoiceScreen({ navigation }) {
                     <View style={{ flex: 1 }}>
                         <Text style={styles.clientName}>{item.client}</Text>
                         <Text style={styles.meta}>
-                            {dayjs(item.issueDate).format("YYYY-MM-DD")} • €
-                            {total.toFixed(2)}
+                            {dayjs(item.issueDate).format("YYYY-MM-DD")} • €{total.toFixed(2)}
                         </Text>
                     </View>
                     <View
                         style={[styles.statusBadge, { backgroundColor: `${statusColor}22` }]}
                     >
                         <Text style={[styles.statusText, { color: statusColor }]}>
-                            {item.status}
+                            {t(`invoices.status.${item.status.toLowerCase()}`)}
                         </Text>
                     </View>
                 </View>
 
                 <View style={styles.cardDetails}>
-                    <Text style={styles.detailText}>
-                        Montant HT: €{item.amount.toFixed(2)}
-                    </Text>
-                    <Text style={styles.detailText}>TVA: €{item.tax.toFixed(2)}</Text>
+                    <Text style={styles.detailText}>{t("invoices.amountExclTax")}: €{item.amount.toFixed(2)}</Text>
+                    <Text style={styles.detailText}>{t("invoices.tax")}: €{item.tax.toFixed(2)}</Text>
                     {item.paidDate && (
                         <Text style={styles.detailText}>
-                            Payée le: {dayjs(item.paidDate).format("YYYY-MM-DD")}
+                            {t("invoices.paidOn")}: {dayjs(item.paidDate).format("YYYY-MM-DD")}
                         </Text>
                     )}
                 </View>
@@ -267,14 +266,14 @@ export default function InvoiceScreen({ navigation }) {
                         onPress={() => openEdit(item)}
                     >
                         <Ionicons name="pencil" size={16} color="#fff" />
-                        <Text style={styles.btnActionText}>Éditer</Text>
+                        <Text style={styles.btnActionText}>{t("common.edit")}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={[styles.btnAction, styles.btnDanger]}
                         onPress={() => setDeleteInvoice(item)}
                     >
                         <Ionicons name="trash" size={16} color="#fff" />
-                        <Text style={styles.btnActionText}>Supprimer</Text>
+                        <Text style={styles.btnActionText}>{t("common.delete")}</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -285,18 +284,15 @@ export default function InvoiceScreen({ navigation }) {
         return (
             <SafeAreaView style={styles.centered}>
                 <ActivityIndicator size="large" color={colors.primary} />
-                <Text style={styles.loadingText}>Chargement des factures...</Text>
+                <Text style={styles.loadingText}>{t("invoices.loading")}</Text>
             </SafeAreaView>
         );
     }
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView
-                contentContainerStyle={{ paddingBottom: 100 }}
-                keyboardShouldPersistTaps="handled"
-            >
-                {/* === HEADER WITH DRAWER === */}
+            {/* HEADER */}
+            <ScrollView contentContainerStyle={{ paddingBottom: 100 }} keyboardShouldPersistTaps="handled">
                 <View
                     style={[
                         styles.header,
@@ -308,38 +304,32 @@ export default function InvoiceScreen({ navigation }) {
                         },
                     ]}
                 >
-                    {/* Drawer Button */}
                     <TouchableOpacity onPress={() => navigation.openDrawer()}>
                         <Ionicons name="menu" size={26} color={colors.text} />
                     </TouchableOpacity>
 
                     <View style={{ flex: 1, alignItems: "center" }}>
-                        <Text style={[styles.headerTitle, { fontSize: 20 }]}>
-                            🧾 Factures
-                        </Text>
-                        <Text style={styles.subtitle}>
-                            Gérez vos factures et suivez les paiements
-                        </Text>
+                        <Text style={[styles.headerTitle, { fontSize: 20 }]}>🧾 {t("invoices.title")}</Text>
+                        <Text style={styles.subtitle}>{t("invoices.subtitle")}</Text>
                     </View>
 
-                    {/* Placeholder to balance layout */}
                     <View style={{ width: 26 }} />
                 </View>
 
-                {/* 🔍 Filters */}
+                {/* FILTERS */}
                 <View style={styles.filterCard}>
-                    <Text style={styles.filterTitle}>Filtres</Text>
+                    <Text style={styles.filterTitle}>{t("invoices.filters")}</Text>
                     <View style={styles.filterRow}>
                         <TextInput
                             style={[styles.input, { flex: 2 }]}
-                            placeholder="Client"
+                            placeholder={t("invoices.client")}
                             placeholderTextColor={colors.textSoft}
                             value={filterClient}
                             onChangeText={setFilterClient}
                         />
                         <TextInput
                             style={[styles.input, { flex: 1 }]}
-                            placeholder="Statut"
+                            placeholder={t("invoices.status")}
                             placeholderTextColor={colors.textSoft}
                             value={filterStatus}
                             onChangeText={setFilterStatus}
@@ -348,14 +338,14 @@ export default function InvoiceScreen({ navigation }) {
                     <View style={styles.filterRow}>
                         <TextInput
                             style={[styles.input, { flex: 1 }]}
-                            placeholder="Du (YYYY-MM-DD)"
+                            placeholder={t("invoices.from")}
                             placeholderTextColor={colors.textSoft}
                             value={filterFrom}
                             onChangeText={setFilterFrom}
                         />
                         <TextInput
                             style={[styles.input, { flex: 1 }]}
-                            placeholder="Au (YYYY-MM-DD)"
+                            placeholder={t("invoices.to")}
                             placeholderTextColor={colors.textSoft}
                             value={filterTo}
                             onChangeText={setFilterTo}
@@ -363,25 +353,15 @@ export default function InvoiceScreen({ navigation }) {
                     </View>
                     <TouchableOpacity style={styles.btnReset} onPress={resetFilters}>
                         <Ionicons name="refresh" size={16} color={colors.primary} />
-                        <Text style={styles.btnResetText}>Réinitialiser</Text>
+                        <Text style={styles.btnResetText}>{t("common.reset")}</Text>
                     </TouchableOpacity>
                 </View>
 
-                {/* 📊 Stats */}
-                <View style={styles.statsRow}>
-                    <Text style={styles.statText}>
-                        Total: <Text style={styles.statValue}>{filtered.length}</Text>
-                    </Text>
-                    <Text style={styles.statText}>
-                        Page {pageIndex + 1} / {totalPages || 1}
-                    </Text>
-                </View>
-
-                {/* 📋 List */}
+                {/* LIST */}
                 {filtered.length === 0 ? (
                     <View style={styles.empty}>
                         <Text style={styles.emptyIcon}>📄</Text>
-                        <Text style={styles.emptyText}>Aucune facture trouvée</Text>
+                        <Text style={styles.emptyText}>{t("invoices.empty")}</Text>
                     </View>
                 ) : (
                     <FlatList
@@ -392,138 +372,7 @@ export default function InvoiceScreen({ navigation }) {
                 )}
             </ScrollView>
 
-            {/* 💾 Modal Create / Edit */}
-            <Modal visible={showModal} animationType="fade" transparent onRequestClose={closeModal}>
-                <View style={styles.overlay}>
-                    <View style={styles.modalContainer}>
-                        {/* Header */}
-                        <View style={styles.header}>
-                            <Text style={styles.title}>
-                                {editing ? "Modifier la facture" : "Nouvelle facture"}
-                            </Text>
-                            <TouchableOpacity onPress={closeModal} style={styles.closeBtn}>
-                                <Ionicons name="close" size={22} color={colors.textSoft} />
-                            </TouchableOpacity>
-                        </View>
-
-                        {/* Body */}
-                        <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
-                            <View style={styles.formGroup}>
-                                <Text style={styles.label}>Nom du client</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Nom du client"
-                                    placeholderTextColor={colors.textSoft}
-                                    value={form.client}
-                                    onChangeText={(t) => setForm({ ...form, client: t })}
-                                />
-                            </View>
-
-                            <View style={styles.formGroupRow}>
-                                <View style={[styles.formGroup, { flex: 1 }]}>
-                                    <Text style={styles.label}>Montant (HT)</Text>
-                                    <TextInput
-                                        style={styles.input}
-                                        keyboardType="numeric"
-                                        placeholder="0.00"
-                                        placeholderTextColor={colors.textSoft}
-                                        value={form.amount}
-                                        onChangeText={(t) => setForm({ ...form, amount: t })}
-                                    />
-                                </View>
-
-                                <View style={[styles.formGroup, { flex: 1 }]}>
-                                    <Text style={styles.label}>TVA (€)</Text>
-                                    <TextInput
-                                        style={styles.input}
-                                        keyboardType="numeric"
-                                        placeholder="0.00"
-                                        placeholderTextColor={colors.textSoft}
-                                        value={form.tax}
-                                        onChangeText={(t) => setForm({ ...form, tax: t })}
-                                    />
-                                </View>
-                            </View>
-
-                            <View style={styles.formGroupRow}>
-                                <View style={[styles.formGroup, { flex: 1 }]}>
-                                    <Text style={styles.label}>Date d'émission</Text>
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="YYYY-MM-DD"
-                                        placeholderTextColor={colors.textSoft}
-                                        value={form.issueDate}
-                                        onChangeText={(t) => setForm({ ...form, issueDate: t })}
-                                    />
-                                </View>
-
-                                <View style={[styles.formGroup, { flex: 1 }]}>
-                                    <Text style={styles.label}>Date de paiement</Text>
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="YYYY-MM-DD"
-                                        placeholderTextColor={colors.textSoft}
-                                        value={form.paidDate}
-                                        onChangeText={(t) => setForm({ ...form, paidDate: t })}
-                                    />
-                                </View>
-                            </View>
-
-                            <View style={styles.formGroup}>
-                                <Text style={styles.label}>Statut</Text>
-                                <View style={styles.typeSelector}>
-                                    {statusOptions.map((status) => (
-                                        <TouchableOpacity
-                                            key={status}
-                                            onPress={() => setForm({ ...form, status })}
-                                            style={[
-                                                styles.typeOption,
-                                                form.status === status && styles.typeSelected,
-                                            ]}
-                                        >
-                                            <Text
-                                                style={[
-                                                    styles.typeText,
-                                                    {
-                                                        color:
-                                                            form.status === status
-                                                                ? colors.primary
-                                                                : colors.textSoft,
-                                                    },
-                                                ]}
-                                            >
-                                                {status}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
-                            </View>
-                        </ScrollView>
-
-                        {/* Footer */}
-                        <View style={styles.footer}>
-                            <TouchableOpacity
-                                onPress={closeModal}
-                                style={styles.btnSecondary}
-                            >
-                                <Text style={styles.btnSecondaryText}>Annuler</Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                onPress={saveInvoice}
-                                style={[styles.btnPrimary, saving && { opacity: 0.6 }]}
-                                disabled={saving}
-                            >
-                                <Text style={styles.btnPrimaryText}>
-                                    {editing ? "Enregistrer" : "Créer"}
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
-
-            {/* ➕ Floating Button */}
+            {/* FLOATING BUTTON */}
             <TouchableOpacity style={styles.fab} onPress={openCreate}>
                 <Ionicons name="add" size={26} color="#fff" />
             </TouchableOpacity>
