@@ -6,7 +6,10 @@
         "button": "Se connecter",
         "subtitle" : "Bon Retour" ,
         "createAccount" : "Créer un compte", 
-        "forgotPassword" :"Mot de passe oublié?"
+        "forgotPassword" :"Mot de passe oublié?",
+        "success" : "Connexion réussie",
+        "error" : "Erreur",
+        "fillAllFields" : "Remplis tous les champs"
     },
     "theme": {
         "dark": "Sombre",
@@ -32,7 +35,9 @@
         "language": "Langue",
         "logout": "Déconnexion",
         "online": "En ligne",
-        "offline": "Hors ligne"
+        "offline": "Hors ligne",
+        "success" : "Réussie",
+        "error" : "Erreur"
     },
     "advice": {
         "headerTitle": "Conseils financiers",

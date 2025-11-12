@@ -6,7 +6,10 @@
         "button": "Sign in",
         "subtitle" : "Welcome Back" ,
         "createAccount" : "Create Account", 
-        "forgotPassword" :"Forgot Password?"
+        "forgotPassword" :"Forgot Password?",
+        "success" : "Login Succeeded",
+        "error" : "Error",
+        "fillAllFields" : "Fill All Fields"
     },
     "theme": {
         "dark": "Dark",
@@ -32,7 +35,9 @@
         "language": "Language",
         "logout": "Logout",
         "online": "Online",
-        "offline": "Offline"
+        "offline": "Offline",
+        "success" : "Success",
+        "error" : "Error"
     },
     "advice": {
         "headerTitle": "Financial Advice",

@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
     View,
     Text,
     TextInput,
     TouchableOpacity,
     ActivityIndicator,
-    Alert,
     KeyboardAvoidingView,
     Platform,
     Animated,
@@ -15,9 +14,10 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "@contexts/authContext";
 import { useTheme } from "@contexts/ThemeContext";
 import { getStyles } from "@theme/styles";
+import CustomAlert from "../../components/CustomAlert";
 
 export default function LoginScreen({ navigation }) {
-    const { login } = useAuth();
+    const { login, confirmLogin } = useAuth();
     const { colors, toggleTheme, mode } = useTheme();
     const { t, i18n } = useTranslation();
     const styles = getStyles(colors);
@@ -26,24 +26,48 @@ export default function LoginScreen({ navigation }) {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+
+    // 🔔 Alert states
+    const [alertVisible, setAlertVisible] = useState(false);
+    const [alertType, setAlertType] = useState("success");
+    const [alertMessage, setAlertMessage] = useState("");
+
+    // Use ref to prevent navigation during alert display
+    const navigationTimeoutRef = useRef(null);
+    const shouldNavigateRef = useRef(false);
+
     const scaleAnim = new Animated.Value(1);
 
     const handleLogin = async () => {
         if (!email || !password) {
-            Alert.alert(t("common.error"), t("login.fillAllFields"));
+            shouldNavigateRef.current = false;
+            setAlertType("error");
+            setAlertMessage(t("login.fillAllFields"));
+            setAlertVisible(true);
             return;
         }
 
         try {
             setLoading(true);
             await login(email.trim(), password);
-            Alert.alert(t("common.success"), t("login.success"));
-            navigation.replace("Main");
+            setLoading(false);
+
+            // Mark that we should navigate after alert
+            shouldNavigateRef.current = true;
+
+            // Show success alert
+            setAlertType("success");
+            setAlertMessage(t("login.success"));
+            setAlertVisible(true);
+
         } catch (err) {
             console.error("Login error:", err);
-            Alert.alert(t("common.error"), t("login.invalid"));
-        } finally {
             setLoading(false);
+            shouldNavigateRef.current = false;
+
+            setAlertType("error");
+            setAlertMessage(t("login.invalid"));
+            setAlertVisible(true);
         }
     };
 
@@ -60,6 +84,33 @@ export default function LoginScreen({ navigation }) {
             useNativeDriver: true,
         }).start();
     };
+
+    const handleAlertClose = () => {
+        setAlertVisible(false);
+
+        // Clear any pending navigation timeout
+        if (navigationTimeoutRef.current) {
+            clearTimeout(navigationTimeoutRef.current);
+        }
+
+        // Confirm login after alert closes if login was successful
+        if (shouldNavigateRef.current) {
+            // This will trigger automatic navigation via conditional rendering
+            navigationTimeoutRef.current = setTimeout(() => {
+                shouldNavigateRef.current = false;
+                confirmLogin(); // Sets token, AppNavigator handles navigation automatically
+            }, 300);
+        }
+    };
+
+    // Cleanup timeout on unmount
+    React.useEffect(() => {
+        return () => {
+            if (navigationTimeoutRef.current) {
+                clearTimeout(navigationTimeoutRef.current);
+            }
+        };
+    }, []);
 
     return (
         <LinearGradient
@@ -78,7 +129,9 @@ export default function LoginScreen({ navigation }) {
                     style={{ alignSelf: "flex-end", marginBottom: 12 }}
                 >
                     <Text style={{ color: colors.primary }}>
-                        {mode === "light" ? "🌙 " + t("theme.dark") : "☀️ " + t("theme.light")}
+                        {mode === "light"
+                            ? "🌙 " + t("theme.dark")
+                            : "☀️ " + t("theme.light")}
                     </Text>
                 </TouchableOpacity>
 
@@ -102,7 +155,7 @@ export default function LoginScreen({ navigation }) {
                     </TouchableOpacity>
                 </View>
 
-                {/* Login */}
+                {/* Login Card */}
                 <View style={styles.cardLogin}>
                     <Text style={styles.title}>Bilancia</Text>
                     <Text style={styles.subtitle}>{t("login.subtitle")}</Text>
@@ -152,22 +205,43 @@ export default function LoginScreen({ navigation }) {
                                 {loading ? (
                                     <ActivityIndicator color="#fff" />
                                 ) : (
-                                    <Text style={styles.buttonText}>{t("login.button")}</Text>
+                                    <Text style={styles.buttonText}>
+                                        {t("login.button")}
+                                    </Text>
                                 )}
                             </LinearGradient>
                         </TouchableOpacity>
                     </Animated.View>
 
                     <View style={styles.linkRow}>
-                        <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-                            <Text style={styles.linkHighlight}>{t("login.createAccount")}</Text>
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate("Register")}
+                        >
+                            <Text style={styles.linkHighlight}>
+                                {t("login.createAccount")}
+                            </Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
-                            <Text style={styles.linkSecondary}>{t("login.forgotPassword")}</Text>
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate("ForgotPassword")}
+                        >
+                            <Text style={styles.linkSecondary}>
+                                {t("login.forgotPassword")}
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 </View>
+
+                {/* Custom styled alert - Always rendered */}
+                {alertVisible && (
+                    <CustomAlert
+                        visible={alertVisible}
+                        type={alertType}
+                        title={t(`common.${alertType}`)}
+                        message={alertMessage}
+                        onClose={handleAlertClose}
+                    />
+                )}
             </KeyboardAvoidingView>
         </LinearGradient>
     );

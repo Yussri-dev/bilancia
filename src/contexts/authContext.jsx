@@ -3,13 +3,15 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { View, ActivityIndicator } from "react-native";
 import { saveToken, getToken, removeToken } from "../services/authStorage";
 import { authApi } from "@api/authApi";
-import apiClient from "@apiClient"
+import apiClient from "@apiClient";
+
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(null);
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [pendingAuth, setPendingAuth] = useState(null); // Holds auth data before navigation
 
     //  Charger token + profil au démarrage
     useEffect(() => {
@@ -30,7 +32,7 @@ export const AuthProvider = ({ children }) => {
         })();
     }, []);
 
-    //  Connexion
+    //  Connexion - returns auth data but doesn't set token yet
     const login = async (email, password) => {
         try {
             const res = await authApi.login({ email, password });
@@ -42,14 +44,35 @@ export const AuthProvider = ({ children }) => {
             }
 
             await saveToken(raw);
-            setToken(raw);
             apiClient.setAuthToken(raw);
 
             const profile = await authApi.getProfile(raw);
-            setUser(profile);
+
+            // Store auth data but don't set token yet
+            setPendingAuth({ token: raw, user: profile });
+
+            return { token: raw, user: profile };
         } catch (error) {
             console.error("Login failed:", error);
             throw error;
+        }
+    };
+
+    // Confirm login - actually sets the token to trigger navigation
+    const confirmLogin = () => {
+        if (pendingAuth) {
+            setToken(pendingAuth.token);
+            setUser(pendingAuth.user);
+            setPendingAuth(null);
+        }
+    };
+
+    // Cancel login - clears pending auth
+    const cancelLogin = async () => {
+        if (pendingAuth) {
+            await removeToken();
+            apiClient.setAuthToken(null);
+            setPendingAuth(null);
         }
     };
 
@@ -96,6 +119,8 @@ export const AuthProvider = ({ children }) => {
                 user,
                 setUser,
                 login,
+                confirmLogin,
+                cancelLogin,
                 logout,
                 fetchUser,
             }}

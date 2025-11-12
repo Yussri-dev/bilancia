@@ -6,7 +6,10 @@
         "button": "Inloggen",
         "subtitle" : "Welkom terug" ,
         "createAccount" : "Maak een account aan", 
-        "forgotPassword" :"Wachtwoord vergeten?"
+        "forgotPassword" :"Wachtwoord vergeten?",
+        "success" : "Inloggen gelukt",
+        "error" : "Fout",
+        "fillAllFields" : "Vul alle velden in"
     },
     "theme": {
         "dark": "Donker",
@@ -32,7 +35,9 @@
         "language": "Taal",
         "logout": "Afmelden",
         "online": "Online",
-        "offline": "Offline"
+        "offline": "Offline",
+        "success" : "Gelukt",
+        "error" : "Fout"
     },
     "advice": {
         "headerTitle": "Financieel advies",
