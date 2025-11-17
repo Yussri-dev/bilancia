@@ -14,7 +14,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "@contexts/authContext";
 import { useTheme } from "@contexts/ThemeContext";
 import { getStyles } from "@theme/styles";
-import CustomAlert from "../../components/CustomAlert";
+import CustomAlert from "@components/CustomAlert";
 
 export default function LoginScreen({ navigation }) {
     const { login, confirmLogin } = useAuth();
@@ -27,7 +27,7 @@ export default function LoginScreen({ navigation }) {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
-    // 🔔 Alert states
+    // Alert states
     const [alertVisible, setAlertVisible] = useState(false);
     const [alertType, setAlertType] = useState("success");
     const [alertMessage, setAlertMessage] = useState("");

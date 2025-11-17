@@ -121,9 +121,9 @@ export default function ProfileScreen({ navigation }) {
                     source={
                         user.avatarUrl
                             ? { uri: user.avatarUrl }
-                            : require("../../../assets/default-avatar.jpg")
+                            : require("@assets/default-avatar.jpg")
                     }
-                    defaultSource={require("../../../assets/default-avatar.jpg")}
+                    defaultSource={require("@assets/default-avatar.jpg")}
                     style={{
                         width: 100,
                         height: 100,
