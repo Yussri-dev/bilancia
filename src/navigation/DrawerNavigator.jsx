@@ -1,9 +1,13 @@
+// src/navigation/DrawerNavigator.jsx
 import React from "react";
+import { View, Text, TouchableOpacity } from "react-native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 
 import CustomDrawerContent from "@components/CustomDrawerContent";
+import { useTheme } from "@contexts/ThemeContext";
+
 import Tabs from "./MainTabs";
 
 import {
@@ -21,33 +25,80 @@ const Drawer = createDrawerNavigator();
 
 export default function DrawerNavigator() {
     const { t } = useTranslation();
+    const { mode, toggleTheme, colors } = useTheme();
 
     return (
         <Drawer.Navigator
-            initialRouteName="Tabs"
-            drawerContent={(props) => <CustomDrawerContent {...props} />}
+            initialRouteName="DashboardTab"
+            drawerContent={(props) => (
+                <View style={{ flex: 1 }}>
+                    <CustomDrawerContent {...props} />
+
+                    <TouchableOpacity
+                        onPress={toggleTheme}
+                        style={{
+                            padding: 16,
+                            alignItems: "center",
+                            borderBottomWidth: 1,
+                            borderBottomColor: colors.border,
+                        }}
+                    >
+                        <Text style={{ color: colors.text, fontSize: 16 }}>
+                            {mode === "light"
+                                ? `🌙  ${t("theme.dark")}`
+                                : `☀️  ${t("theme.light")}`}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            )}
             screenOptions={{
                 headerShown: false,
-                drawerActiveTintColor: "#7C3AED",
-                drawerInactiveTintColor: "#94A3B8",
+                drawerActiveTintColor: colors.primary,
+                drawerInactiveTintColor: colors.textSecondary,
                 drawerStyle: {
-                    backgroundColor: "#0B1221",
+                    backgroundColor: colors.background,
                     width: 260,
                 },
                 drawerLabelStyle: { fontSize: 16 },
             }}
         >
+
             <Drawer.Screen
-                name="Tabs"
+                name="DashboardTab"
                 component={Tabs}
+                initialParams={{ screen: "Home" }}
                 options={{
                     title: t("dashboard.title"),
                     drawerIcon: ({ color, size }) => (
-                        <Ionicons name="grid" color={color} size={size} />
+                        <Ionicons name="home" color={color} size={size} />
                     ),
                 }}
             />
 
+            <Drawer.Screen
+                name="TransactionTab"
+                component={Tabs}
+                initialParams={{ screen: "Transaction" }}
+                options={{
+                    title: t("transactions.title"),
+                    drawerIcon: ({ color, size }) => (
+                        <Ionicons name="card" color={color} size={size} />
+                    ),
+                }}
+            />
+
+            <Drawer.Screen
+                name="InvoiceTab"
+                component={Tabs}
+                initialParams={{ screen: "Invoice" }}
+                options={{
+                    title: t("invoices.title"),
+                    drawerIcon: ({ color, size }) => (
+                        <Ionicons name="newspaper" color={color} size={size} />
+                    ),
+                }}
+            />
+            
             <Drawer.Screen
                 name="Profile"
                 component={ProfileScreen}
@@ -99,28 +150,6 @@ export default function DrawerNavigator() {
                     title: t("goals.title"),
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="football" size={size} color={color} />
-                    ),
-                }}
-            />
-
-            <Drawer.Screen
-                name="Invoice"
-                component={InvoiceScreen}
-                options={{
-                    title: t("invoices.title"),
-                    drawerIcon: ({ color, size }) => (
-                        <Ionicons name="newspaper" size={size} color={color} />
-                    ),
-                }}
-            />
-
-            <Drawer.Screen
-                name="Transaction"
-                component={TransactionScreen}
-                options={{
-                    title: t("transactions.title"),
-                    drawerIcon: ({ color, size }) => (
-                        <Ionicons name="card" size={size} color={color} />
                     ),
                 }}
             />

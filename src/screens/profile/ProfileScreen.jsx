@@ -97,7 +97,6 @@ export default function ProfileScreen({ navigation }) {
                 padding: 20,
             }}
         >
-            {/* 🔹 Header: Retour + Menu Drawer */}
             <View
                 style={{
                     flexDirection: "row",
@@ -115,15 +114,14 @@ export default function ProfileScreen({ navigation }) {
                 </TouchableOpacity>
             </View>
 
-            {/* 🔹 Profile info */}
             <View style={{ alignItems: "center", marginBottom: 24 }}>
                 <Image
                     source={
                         user.avatarUrl
                             ? { uri: user.avatarUrl }
-                            : require("@assets/default-avatar.jpg")
+                            : require("../../../assets/default-avatar.jpg")
                     }
-                    defaultSource={require("@assets/default-avatar.jpg")}
+                    defaultSource={require("../../../assets/default-avatar.jpg")}
                     style={{
                         width: 100,
                         height: 100,
@@ -148,7 +146,6 @@ export default function ProfileScreen({ navigation }) {
                 </Text>
             </View>
 
-            {/* 🔹 Buttons */}
             <View style={{ gap: 12 }}>
                 <TouchableOpacity
                     onPress={() =>
@@ -189,7 +186,6 @@ export default function ProfileScreen({ navigation }) {
                 </TouchableOpacity>
             </View>
 
-            {/* 🔹 Account details */}
             <View
                 style={{
                     marginTop: 40,

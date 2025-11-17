@@ -9,6 +9,10 @@ export const getStyles = (colors) =>
             backgroundColor: colors.background,
             padding: 16,
         },
+        screen: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
         centered: {
             flex: 1,
             justifyContent: "center",
@@ -35,6 +39,8 @@ export const getStyles = (colors) =>
             fontSize: 14,
             marginTop: 4,
         },
+
+        // PRIMARY BUTTON (global)
         btnPrimary: {
             flexDirection: "row",
             alignItems: "center",
@@ -201,7 +207,7 @@ export const getStyles = (colors) =>
             fontWeight: "600",
         },
 
-        // === DASHBOARD-SPECIFIC ===
+        // === DASHBOARD ===
         loadingContainer: {
             flex: 1,
             justifyContent: "center",
@@ -258,7 +264,8 @@ export const getStyles = (colors) =>
             fontSize: 12,
             color: colors.textSoft,
         },
-        // === DASHBOARD DATE SELECTOR ===
+
+        // === DATE SELECTOR ===
         dateCard: {
             flex: 1,
             minWidth: "45%",
@@ -285,22 +292,16 @@ export const getStyles = (colors) =>
             marginRight: 8,
         },
 
-        success: {
-            color: colors.success,
-        },
-        danger: {
-            color: colors.danger,
-        },
-        warning: {
-            color: colors.warning,
-        },
+        success: { color: colors.success },
+        danger: { color: colors.danger },
+        warning: { color: colors.warning },
+
         chart: {
             marginVertical: 8,
             borderRadius: 16,
         },
-        upcomingList: {
-            gap: 12,
-        },
+
+        upcomingList: { gap: 12 },
         upcomingItem: {
             flexDirection: "row",
             justifyContent: "space-between",
@@ -309,9 +310,7 @@ export const getStyles = (colors) =>
             borderBottomWidth: 1,
             borderBottomColor: colors.border,
         },
-        upcomingLeft: {
-            flex: 1,
-        },
+        upcomingLeft: { flex: 1 },
         upcomingName: {
             fontSize: 16,
             color: colors.text,
@@ -327,6 +326,7 @@ export const getStyles = (colors) =>
             fontWeight: "600",
             color: colors.primary,
         },
+
         toggleRow: {
             flexDirection: "row",
             alignItems: "center",
@@ -336,6 +336,8 @@ export const getStyles = (colors) =>
         toggleText: {
             color: colors.textSoft,
         },
+
+        // === CATEGORY STATS ===
         statsGrid: {
             flexDirection: "row",
             flexWrap: "wrap",
@@ -370,6 +372,7 @@ export const getStyles = (colors) =>
             color: colors.textSoft,
             fontSize: 12,
         },
+
         chip: {
             borderWidth: 1,
             borderColor: colors.border,
@@ -389,6 +392,8 @@ export const getStyles = (colors) =>
             color: "#fff",
             fontWeight: "600",
         },
+
+        // CATEGORY
         categoryChip: {
             borderWidth: 1,
             borderColor: colors.border,
@@ -409,6 +414,8 @@ export const getStyles = (colors) =>
             color: "#fff",
             fontWeight: "600",
         },
+
+        // SECONDARY BUTTON
         btnSuccess: {
             backgroundColor: colors.success,
             paddingHorizontal: 16,
@@ -418,6 +425,8 @@ export const getStyles = (colors) =>
             alignItems: "center",
             gap: 6,
         },
+
+        // === MODALS ===
         modalOverlay: {
             flex: 1,
             backgroundColor: "rgba(0,0,0,0.4)",
@@ -438,7 +447,8 @@ export const getStyles = (colors) =>
             elevation: 8,
         },
 
-        modalHeader: {
+        // FIRST modal header
+        modalHeaderPrimary: {
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
@@ -447,8 +457,7 @@ export const getStyles = (colors) =>
             paddingBottom: 10,
             marginBottom: 16,
         },
-
-        modalTitle: {
+        modalTitlePrimary: {
             fontSize: 18,
             fontWeight: "700",
             color: colors.text,
@@ -474,11 +483,12 @@ export const getStyles = (colors) =>
             color: colors.text,
         },
 
-        toggleRow: {
+        toggleRowWrap: {
             flexDirection: "row",
             flexWrap: "wrap",
             gap: 10,
         },
+
         toggleButtonRounded: {
             borderWidth: 1,
             borderColor: colors.border,
@@ -531,71 +541,9 @@ export const getStyles = (colors) =>
             fontWeight: "600",
             fontSize: 16,
         },
-        // === INVOICE-SPECIFIC STYLES ===
-        clientName: {
-            fontSize: 16,
-            fontWeight: "600",
-            color: colors.text,
-            marginBottom: 2,
-        },
-        cardDetails: {
-            backgroundColor: colors.surface2,
-            padding: 10,
-            borderRadius: 8,
-            marginBottom: 10,
-        },
-        detailText: {
-            fontSize: 13,
-            color: colors.textSoft,
-            marginBottom: 4,
-        },
-        cardActions: {
-            flexDirection: "row",
-            gap: 8,
-            flexWrap: "wrap",
-        },
-        cardName: {
-            fontSize: 16,
-            fontWeight: "600",
-            color: colors.text,
-            marginBottom: 10,
-        },
-        cardButtons: {
-            flexDirection: "row",
-            gap: 8,
-        },
-        btn: {
-            width: 36,
-            height: 36,
-            borderRadius: 8,
-            justifyContent: "center",
-            alignItems: "center",
-        },
-        formRow: {
-            flexDirection: "row",
-            gap: 10,
-        },
-        emptyIcon: {
-            fontSize: 48,
-            marginBottom: 12,
-        },
-        overlay: {
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.55)",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 12,
-        },
-        modalContainer: {
-            backgroundColor: colors.background,
-            borderRadius: 16,
-            borderWidth: 1,
-            borderColor: colors.border,
-            width: "100%",
-            maxHeight: "90%",
-            overflow: "hidden",
-        },
-        header: {
+
+        // === INVOICE MODAL (SECOND SET OF DUPLICATES FIXED) ===
+        modalHeaderSecondary: {
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
@@ -604,10 +552,15 @@ export const getStyles = (colors) =>
             borderBottomWidth: 1,
             borderBottomColor: colors.border,
         },
-        title: { fontSize: 18, fontWeight: "700", color: colors.text },
+        modalTitleSecondary: {
+            fontSize: 18,
+            fontWeight: "700",
+            color: colors.text,
+        },
+
         closeBtn: { padding: 6 },
         body: { padding: 16 },
-        formGroup: { marginBottom: 14 },
+        modalFormGroup: { marginBottom: 14 },
         formGroupRow: {
             flexDirection: "row",
             justifyContent: "space-between",
@@ -615,7 +568,7 @@ export const getStyles = (colors) =>
             marginBottom: 14,
             gap: 10,
         },
-        label: { color: colors.textSoft, fontWeight: "600", marginBottom: 6 },
+        formLabel: { color: colors.textSoft, fontWeight: "600", marginBottom: 6 },
         typeSelector: {
             flexDirection: "row",
             justifyContent: "space-between",
@@ -635,6 +588,7 @@ export const getStyles = (colors) =>
             backgroundColor: "#1e1b4b",
         },
         typeText: { fontWeight: "600" },
+
         footer: {
             flexDirection: "row",
             justifyContent: "flex-end",
@@ -643,13 +597,19 @@ export const getStyles = (colors) =>
             padding: 14,
             gap: 10,
         },
-        btnPrimary: {
+
+        // FIXED second duplicate
+        btnPrimaryFooter: {
             backgroundColor: colors.primary,
             borderRadius: 10,
             paddingVertical: 10,
             paddingHorizontal: 20,
         },
-        btnPrimaryText: { color: "#fff", fontWeight: "700" },
+        btnPrimaryFooterText: {
+            color: "#fff",
+            fontWeight: "700",
+        },
+
         btnSecondary: {
             backgroundColor: "transparent",
             borderColor: colors.border,
@@ -659,6 +619,7 @@ export const getStyles = (colors) =>
             paddingHorizontal: 20,
         },
         btnSecondaryText: { color: colors.textSoft },
+
         fab: {
             position: "absolute",
             bottom: 24,
@@ -676,12 +637,13 @@ export const getStyles = (colors) =>
             shadowOffset: { width: 0, height: 3 },
         },
 
+        // === AUTH SCREEN (LOGIN) ===
         gradient: {
             flex: 1,
             justifyContent: "center",
             alignItems: "center",
         },
-        container: {
+        loginContainer: {
             width: "100%",
             paddingHorizontal: 24,
         },
@@ -694,19 +656,23 @@ export const getStyles = (colors) =>
             shadowRadius: 12,
             elevation: 10,
         },
-        title: {
+
+        // FIXED duplicate
+        loginTitle: {
             fontSize: 32,
             fontWeight: "bold",
             color: "#A78BFA",
             textAlign: "center",
             marginBottom: 6,
         },
-        subtitle: {
+
+        loginSubtitle: {
             fontSize: 14,
             color: "#94A3B8",
             textAlign: "center",
             marginBottom: 28,
         },
+
         eyeButton: {
             position: "absolute",
             right: 10,

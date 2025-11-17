@@ -13,11 +13,11 @@ import {
 } from "react-native";
 import { authApi } from "@api/authApi";
 import { useAuth } from "@contexts/authContext";
-import { useTranslation } from "react-i18next"; // ✅ Added
+import { useTranslation } from "react-i18next"; 
 
 export default function RegisterScreen({ navigation }) {
     const { setUser } = useAuth();
-    const { t } = useTranslation(); // ✅ Added
+    const { t } = useTranslation();
 
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");

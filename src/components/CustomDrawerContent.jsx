@@ -5,18 +5,32 @@ import { DrawerContentScrollView, DrawerItemList } from "@react-navigation/drawe
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@contexts/authContext";
 import { useTranslation } from "react-i18next";
+import { useTheme } from "@contexts/ThemeContext";
+import { getStyles } from "@theme/styles";
 
 export default function CustomDrawerContent(props) {
     const { user, logout } = useAuth();
     const { t, i18n } = useTranslation();
+    const { colors } = useTheme();
+    const styles = getStyles(colors);
 
     return (
-        <View style={{ flex: 1, backgroundColor: "#0B1221" }}>
-            <DrawerContentScrollView {...props}>
+        <View style={{ flex: 1, backgroundColor: colors.background }}>
+            <DrawerContentScrollView {...props}
+                style={{ backgroundColor: colors.background }}
+            >
                 {/* === USER HEADER === */}
-                <View style={{ padding: 20, borderBottomWidth: 1, borderColor: "#1E293B" }}>
+                <View
+                    style={{
+                        padding: 20,
+                        borderBottomWidth: 1,
+                        borderColor: colors.border,
+                        flexDirection: "row",
+                        alignItems: "center",
+                    }}
+                >
                     {user ? (
-                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                        <>
                             <Image
                                 source={
                                     user.avatarUrl
@@ -28,19 +42,23 @@ export default function CustomDrawerContent(props) {
                                     width: 60,
                                     height: 60,
                                     borderRadius: 50,
-                                    marginBottom: 16,
                                 }}
-                                onError={() => console.warn("Image failed to load")}
                             />
+
                             <View style={{ marginLeft: 12 }}>
-                                <Text style={{ color: "#fff", fontWeight: "600", fontSize: 16 }}>
+                                <Text style={{ color: colors.text, fontWeight: "600", fontSize: 16 }}>
                                     {user.fullName || user.username || t("profile.defaultUser")}
                                 </Text>
-                                <Text style={{ color: "#7C3AED" }}>{t("common.online")}</Text>
+
+                                <Text style={{ color: colors.primary }}>
+                                    {t("common.online")}
+                                </Text>
                             </View>
-                        </View>
+                        </>
                     ) : (
-                        <Text style={{ color: "#999" }}>{t("common.offline")}</Text>
+                        <Text style={{ color: colors.textSoft }}>
+                            {t("common.offline")}
+                        </Text>
                     )}
                 </View>
 
@@ -53,12 +71,12 @@ export default function CustomDrawerContent(props) {
                 style={{
                     padding: 20,
                     borderTopWidth: 1,
-                    borderColor: "#1E293B",
+                    borderColor: colors.border,
                 }}
             >
                 <Text
                     style={{
-                        color: "#94A3B8",
+                        color: colors.textSoft,
                         fontWeight: "600",
                         marginBottom: 10,
                         fontSize: 14,
@@ -66,6 +84,7 @@ export default function CustomDrawerContent(props) {
                 >
                     🌐 {t("common.language")}
                 </Text>
+
                 <View style={{ flexDirection: "row" }}>
                     <TouchableOpacity onPress={() => i18n.changeLanguage("fr")} style={{ marginRight: 12 }}>
                         <Text style={{ fontSize: 20 }}>🇫🇷</Text>
@@ -77,7 +96,6 @@ export default function CustomDrawerContent(props) {
                         <Text style={{ fontSize: 20 }}>🇳🇱</Text>
                     </TouchableOpacity>
                 </View>
-
             </View>
 
             {/* === LOGOUT BUTTON === */}
@@ -86,17 +104,17 @@ export default function CustomDrawerContent(props) {
                     style={{
                         padding: 20,
                         borderTopWidth: 1,
-                        borderColor: "#1E293B",
+                        borderColor: colors.border,
                     }}
                 >
                     <TouchableOpacity
                         onPress={logout}
                         style={{ flexDirection: "row", alignItems: "center" }}
                     >
-                        <Ionicons name="log-out" size={20} color="#E11D48" />
+                        <Ionicons name="log-out" size={20} color={colors.danger} />
                         <Text
                             style={{
-                                color: "#E11D48",
+                                color: colors.danger,
                                 marginLeft: 10,
                                 fontWeight: "600",
                             }}
