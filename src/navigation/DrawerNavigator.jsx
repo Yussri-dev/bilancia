@@ -1,6 +1,8 @@
 import React from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
+
 import CustomDrawerContent from "@components/CustomDrawerContent";
 import Tabs from "./MainTabs";
 
@@ -13,11 +15,13 @@ import {
     ProfileScreen,
 } from "@screens";
 
-import CategoryStack from "@navigation/CategoryStack"; //  Correct path
+import CategoryStack from "@navigation/CategoryStack";
 
 const Drawer = createDrawerNavigator();
 
 export default function DrawerNavigator() {
+    const { t } = useTranslation();
+
     return (
         <Drawer.Navigator
             initialRouteName="Tabs"
@@ -37,7 +41,7 @@ export default function DrawerNavigator() {
                 name="Tabs"
                 component={Tabs}
                 options={{
-                    title: "Tableau de bord",
+                    title: t("dashboard.title"),
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="grid" color={color} size={size} />
                     ),
@@ -48,7 +52,7 @@ export default function DrawerNavigator() {
                 name="Profile"
                 component={ProfileScreen}
                 options={{
-                    title: "Profil",
+                    title: t("profile.accountDetails"),
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="person-circle" color={color} size={size} />
                     ),
@@ -59,7 +63,7 @@ export default function DrawerNavigator() {
                 name="Advices"
                 component={AdviceScreen}
                 options={{
-                    title: "Advices",
+                    title: t("advice.headerTitle"),
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="bulb" size={size} color={color} />
                     ),
@@ -70,7 +74,7 @@ export default function DrawerNavigator() {
                 name="Analytics"
                 component={AnalyticsScreen}
                 options={{
-                    title: "Analytics",
+                    title: t("analytics.title"),
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="stats-chart" size={size} color={color} />
                     ),
@@ -81,7 +85,7 @@ export default function DrawerNavigator() {
                 name="Category"
                 component={CategoryStack}
                 options={{
-                    title: "Catégories",
+                    title: t("categories.title"),
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="apps" size={size} color={color} />
                     ),
@@ -92,10 +96,10 @@ export default function DrawerNavigator() {
                 name="Goal"
                 component={GoalsScreen}
                 options={{
-                    title: "Objectif",
+                    title: t("goals.title"),
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="football" size={size} color={color} />
-                    )
+                    ),
                 }}
             />
 
@@ -103,10 +107,10 @@ export default function DrawerNavigator() {
                 name="Invoice"
                 component={InvoiceScreen}
                 options={{
-                    title: "Factures",
+                    title: t("invoices.title"),
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="newspaper" size={size} color={color} />
-                    )
+                    ),
                 }}
             />
 
@@ -114,10 +118,10 @@ export default function DrawerNavigator() {
                 name="Transaction"
                 component={TransactionScreen}
                 options={{
-                    title: "Transactions",
+                    title: t("transactions.title"),
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="card" size={size} color={color} />
-                    )
+                    ),
                 }}
             />
         </Drawer.Navigator>

@@ -4,12 +4,12 @@
         "email": "E-mailadres",
         "password": "Wachtwoord",
         "button": "Inloggen",
-        "subtitle" : "Welkom terug" ,
-        "createAccount" : "Maak een account aan", 
-        "forgotPassword" :"Wachtwoord vergeten?",
-        "success" : "Inloggen gelukt",
-        "error" : "Fout",
-        "fillAllFields" : "Vul alle velden in"
+        "subtitle": "Welkom terug",
+        "createAccount": "Maak een account aan",
+        "forgotPassword": "Wachtwoord vergeten?",
+        "success": "Inloggen gelukt",
+        "error": "Fout",
+        "fillAllFields": "Vul alle velden in"
     },
     "theme": {
         "dark": "Donker",
@@ -36,8 +36,14 @@
         "logout": "Afmelden",
         "online": "Online",
         "offline": "Offline",
-        "success" : "Gelukt",
-        "error" : "Fout"
+        "success": "Succes",
+        "error": "Fout",
+        "addWithIcon": "Toevoegen",
+        "edit": "Bewerken",
+        "delete": "Verwijderen",
+        "reset": "Resetten",
+        "cancel": "Annuleren",
+        "create": "Aanmaken"
     },
     "advice": {
         "headerTitle": "Financieel advies",
@@ -173,9 +179,9 @@
         "title": "Facturen",
         "subtitle": "Beheer je facturen en volg betalingen op",
         "loading": "Facturen laden...",
-        "loadError": "Kan facturen niet laden.",
-        "saveError": "Kan factuur niet opslaan.",
-        "deleteError": "Kan factuur niet verwijderen.",
+        "loadError": "Facturen kunnen niet worden geladen.",
+        "saveError": "De factuur kan niet worden opgeslagen.",
+        "deleteError": "De factuur kan niet worden verwijderd.",
         "confirmDelete": "Factuur van {{client}} verwijderen?",
         "confirmTitle": "Bevestiging",
         "filters": "Filters",
@@ -193,7 +199,7 @@
         "amount": "Bedrag (excl. btw)",
         "tax": "BTW (€)",
         "issueDate": "Uitgiftedatum",
-        "paidDate": "Betaaldatum",
+        "paidDate": "Betalingsdatum",
         "status": "Status",
         "pending": "In afwachting",
         "paid": "Betaald",
@@ -204,9 +210,13 @@
         "cancel": "Annuleren",
         "edit": "Bewerken",
         "delete": "Verwijderen",
-        "htAmount": "Bedrag excl. btw: €{{amount}}",
+        "htAmount": "Bedrag (excl. btw): €{{amount}}",
         "vatAmount": "BTW: €{{tax}}",
-        "paidOn": "Betaald op: {{date}}"
+        "paidOn": "Betaald op: {{date}}",
+        "client": "Klant",
+        "from": "Van",
+        "to": "Tot",
+        "empty": "Leeg"
     },
     "profile": {
         "loading": "Profiel laden...",
@@ -225,7 +235,7 @@
         "confirmationTitle": "📧 Bevestiging"
     },
     "transactions": {
-        "title": "💳 Transacties",
+        "title": "Transacties",
         "editTitle": "Transactie bewerken",
         "newTitle": "Nieuwe Transactie",
         "subtitle": "Volg je inkomsten en uitgaven",

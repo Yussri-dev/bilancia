@@ -4,12 +4,12 @@
         "email": "Email address",
         "password": "Password",
         "button": "Sign in",
-        "subtitle" : "Welcome Back" ,
-        "createAccount" : "Create Account", 
-        "forgotPassword" :"Forgot Password?",
-        "success" : "Login Succeeded",
-        "error" : "Error",
-        "fillAllFields" : "Fill All Fields"
+        "subtitle": "Welcome Back",
+        "createAccount": "Create Account",
+        "forgotPassword": "Forgot Password?",
+        "success": "Login Succeeded",
+        "error": "Error",
+        "fillAllFields": "Fill All Fields"
     },
     "theme": {
         "dark": "Dark",
@@ -36,8 +36,14 @@
         "logout": "Logout",
         "online": "Online",
         "offline": "Offline",
-        "success" : "Success",
-        "error" : "Error"
+        "success": "Success",
+        "error": "Error",
+        "addWithIcon": "Add",
+        "edit": "Edit",
+        "delete": "Delete",
+        "reset": "Reset",
+        "cancel": "Cancel",
+        "create" : "Create"
     },
     "advice": {
         "headerTitle": "Financial Advice",
@@ -206,7 +212,11 @@
         "delete": "Delete",
         "htAmount": "Amount (excl. tax): €{{amount}}",
         "vatAmount": "VAT: €{{tax}}",
-        "paidOn": "Paid on: {{date}}"
+        "paidOn": "Paid on: {{date}}",
+        "client": "Client",
+        "from": "From",
+        "to": "To",
+        "empty": "Empty"
     },
     "profile": {
         "loading": "Loading profile...",
@@ -225,7 +235,7 @@
         "confirmationTitle": "📧 Confirmation"
     },
     "transactions": {
-        "title": "💳 Transactions",
+        "title": "Transactions",
         "editTitle": "Edit Transaction",
         "newTitle": "New Transaction",
         "subtitle": "Track your income and expenses",

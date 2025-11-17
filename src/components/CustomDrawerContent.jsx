@@ -34,7 +34,7 @@ export default function CustomDrawerContent(props) {
                             />
                             <View style={{ marginLeft: 12 }}>
                                 <Text style={{ color: "#fff", fontWeight: "600", fontSize: 16 }}>
-                                    {user.username || "Utilisateur"}
+                                    {user.fullName || user.username || t("profile.defaultUser")}
                                 </Text>
                                 <Text style={{ color: "#7C3AED" }}>{t("common.online")}</Text>
                             </View>

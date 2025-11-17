@@ -4,12 +4,12 @@
         "email": "Adresse e-mail",
         "password": "Mot de passe",
         "button": "Se connecter",
-        "subtitle" : "Bon Retour" ,
-        "createAccount" : "Créer un compte", 
-        "forgotPassword" :"Mot de passe oublié?",
-        "success" : "Connexion réussie",
-        "error" : "Erreur",
-        "fillAllFields" : "Remplis tous les champs"
+        "subtitle": "Bon Retour",
+        "createAccount": "Créer un compte",
+        "forgotPassword": "Mot de passe oublié?",
+        "success": "Connexion réussie",
+        "error": "Erreur",
+        "fillAllFields": "Remplis tous les champs"
     },
     "theme": {
         "dark": "Sombre",
@@ -36,8 +36,14 @@
         "logout": "Déconnexion",
         "online": "En ligne",
         "offline": "Hors ligne",
-        "success" : "Réussie",
-        "error" : "Erreur"
+        "success": "Succès",
+        "error": "Erreur",
+        "addWithIcon": "Ajouter",
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "reset": "Réinitialiser",
+        "cancel": "Annuler",
+        "create": "Créer"
     },
     "advice": {
         "headerTitle": "Conseils financiers",
@@ -148,7 +154,7 @@
         "order": "Ordre",
         "orderHint": "Plus petit = affiché en premier",
         "archive": "Archiver",
-        "saveError": "Impossible d’enregistrer la catégorie"
+        "saveError": "Impossible d'enregistrer la catégorie"
     },
     "goals": {
         "title": "Objectifs d'épargne",
@@ -176,14 +182,14 @@
         "loadError": "Impossible de charger les factures.",
         "saveError": "Impossible d'enregistrer la facture.",
         "deleteError": "Impossible de supprimer la facture.",
-        "confirmDelete": "Supprimer la facture {{client}} ?",
+        "confirmDelete": "Supprimer la facture de {{client}} ?",
         "confirmTitle": "Confirmation",
         "filters": "Filtres",
         "filterClient": "Client",
         "filterStatus": "Statut",
-        "filterFrom": "Du (YYYY-MM-DD)",
-        "filterTo": "Au (YYYY-MM-DD)",
-        "resetFilters": "Réinitialiser",
+        "filterFrom": "De (YYYY-MM-DD)",
+        "filterTo": "À (YYYY-MM-DD)",
+        "resetFilters": "Réinitialiser les filtres",
         "total": "Total",
         "page": "Page",
         "noInvoices": "Aucune facture trouvée",
@@ -202,11 +208,15 @@
         "save": "Enregistrer",
         "create": "Créer",
         "cancel": "Annuler",
-        "edit": "Éditer",
+        "edit": "Modifier",
         "delete": "Supprimer",
-        "htAmount": "Montant HT : €{{amount}}",
+        "htAmount": "Montant (HT) : €{{amount}}",
         "vatAmount": "TVA : €{{tax}}",
-        "paidOn": "Payée le : {{date}}"
+        "paidOn": "Payée le : {{date}}",
+        "client": "Client",
+        "from": "De",
+        "to": "À",
+        "empty": "Vide"
     },
     "profile": {
         "loading": "Chargement du profil...",
@@ -225,7 +235,7 @@
         "confirmationTitle": "📧 Confirmation"
     },
     "transactions": {
-        "title": "💳 Transactions",
+        "title": "Transactions",
         "editTitle": "Modifier la transaction",
         "newTitle": "Nouvelle transaction",
         "subtitle": "Suivez vos revenus et dépenses",
