@@ -15,14 +15,14 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.yussri.Bilancia",
-      "buildNumber" : "1",
+      "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "package": "com.yussri.Bilancia",
-      "versionCode" : 1,
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -39,6 +39,13 @@
       "eas": {
         "projectId": "3b2d1f3d-7f27-4453-80be-9334e2759f49"
       }
+    },
+    "owner": "yussri",
+    "updates": {
+      "url": "https://u.expo.dev/3b2d1f3d-7f27-4453-80be-9334e2759f49"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     }
   }
 }

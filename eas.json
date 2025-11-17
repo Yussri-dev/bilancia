@@ -5,22 +5,16 @@
   },
   "build": {
     "development": {
-      "hooks": {
-        "pre-build": "node scripts/bumpVersion.js"
-      },
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "channel": "development"
     },
     "preview": {
-      "hooks": {
-        "pre-build": "node scripts/bumpVersion.js"
-      },
-      "distribution": "internal"
+      "distribution": "internal",
+      "channel": "preview"
     },
     "production": {
-      "hooks": {
-        "pre-build": "node scripts/bumpVersion.js"
-      }
+      "channel": "production"
     }
   },
   "submit": {
