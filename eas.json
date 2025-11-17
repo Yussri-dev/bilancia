@@ -1,18 +1,26 @@
 {
   "cli": {
     "version": ">= 16.26.0",
-    "appVersionSource": "remote"
+    "appVersionSource": "local"
   },
   "build": {
     "development": {
+      "hooks": {
+        "pre-build": "node scripts/bumpVersion.js"
+      },
       "developmentClient": true,
       "distribution": "internal"
     },
     "preview": {
+      "hooks": {
+        "pre-build": "node scripts/bumpVersion.js"
+      },
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      "hooks": {
+        "pre-build": "node scripts/bumpVersion.js"
+      }
     }
   },
   "submit": {
