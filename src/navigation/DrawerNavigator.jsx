@@ -20,6 +20,7 @@ import {
 } from "@screens";
 
 import CategoryStack from "@navigation/CategoryStack";
+import InvoiceStack from "@navigation/InvoiceStack";
 
 const Drawer = createDrawerNavigator();
 
@@ -87,7 +88,7 @@ export default function DrawerNavigator() {
                 }}
             />
 
-            <Drawer.Screen
+            {/* <Drawer.Screen
                 name="InvoiceTab"
                 component={Tabs}
                 initialParams={{ screen: "Invoice" }}
@@ -97,8 +98,20 @@ export default function DrawerNavigator() {
                         <Ionicons name="newspaper" color={color} size={size} />
                     ),
                 }}
+            /> */}
+
+
+            <Drawer.Screen
+                name="Invoice"
+                component={InvoiceStack}
+                options={{
+                    title: t("invoices.title"),
+                    drawerIcon: ({ color, size }) => (
+                        <Ionicons name="apps" size={size} color={color} />
+                    ),
+                }}
             />
-            
+
             <Drawer.Screen
                 name="Profile"
                 component={ProfileScreen}

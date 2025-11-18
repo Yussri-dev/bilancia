@@ -20,9 +20,9 @@ const TAB_SCREENS = [
     // { name: "Categories", title: "Catégories", icon: "folder", component: CategoriesScreen },
     // { name: "Analytics", title: "Analytics", icon: "stats-chart", component: AnalyticsScreen },
     // { name: "Advices", title: "Conseils", icon: "bulb", component: AdviceScreen },
-    // { name: "Goals", title: "Objectifs", icon: "locate", component: GoalsScreen },
     { name: "Transaction", title: "Transactions", icon: "card", component: TransactionScreen },
-    { name: "Invoice", title: "Factures", icon: "newspaper", component: InvoiceScreen },
+    { name: "Goals", title: "Objectifs", icon: "locate", component: GoalsScreen },
+    // { name: "Invoice", title: "Factures", icon: "newspaper", component: InvoiceScreen },
 ];
 
 export default function MainTabs() {

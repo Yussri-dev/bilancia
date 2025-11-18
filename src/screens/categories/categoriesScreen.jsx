@@ -176,29 +176,29 @@ export default function CategoriesScreen({ navigation }) {
                             <Text style={styles.cardName}>
                                 {item.icon || "📁"} {item.name}
                             </Text>
-                            <View style={styles.cardButtons}>
+                            <View
+                                style={{
+                                    flexDirection: "row",
+                                    justifyContent: "flex-end",
+                                    marginTop: 10,
+                                    gap: 10,
+                                }}
+                            >
                                 <TouchableOpacity
                                     onPress={() =>
-                                        navigation.navigate("CategoryModel", {
-                                            mode: "edit",
-                                            category: item,
-                                        })
-                                    }
-                                    style={[
-                                        styles.btn,
-                                        { borderColor: colors.primary, borderWidth: 1 },
-                                    ]}
+                                        navigation.navigate("CategoryModel", { mode: "edit", category: item, })}
+                                    style={[styles.btnAction, styles.btnSuccess]}
                                 >
-                                    <Ionicons name="pencil" size={16} color={colors.primary} />
+                                    <Ionicons name="pencil" size={14} color="#fff" />
+                                    <Text style={styles.btnActionText}>{t("transactions.edit")}</Text>
                                 </TouchableOpacity>
+
                                 <TouchableOpacity
                                     onPress={() => deleteCategory(item.id)}
-                                    style={[
-                                        styles.btn,
-                                        { borderColor: colors.danger, borderWidth: 1 },
-                                    ]}
+                                    style={[styles.btnAction, styles.btnDanger]}
                                 >
-                                    <Ionicons name="trash" size={16} color={colors.danger} />
+                                    <Ionicons name="trash" size={14} color="#fff" />
+                                    <Text style={styles.btnActionText}>{t("transactions.delete")}</Text>
                                 </TouchableOpacity>
                             </View>
                         </View>

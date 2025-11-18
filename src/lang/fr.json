@@ -17,6 +17,7 @@
     },
     "dashboard": {
         "title": "Tableau de bord",
+        "subtitle": "",
         "loading": "Chargement du tableau de bord...",
         "loadError": "Impossible de charger les données.",
         "offlineWarning": "Vous êtes hors ligne. Les graphiques utilisent les données locales.",
@@ -43,7 +44,8 @@
         "delete": "Supprimer",
         "reset": "Réinitialiser",
         "cancel": "Annuler",
-        "create": "Créer"
+        "create": "Créer",
+        "add": "Ajouter"
     },
     "advice": {
         "headerTitle": "Conseils financiers",
@@ -268,6 +270,7 @@
         "incomeType": "💰 Revenu",
         "expenseType": "💸 Dépense",
         "transferType": "🔄 Transfert",
-        "formError": "Veuillez remplir tous les champs obligatoires"
+        "formError": "Veuillez remplir tous les champs obligatoires",
+        "noResults": "Aucun résultat"
     }
 }

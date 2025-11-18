@@ -10,15 +10,15 @@ import {
     ScrollView,
     Alert,
     ActivityIndicator,
-    Animated,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
+import apiClient from "@apiClient";
+
 import { useAuth } from "@contexts/authContext";
 import { useTheme } from "@contexts/ThemeContext";
 import { getStyles } from "@theme/styles";
-import { SafeAreaView } from "react-native-safe-area-context";
-import apiClient from "@apiClient";
 import { useTranslation } from "react-i18next";
 
 export default function TransactionScreen({ navigation }) {
@@ -30,15 +30,18 @@ export default function TransactionScreen({ navigation }) {
     const [transactions, setTransactions] = useState([]);
     const [categories, setCategories] = useState([]);
     const [filtered, setFiltered] = useState([]);
+
     const [loading, setLoading] = useState(true);
+    const [searchText, setSearchText] = useState("");
 
     const [incomeTotal, setIncomeTotal] = useState(0);
     const [expenseTotal, setExpenseTotal] = useState(0);
+
     const balance = incomeTotal - expenseTotal;
 
-    const [searchText, setSearchText] = useState("");
     const [showModal, setShowModal] = useState(false);
     const [editing, setEditing] = useState(null);
+
     const [form, setForm] = useState({
         amount: "",
         date: dayjs().format("YYYY-MM-DD"),
@@ -46,28 +49,16 @@ export default function TransactionScreen({ navigation }) {
         categoryId: "",
         type: "Expense",
     });
+
     const [saving, setSaving] = useState(false);
-    const [formError, setFormError] = useState("");
 
-    const [dropdownCategoryOpen, setDropdownCategoryOpen] = useState(false);
-    const [dropdownTypeOpen, setDropdownTypeOpen] = useState(false);
-    const dropdownAnim = useState(new Animated.Value(0))[0];
+    // Format currency safely
+    const formatCurrency = (val) => `€${Number(val || 0).toFixed(2)}`;
 
-    const animateDropdown = (open) => {
-        Animated.timing(dropdownAnim, {
-            toValue: open ? 1 : 0,
-            duration: 200,
-            useNativeDriver: false,
-        }).start();
-    };
-
-    const toggleCategoryDropdown = () => {
-        animateDropdown(!dropdownCategoryOpen);
-        setDropdownCategoryOpen(!dropdownCategoryOpen);
-    };
-
+    // Load data
     const loadData = useCallback(async () => {
         setLoading(true);
+
         try {
             apiClient.setAuthToken(token);
 
@@ -76,11 +67,16 @@ export default function TransactionScreen({ navigation }) {
                 apiClient.get("/category"),
             ]);
 
-            setTransactions(txRes.data || []);
+            // Ensure all amounts become real numbers
+            const tx = (txRes.data || []).map((t) => ({
+                ...t,
+                amount: Number(t.amount || 0),
+            }));
+
+            setTransactions(tx);
             setCategories(catRes.data || []);
-        } catch (e) {
-            console.error("Error loading data:", e.message);
-            Alert.alert(t("transactions.error", "Erreur"), t("transactions.loadError", "Impossible de charger les transactions ou catégories."));
+        } catch (err) {
+            Alert.alert(t("transactions.error"), t("transactions.loadError"));
         } finally {
             setLoading(false);
         }
@@ -91,34 +87,35 @@ export default function TransactionScreen({ navigation }) {
         return unsubscribe;
     }, [navigation, loadData]);
 
+    // Filtering & totals
     useEffect(() => {
-        if (!transactions.length) {
-            setFiltered([]);
-            setIncomeTotal(0);
-            setExpenseTotal(0);
-            return;
-        }
-
         let result = [...transactions];
-        if (searchText)
-            result = result.filter((t) =>
-                t.description?.toLowerCase().includes(searchText.toLowerCase())
+
+        if (searchText) {
+            result = result.filter((tx) =>
+                (tx.description || "")
+                    .toLowerCase()
+                    .includes(searchText.toLowerCase())
             );
+        }
 
         result.sort((a, b) => new Date(b.date) - new Date(a.date));
         setFiltered(result);
 
-        const income = result
-            .filter((t) => t.type?.toLowerCase() === "income")
-            .reduce((sum, t) => sum + t.amount, 0);
-        const expense = result
-            .filter((t) => t.type?.toLowerCase() === "expense")
-            .reduce((sum, t) => sum + t.amount, 0);
+        setIncomeTotal(
+            result
+                .filter((t) => t.type?.toLowerCase() === "income")
+                .reduce((sum, t) => sum + Number(t.amount), 0)
+        );
 
-        setIncomeTotal(income);
-        setExpenseTotal(expense);
+        setExpenseTotal(
+            result
+                .filter((t) => t.type?.toLowerCase() === "expense")
+                .reduce((sum, t) => sum + Number(t.amount), 0)
+        );
     }, [transactions, searchText]);
 
+    // Modal helpers
     const openCreate = () => {
         setEditing(null);
         setForm({
@@ -128,38 +125,29 @@ export default function TransactionScreen({ navigation }) {
             categoryId: "",
             type: "Expense",
         });
-        setFormError("");
         setShowModal(true);
     };
 
     const openEdit = (tx) => {
         setEditing(tx);
         setForm({
-            amount: tx.amount.toString(),
+            amount: String(tx.amount),
             date: dayjs(tx.date).format("YYYY-MM-DD"),
             description: tx.description || "",
-            categoryId: tx.categoryId || "",
+            categoryId: tx.categoryId,
             type: tx.type,
         });
         setShowModal(true);
     };
 
-    const closeModal = () => {
-        setShowModal(false);
-        setEditing(null);
-        setFormError("");
-        setDropdownCategoryOpen(false);
-        setDropdownTypeOpen(false);
-    };
-
     const saveTransaction = async () => {
         if (!form.amount || !form.categoryId) {
-            setFormError(t("transactions.requiredFields", "Veuillez remplir tous les champs obligatoires"));
+            Alert.alert(t("transactions.error"), t("transactions.requiredFields"));
             return;
         }
 
         const dto = {
-            amount: parseFloat(form.amount),
+            amount: Number(form.amount),
             date: form.date,
             description: form.description,
             categoryId: form.categoryId,
@@ -167,31 +155,33 @@ export default function TransactionScreen({ navigation }) {
         };
 
         setSaving(true);
+
         try {
             apiClient.setAuthToken(token);
+
             if (editing) {
                 await apiClient.put(`/transaction/${editing.id}`, dto);
             } else {
                 await apiClient.post("/transaction", dto);
             }
-            closeModal();
+
+            setShowModal(false);
             await loadData();
-        } catch (e) {
-            console.error("Save error:", e);
-            Alert.alert(t("transactions.error", "Erreur"), t("transactions.saveError", "Impossible d'enregistrer la transaction"));
+        } catch (err) {
+            Alert.alert(t("transactions.error"), t("transactions.saveError"));
         } finally {
             setSaving(false);
         }
     };
 
-    const deleteTransaction = async (id) => {
+    const deleteTransaction = (id) => {
         Alert.alert(
-            t("transactions.confirm", "Confirmer"),
-            t("transactions.deleteConfirm", "Supprimer cette transaction ?"),
+            t("transactions.confirm"),
+            t("transactions.deleteConfirm"),
             [
-                { text: t("transactions.cancel", "Annuler"), style: "cancel" },
+                { text: t("transactions.cancel"), style: "cancel" },
                 {
-                    text: t("transactions.delete", "Supprimer"),
+                    text: t("transactions.delete"),
                     style: "destructive",
                     onPress: async () => {
                         try {
@@ -199,7 +189,7 @@ export default function TransactionScreen({ navigation }) {
                             await apiClient.delete(`/transaction/${id}`);
                             await loadData();
                         } catch {
-                            Alert.alert(t("transactions.error", "Erreur"), t("transactions.deleteError", "Impossible de supprimer"));
+                            Alert.alert(t("transactions.error"), t("transactions.deleteError"));
                         }
                     },
                 },
@@ -207,69 +197,81 @@ export default function TransactionScreen({ navigation }) {
         );
     };
 
-    const dropdownHeight = dropdownAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: [0, 150],
-    });
-
+    // Render transaction card
     const renderItem = ({ item }) => {
         const category = categories.find((c) => c.id === item.categoryId);
+
         return (
-            <View style={[styles.card, { marginHorizontal: 4, marginBottom: 12 }]}>
+            <View style={[styles.card, { marginBottom: 12 }]}>
                 <View style={styles.cardHeader}>
                     <View style={{ flex: 1 }}>
-                        <Text style={styles.clientName}>{category?.name || t("transactions.noCategory", "Sans catégorie")}</Text>
-                        <Text style={styles.meta}>
-                            {dayjs(item.date).format("DD/MM/YYYY")} · {item.categoryName || "—"}
+                        <Text style={styles.cardTitle}>
+                            {category?.name || t("transactions.noCategory")}
                         </Text>
-                        <Text style={[styles.kpiValue, { fontSize: 18, marginTop: 4 }]}>
-                            €{item.amount.toFixed(2)}
+
+                        <Text style={styles.meta}>
+                            {dayjs(item.date).format("DD/MM/YYYY")}
+                        </Text>
+
+                        <Text
+                            style={[
+                                styles.kpiValue,
+                                {
+                                    fontSize: 20,
+                                    marginTop: 6,
+                                    color:
+                                        item.type === "Income"
+                                            ? colors.success
+                                            : item.type === "Transfer"
+                                            ? colors.warning
+                                            : colors.danger,
+                                },
+                            ]}
+                        >
+                            {formatCurrency(item.amount)}
                         </Text>
                     </View>
+
                     <View
                         style={[
                             styles.statusBadge,
-                            {
-                                backgroundColor:
-                                    item.type?.toLowerCase() === "income"
-                                        ? `${colors.success}22`
-                                        : item.type?.toLowerCase() === "transfer"
-                                            ? `${colors.warning}22`
-                                            : `${colors.danger}22`,
-                            },
+                            { backgroundColor: colors.surface2 },
                         ]}
                     >
-                        <Text
-                            style={{
-                                color:
-                                    item.type?.toLowerCase() === "income"
-                                        ? colors.success
-                                        : item.type?.toLowerCase() === "transfer"
-                                            ? colors.warning
-                                            : colors.danger,
-                            }}
-                        >
+                        <Text style={[styles.statusText, { color: colors.text }]}>
                             {item.type}
                         </Text>
                     </View>
                 </View>
 
-                <Text style={styles.detailText}>{item.description || "—"}</Text>
+                {item.description ? (
+                    <Text style={[styles.meta, { marginTop: 6 }]}>
+                        {item.description}
+                    </Text>
+                ) : null}
 
-                <View style={styles.cardActions}>
+                <View
+                    style={{
+                        flexDirection: "row",
+                        justifyContent: "flex-end",
+                        marginTop: 10,
+                        gap: 10,
+                    }}
+                >
                     <TouchableOpacity
-                        style={[styles.btnAction, styles.btnPrimary]}
                         onPress={() => openEdit(item)}
+                        style={[styles.btnAction, styles.btnSuccess]}
                     >
-                        <Ionicons name="pencil" size={16} color="#fff" />
-                        <Text style={styles.btnActionText}>{t("transactions.edit", "Éditer")}</Text>
+                        <Ionicons name="pencil" size={14} color="#fff" />
+                        <Text style={styles.btnActionText}>{t("transactions.edit")}</Text>
                     </TouchableOpacity>
+
                     <TouchableOpacity
-                        style={[styles.btnAction, styles.btnDanger]}
                         onPress={() => deleteTransaction(item.id)}
+                        style={[styles.btnAction, styles.btnDanger]}
                     >
-                        <Ionicons name="trash" size={16} color="#fff" />
-                        <Text style={styles.btnActionText}>{t("transactions.delete", "Supprimer")}</Text>
+                        <Ionicons name="trash" size={14} color="#fff" />
+                        <Text style={styles.btnActionText}>{t("transactions.delete")}</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -280,301 +282,226 @@ export default function TransactionScreen({ navigation }) {
         return (
             <SafeAreaView style={styles.centered}>
                 <ActivityIndicator size="large" color={colors.primary} />
-                <Text style={styles.loadingText}>{t("transactions.loading", "Chargement des transactions...")}</Text>
+                <Text style={styles.loadingText}>{t("transactions.loading")}</Text>
             </SafeAreaView>
         );
     }
 
     return (
         <SafeAreaView style={styles.container}>
+            {/* HEADER */}
+            <View style={[styles.header, { marginBottom: 16 }]}>
+                <TouchableOpacity onPress={() => navigation.openDrawer()}>
+                    <Ionicons name="menu" size={26} color={colors.text} />
+                </TouchableOpacity>
+
+                <Text style={styles.title}>{t("transactions.title")}</Text>
+
+                <View style={{ width: 26 }} />
+            </View>
+
+            {/* KPIs */}
+            <View style={styles.kpiGrid}>
+                <View style={styles.kpiCard}>
+                    <Text style={styles.kpiTitle}>{t("transactions.income")}</Text>
+                    <Text style={[styles.kpiValue, styles.success]}>
+                        {formatCurrency(incomeTotal)}
+                    </Text>
+                </View>
+
+                <View style={styles.kpiCard}>
+                    <Text style={styles.kpiTitle}>{t("transactions.expense")}</Text>
+                    <Text style={[styles.kpiValue, styles.danger]}>
+                        {formatCurrency(expenseTotal)}
+                    </Text>
+                </View>
+
+                <View style={styles.kpiCard}>
+                    <Text style={styles.kpiTitle}>{t("transactions.balance")}</Text>
+                    <Text
+                        style={[
+                            styles.kpiValue,
+                            balance >= 0 ? styles.success : styles.danger,
+                        ]}
+                    >
+                        {formatCurrency(balance)}
+                    </Text>
+                </View>
+            </View>
+
+            {/* Search */}
+            <View style={styles.card}>
+                <TextInput
+                    style={styles.input}
+                    placeholder={t("transactions.searchPlaceholder")}
+                    placeholderTextColor={colors.textSoft}
+                    value={searchText}
+                    onChangeText={setSearchText}
+                />
+            </View>
+
+            {/* List */}
             <FlatList
                 data={filtered}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderItem}
-                ListHeaderComponent={
-                    <>
-                        {/* === HEADER WITH DRAWER === */}
-                        <View
-                            style={[
-                                styles.header,
-                                {
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                    justifyContent: "space-between",
-                                    marginBottom: 12,
-                                },
-                            ]}
-                        >
-                            {/* Drawer Button */}
-                            <TouchableOpacity onPress={() => navigation.openDrawer()}>
-                                <Ionicons name="menu" size={26} color={colors.text} />
-                            </TouchableOpacity>
-
-                            <View style={{ flex: 1, alignItems: "center" }}>
-                                <Text style={[styles.headerTitle, { fontSize: 20 }]}>
-                                    {t("transactions.title", "Transactions")}
-                                </Text>
-                                <Text style={styles.subtitle}>
-                                    {t("transactions.subtitle", "Suivez vos revenus et dépenses")}
-                                </Text>
-                            </View>
-
-                            {/* Placeholder to balance layout */}
-                            <View style={{ width: 26 }} />
-                        </View>
-
-                        {/* KPIs */}
-                        <View style={styles.kpiGrid}>
-                            <View style={styles.kpiCard}>
-                                <Text style={styles.kpiTitle}>{t("transactions.income", "Revenus")}</Text>
-                                <Text style={[styles.kpiValue, styles.success]}>
-                                    €{incomeTotal.toFixed(2)}
-                                </Text>
-                            </View>
-
-                            <View style={styles.kpiCard}>
-                                <Text style={styles.kpiTitle}>{t("transactions.expense", "Dépenses")}</Text>
-                                <Text style={[styles.kpiValue, styles.danger]}>
-                                    €{expenseTotal.toFixed(2)}
-                                </Text>
-                            </View>
-
-                            <View style={styles.kpiCard}>
-                                <Text style={styles.kpiTitle}>{t("transactions.balance", "Solde")}</Text>
-                                <Text
-                                    style={[
-                                        styles.kpiValue,
-                                        balance >= 0 ? styles.success : styles.danger,
-                                    ]}
-                                >
-                                    €{balance.toFixed(2)}
-                                </Text>
-                            </View>
-                        </View>
-
-                        {/* Search */}
-                        <View style={styles.card}>
-                            <TextInput
-                                style={styles.input}
-                                placeholder={t("transactions.searchPlaceholder", "Rechercher une description...")}
-                                placeholderTextColor={colors.textSoft}
-                                value={searchText}
-                                onChangeText={setSearchText}
-                            />
-                        </View>
-
-                        {filtered.length === 0 && (
-                            <View style={styles.empty}>
-                                <Text style={styles.emptyIcon}>📄</Text>
-                                <Text style={styles.emptyText}>{t("transactions.noResults", "Aucune transaction trouvée")}</Text>
-                            </View>
-                        )}
-                    </>
+                ListEmptyComponent={
+                    <View style={styles.empty}>
+                        <Text style={styles.emptyText}>{t("transactions.noResults")}</Text>
+                    </View>
                 }
-                ListFooterComponent={<View style={{ height: 80 }} />}
+                contentContainerStyle={{ paddingBottom: 120 }}
             />
 
+            {/* Floating Button */}
+            <TouchableOpacity style={styles.fab} onPress={openCreate}>
+                <Ionicons name="add" size={30} color="#fff" />
+            </TouchableOpacity>
+
             {/* Modal */}
-            <Modal visible={showModal} animationType="fade" transparent>
-                <View style={styles.overlay}>
-                    <View style={styles.modalContainer}>
-                        <View style={styles.header}>
-                            <Text style={styles.title}>
+            <Modal visible={showModal} transparent animationType="fade">
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalCardCentered}>
+                        <View style={styles.modalHeaderPrimary}>
+                            <Text style={styles.modalTitlePrimary}>
                                 {editing
-                                    ? t("transactions.editTitle", "Modifier la transaction")
-                                    : t("transactions.newTitle", "Nouvelle transaction")}
+                                    ? t("transactions.editTitle")
+                                    : t("transactions.newTitle")}
                             </Text>
-                            <TouchableOpacity onPress={closeModal} style={styles.closeBtn}>
-                                <Ionicons name="close" size={22} color={colors.textSoft} />
+                            <TouchableOpacity onPress={() => setShowModal(false)}>
+                                <Ionicons name="close" size={24} color={colors.textSoft} />
                             </TouchableOpacity>
                         </View>
 
-                        <ScrollView style={styles.body}>
+                        <ScrollView>
                             {/* Amount */}
                             <View style={styles.formGroup}>
-                                <Text style={styles.label}>{t("transactions.amount", "Montant (€)")}</Text>
+                                <Text style={styles.label}>{t("transactions.amount")}</Text>
                                 <TextInput
-                                    style={styles.input}
+                                    style={styles.inputRounded}
                                     keyboardType="numeric"
                                     value={form.amount}
-                                    onChangeText={(tVal) => setForm({ ...form, amount: tVal })}
+                                    onChangeText={(v) =>
+                                        setForm({ ...form, amount: v })
+                                    }
                                 />
                             </View>
 
                             {/* Date */}
                             <View style={styles.formGroup}>
-                                <Text style={styles.label}>{t("transactions.date", "Date")}</Text>
+                                <Text style={styles.label}>{t("transactions.date")}</Text>
                                 <TextInput
-                                    style={styles.input}
+                                    style={styles.inputRounded}
                                     value={form.date}
-                                    onChangeText={(tVal) => setForm({ ...form, date: tVal })}
+                                    onChangeText={(v) =>
+                                        setForm({ ...form, date: v })
+                                    }
                                 />
                             </View>
 
                             {/* Category */}
                             <View style={styles.formGroup}>
-                                <Text style={styles.label}>{t("transactions.category", "Catégorie")}</Text>
-                                <TouchableOpacity
-                                    style={[
-                                        styles.input,
-                                        { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-                                    ]}
-                                    onPress={toggleCategoryDropdown}
-                                >
-                                    <Text
-                                        style={{
-                                            color: form.categoryId ? colors.text : colors.textSoft,
-                                        }}
-                                    >
-                                        {categories.find((c) => c.id === form.categoryId)?.name ||
-                                            t("transactions.selectCategory", "Sélectionnez une catégorie")}
-                                    </Text>
-                                    <Ionicons
-                                        name={dropdownCategoryOpen ? "chevron-up" : "chevron-down"}
-                                        size={20}
-                                        color={colors.textSoft}
-                                    />
-                                </TouchableOpacity>
+                                <Text style={styles.label}>{t("transactions.category")}</Text>
 
-                                <Animated.View
-                                    style={{
-                                        overflow: "hidden",
-                                        height: dropdownAnim.interpolate({
-                                            inputRange: [0, 1],
-                                            outputRange: [0, 150],
-                                        }),
-                                    }}
-                                >
-                                    <ScrollView>
-                                        {categories.map((cat) => (
-                                            <TouchableOpacity
-                                                key={cat.id}
-                                                style={{
-                                                    paddingVertical: 8,
-                                                    paddingHorizontal: 12,
-                                                    backgroundColor:
-                                                        form.categoryId === cat.id
-                                                            ? `${colors.primary}15`
-                                                            : "transparent",
-                                                }}
-                                                onPress={() => {
-                                                    setForm({ ...form, categoryId: cat.id });
-                                                    toggleCategoryDropdown();
-                                                }}
-                                            >
-                                                <Text
-                                                    style={{
-                                                        color:
-                                                            form.categoryId === cat.id
-                                                                ? colors.primary
-                                                                : colors.text,
-                                                    }}
-                                                >
-                                                    {cat.name}
-                                                </Text>
-                                            </TouchableOpacity>
-                                        ))}
-                                    </ScrollView>
-                                </Animated.View>
+                                {categories.map((cat) => (
+                                    <TouchableOpacity
+                                        key={cat.id}
+                                        style={[
+                                            styles.toggleButtonRounded,
+                                            form.categoryId === cat.id &&
+                                                styles.toggleButtonActive,
+                                            { marginBottom: 8 },
+                                        ]}
+                                        onPress={() =>
+                                            setForm({ ...form, categoryId: cat.id })
+                                        }
+                                    >
+                                        <Text
+                                            style={[
+                                                styles.toggleButtonText,
+                                                form.categoryId === cat.id &&
+                                                    styles.toggleButtonTextActive,
+                                            ]}
+                                        >
+                                            {cat.name}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
                             </View>
 
                             {/* Type */}
                             <View style={styles.formGroup}>
-                                <Text style={styles.label}>{t("transactions.type", "Type")}</Text>
-                                <TouchableOpacity
-                                    style={[
-                                        styles.input,
-                                        { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-                                    ]}
-                                    onPress={() => setDropdownTypeOpen(!dropdownTypeOpen)}
-                                >
-                                    <Text style={{ color: colors.text }}>
-                                        {form.type || t("transactions.selectType", "Sélectionnez un type")}
-                                    </Text>
-                                    <Ionicons
-                                        name={dropdownTypeOpen ? "chevron-up" : "chevron-down"}
-                                        size={20}
-                                        color={colors.textSoft}
-                                    />
-                                </TouchableOpacity>
+                                <Text style={styles.label}>{t("transactions.type")}</Text>
 
-                                {dropdownTypeOpen && (
-                                    <View style={styles.dropdownMenu}>
-                                        {["Income", "Expense", "Transfer"].map((type) => (
-                                            <TouchableOpacity
-                                                key={type}
-                                                style={{
-                                                    paddingVertical: 8,
-                                                    paddingHorizontal: 12,
-                                                    backgroundColor:
-                                                        form.type === type
-                                                            ? `${colors.primary}15`
-                                                            : "transparent",
-                                                }}
-                                                onPress={() => {
-                                                    setForm({ ...form, type });
-                                                    setDropdownTypeOpen(false);
-                                                }}
-                                            >
-                                                <Text
-                                                    style={{
-                                                        color:
-                                                            form.type === type
-                                                                ? colors.primary
-                                                                : colors.text,
-                                                    }}
-                                                >
-                                                    {type === "Income"
-                                                        ? "💰 " + t("transactions.income", "Income")
-                                                        : type === "Expense"
-                                                            ? "💸 " + t("transactions.expense", "Expense")
-                                                            : "🔄 " + t("transactions.transfer", "Transfer")}
-                                                </Text>
-                                            </TouchableOpacity>
-                                        ))}
-                                    </View>
-                                )}
+                                {["Income", "Expense", "Transfer"].map((type) => (
+                                    <TouchableOpacity
+                                        key={type}
+                                        style={[
+                                            styles.toggleButtonRounded,
+                                            form.type === type &&
+                                                styles.toggleButtonActive,
+                                            { marginBottom: 8 },
+                                        ]}
+                                        onPress={() =>
+                                            setForm({ ...form, type })
+                                        }
+                                    >
+                                        <Text
+                                            style={[
+                                                styles.toggleButtonText,
+                                                form.type === type &&
+                                                    styles.toggleButtonTextActive,
+                                            ]}
+                                        >
+                                            {type}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
                             </View>
 
                             {/* Description */}
                             <View style={styles.formGroup}>
-                                <Text style={styles.label}>{t("transactions.description", "Description")}</Text>
+                                <Text style={styles.label}>
+                                    {t("transactions.description")}
+                                </Text>
                                 <TextInput
-                                    style={styles.input}
+                                    style={styles.inputRounded}
                                     value={form.description}
-                                    onChangeText={(tVal) =>
-                                        setForm({ ...form, description: tVal })
+                                    onChangeText={(v) =>
+                                        setForm({ ...form, description: v })
                                     }
                                 />
                             </View>
-
-                            {formError && <Text style={styles.errorText}>{formError}</Text>}
                         </ScrollView>
 
-                        <View style={styles.footer}>
-                            <TouchableOpacity onPress={closeModal} style={styles.btnSecondary}>
-                                <Text style={styles.btnSecondaryText}>{t("transactions.cancel", "Annuler")}</Text>
+                        <View style={styles.modalFooterButtons}>
+                            <TouchableOpacity
+                                onPress={() => setShowModal(false)}
+                                style={styles.btnCancelRounded}
+                            >
+                                <Text style={styles.btnCancelText}>
+                                    {t("transactions.cancel")}
+                                </Text>
                             </TouchableOpacity>
+
                             <TouchableOpacity
                                 onPress={saveTransaction}
-                                style={[styles.btnPrimary, saving && { opacity: 0.6 }]}
                                 disabled={saving}
+                                style={[
+                                    styles.btnPrimaryRounded,
+                                    saving && { opacity: 0.6 },
+                                ]}
                             >
                                 <Text style={styles.btnPrimaryText}>
                                     {editing
-                                        ? t("transactions.save", "Enregistrer")
-                                        : t("transactions.create", "Créer")}
+                                        ? t("transactions.save")
+                                        : t("transactions.create")}
                                 </Text>
                             </TouchableOpacity>
                         </View>
                     </View>
                 </View>
             </Modal>
-
-            {/* Floating Button */}
-            <TouchableOpacity style={styles.fab} onPress={openCreate}>
-                <Ionicons name="add" size={26} color="#fff" />
-            </TouchableOpacity>
         </SafeAreaView>
     );
 }

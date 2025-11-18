@@ -14,12 +14,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as FileSystem from "expo-file-system";
 import { Buffer } from "buffer";
-import { useTranslation } from "react-i18next"; // ✅ Added
+import { useTranslation } from "react-i18next";
 
 export default function AnalyticsScreen({ navigation }) {
     const { colors } = useTheme();
     const styles = getStyles(colors);
-    const { t } = useTranslation(); // ✅ Added
+    const { t } = useTranslation();
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -67,7 +67,7 @@ export default function AnalyticsScreen({ navigation }) {
         loadData();
     }, []);
 
-    //  Export to PDF / Excel (Expo-safe)
+    // EXCEL / PDF EXPORT
     const exportFile = async (format) => {
         try {
             const res = await AnalyticsApi.exportReport(format);
@@ -117,61 +117,69 @@ export default function AnalyticsScreen({ navigation }) {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ padding: 16, paddingBottom: 50 }}
             >
-                {/* === HEADER === */}
+                {/* HEADER */}
                 <View style={[styles.header, { marginBottom: 20 }]}>
                     <TouchableOpacity onPress={() => navigation.openDrawer()}>
                         <Ionicons name="menu" size={26} color={colors.text} />
                     </TouchableOpacity>
+
                     <Text style={[styles.headerTitle, { fontSize: 22 }]}>
                         📊 {t("analytics.title")}
                     </Text>
+
                     <View style={{ width: 26 }} />
                 </View>
 
-                {/* === KPI GRID === */}
+                {/* KPI GRID */}
                 {overview && (
-                    <View style={styles.statsGrid}>
+                    <View style={styles.kpiGrid}>
                         <StatCard
                             icon="cash-outline"
                             label={t("analytics.income")}
                             value={overview.totalIncome}
                             color={colors.success}
+                            colors={colors}
                         />
                         <StatCard
                             icon="trending-down-outline"
                             label={t("analytics.expenses")}
                             value={overview.totalExpense}
                             color={colors.danger}
+                            colors={colors}
                         />
                         <StatCard
                             icon="wallet-outline"
                             label={t("analytics.netBalance")}
                             value={overview.netBalance}
                             color={colors.text}
+                            colors={colors}
                         />
                         <StatCard
                             icon="swap-horizontal-outline"
                             label={t("analytics.transactions")}
                             value={overview.transactionCount}
                             color={colors.text}
+                            colors={colors}
                         />
                         <StatCard
                             icon="file-tray-outline"
                             label={t("analytics.pendingInvoices")}
                             value={overview.pendingInvoicesTotal}
                             color={colors.warning}
+                            colors={colors}
                         />
                     </View>
                 )}
 
-                {/* === RATIO === */}
+                {/* RATIO */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>
                         💹 {t("analytics.incomeExpenseRatio")}
                     </Text>
+
                     {ratio && (
-                        <Text style={{ color: colors.text, fontSize: 16 }}>
-                            {`${ratio.income.toFixed(2)} / ${ratio.expense.toFixed(2)} → `}
+                        <Text style={styles.meta}>
+                            {ratio.income.toFixed(2)} / {ratio.expense.toFixed(2)} →{" "}
                             <Text style={{ fontWeight: "700", color: colors.primary }}>
                                 {ratio.ratio.toFixed(2)}
                             </Text>
@@ -179,23 +187,23 @@ export default function AnalyticsScreen({ navigation }) {
                     )}
                 </View>
 
-                {/* === AVERAGE + PREDICTION === */}
+                {/* AVERAGE + PREDICTION */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>
                         📆 {t("analytics.avgMonthlyExpense")}
                     </Text>
+
                     {avg && (
                         <Text
-                            style={{
-                                color: colors.text,
-                                fontSize: 20,
-                                fontWeight: "bold",
-                                marginBottom: 6,
-                            }}
+                            style={[
+                                styles.kpiValue,
+                                { marginBottom: 6, fontSize: 22 },
+                            ]}
                         >
                             {avg.averageMonthlyExpense.toFixed(2)} €
                         </Text>
                     )}
+
                     {prediction && (
                         <View style={{ marginTop: 8 }}>
                             <Text style={styles.cardTitle}>
@@ -204,7 +212,7 @@ export default function AnalyticsScreen({ navigation }) {
                             <Text
                                 style={{
                                     color: colors.primary,
-                                    fontSize: 20,
+                                    fontSize: 22,
                                     fontWeight: "bold",
                                 }}
                             >
@@ -214,35 +222,37 @@ export default function AnalyticsScreen({ navigation }) {
                     )}
                 </View>
 
-                {/* === TOP CATEGORIES === */}
+                {/* TOP CATEGORIES */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>
                         🏷️ {t("analytics.topExpenseCategories")}
                     </Text>
+
                     {top.length === 0 ? (
-                        <Text style={styles.muted}>{t("analytics.noExpenses")}</Text>
+                        <Text style={styles.emptyText}>
+                            {t("analytics.noExpenses")}
+                        </Text>
                     ) : (
                         top.map((tItem, i) => (
-                            <View key={tItem.category} style={{ marginVertical: 8 }}>
+                            <View key={tItem.category} style={{ marginVertical: 10 }}>
                                 <View
                                     style={{
                                         flexDirection: "row",
                                         justifyContent: "space-between",
-                                        marginBottom: 4,
+                                        marginBottom: 6,
                                     }}
                                 >
-                                    <Text style={{ color: colors.text }}>
-                                        {tItem.category}
-                                    </Text>
-                                    <Text style={{ color: colors.text }}>
+                                    <Text style={styles.meta}>{tItem.category}</Text>
+                                    <Text style={styles.kpiValue}>
                                         {tItem.totalSpent.toFixed(2)} €
                                     </Text>
                                 </View>
+
                                 <View
                                     style={{
                                         backgroundColor: colors.surface2,
                                         height: 8,
-                                        borderRadius: 8,
+                                        borderRadius: 10,
                                         overflow: "hidden",
                                     }}
                                 >
@@ -250,7 +260,9 @@ export default function AnalyticsScreen({ navigation }) {
                                         style={{
                                             width: `${Math.min(
                                                 100,
-                                                (tItem.totalSpent / top[0].totalSpent) * 100
+                                                (tItem.totalSpent /
+                                                    top[0].totalSpent) *
+                                                100
                                             )}%`,
                                             backgroundColor:
                                                 i === 0
@@ -267,63 +279,88 @@ export default function AnalyticsScreen({ navigation }) {
                     )}
                 </View>
 
-                {/* === HISTORY === */}
+                {/* HISTORY */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>
                         🗓️ {t("analytics.monthlyHistory")}
                     </Text>
-                    {history.map((item) => (
-                        <View
-                            key={item.month}
-                            style={{
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                paddingVertical: 8,
-                                borderBottomColor: colors.border,
-                                borderBottomWidth: 1,
-                            }}
-                        >
-                            <Text style={{ color: colors.textSoft }}>{item.month}</Text>
-                            <Text style={{ color: colors.success }}>
-                                +{item.income.toFixed(2)}
-                            </Text>
-                            <Text style={{ color: colors.danger }}>
-                                -{item.expense.toFixed(2)}
-                            </Text>
-                            <Text
+
+                    {history.length === 0 ? (
+                        <Text style={styles.emptyText}>{t("analytics.noHistory")}</Text>
+                    ) : (
+                        history.map((item) => (
+                            <View
+                                key={item.month}
                                 style={{
-                                    color:
-                                        item.income - item.expense >= 0
-                                            ? colors.success
-                                            : colors.danger,
-                                    fontWeight: "600",
+                                    backgroundColor: colors.surface2,
+                                    padding: 12,
+                                    borderRadius: 12,
+                                    marginBottom: 12,
+                                    flexDirection: "row",
+                                    justifyContent: "space-between",
                                 }}
                             >
-                                {(item.income - item.expense).toFixed(2)}
-                            </Text>
-                        </View>
-                    ))}
+                                <Text style={styles.meta}>{item.month}</Text>
+
+                                <Text style={{ color: colors.success }}>
+                                    +{item.income.toFixed(2)}
+                                </Text>
+
+                                <Text style={{ color: colors.danger }}>
+                                    -{item.expense.toFixed(2)}
+                                </Text>
+
+                                <Text
+                                    style={{
+                                        color:
+                                            item.income - item.expense >= 0
+                                                ? colors.success
+                                                : colors.danger,
+                                        fontWeight: "700",
+                                    }}
+                                >
+                                    {(item.income - item.expense).toFixed(2)}
+                                </Text>
+                            </View>
+                        ))
+                    )}
                 </View>
 
-                {/* === EXPORT === */}
-                <View style={[styles.card, { marginBottom: 30 }]}>
+                {/* EXPORT */}
+                <View style={[styles.card, { marginBottom: 40 }]}>
                     <Text style={styles.cardTitle}>
                         📤 {t("analytics.exportReports")}
                     </Text>
-                    <View style={{ flexDirection: "row", marginTop: 10 }}>
+
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            gap: 12,
+                            marginTop: 12,
+                        }}
+                    >
                         <TouchableOpacity
                             onPress={() => exportFile("pdf")}
-                            style={[styles.btnPrimary, { marginRight: 10 }]}
+                            style={styles.btnPrimaryRounded}
                         >
-                            <Ionicons name="document-text-outline" size={18} color="#fff" />
-                            <Text style={styles.btnText}>PDF</Text>
+                            <Ionicons
+                                name="document-text-outline"
+                                size={18}
+                                color="#fff"
+                            />
+                            <Text style={styles.btnPrimaryText}>PDF</Text>
                         </TouchableOpacity>
+
                         <TouchableOpacity
                             onPress={() => exportFile("excel")}
-                            style={styles.btnPrimary}
+                            style={styles.btnPrimaryRounded}
                         >
-                            <Ionicons name="document-outline" size={18} color="#fff" />
-                            <Text style={styles.btnText}>Excel</Text>
+                            <Ionicons
+                                name="document-outline"
+                                size={18}
+                                color="#fff"
+                            />
+                            <Text style={styles.btnPrimaryText}>Excel</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -332,27 +369,35 @@ export default function AnalyticsScreen({ navigation }) {
     );
 }
 
-/* === COMPONENT: StatCard === */
-const StatCard = ({ icon, label, value, color }) => {
+/* === COMPONENT: StatCard (REBUILT) === */
+const StatCard = ({ icon, label, value, color, colors }) => {
     return (
-        <View style={{ ...statCardStyle, borderColor: color }}>
+        <View
+            style={{
+                backgroundColor: colors.card,
+                padding: 16,
+                borderRadius: 18,
+                marginBottom: 16,
+                flexBasis: "48%",
+                shadowColor: "#000",
+                shadowOpacity: 0.12,
+                shadowRadius: 6,
+                shadowOffset: { width: 0, height: 3 },
+                elevation: 4,
+                borderLeftWidth: 3,
+                borderLeftColor: color,
+            }}
+        >
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                 <Ionicons name={icon} size={20} color={color} />
-                <Text style={{ color: color, fontWeight: "700", fontSize: 16 }}>
+                <Text style={{ color: color, fontWeight: "700", fontSize: 18 }}>
                     € {value?.toFixed(2) ?? "0.00"}
                 </Text>
             </View>
-            <Text style={{ color: "#9ca3af", fontSize: 12, marginTop: 4 }}>
+
+            <Text style={{ color: colors.textSoft, fontSize: 13, marginTop: 6 }}>
                 {label}
             </Text>
         </View>
     );
-};
-
-const statCardStyle = {
-    flexBasis: "48%",
-    borderRadius: 12,
-    borderWidth: 1,
-    backgroundColor: "rgba(255,255,255,0.02)",
-    padding: 12,
 };

@@ -17,6 +17,7 @@
     },
     "dashboard": {
         "title": "Dashboard",
+        "subtitle": "",
         "loading": "Dashboard wordt geladen...",
         "loadError": "Gegevens kunnen niet worden geladen.",
         "offlineWarning": "Je bent offline. Grafieken gebruiken lokale gegevens.",
@@ -43,7 +44,8 @@
         "delete": "Verwijderen",
         "reset": "Resetten",
         "cancel": "Annuleren",
-        "create": "Aanmaken"
+        "create": "Aanmaken",
+        "add" : "toevoegen"
     },
     "advice": {
         "headerTitle": "Financieel advies",
@@ -268,6 +270,7 @@
         "incomeType": "💰 Inkomsten",
         "expenseType": "💸 Uitgave",
         "transferType": "🔄 Overschrijving",
-        "formError": "Vul alle verplichte velden in"
+        "formError": "Vul alle verplichte velden in",
+        "noResults" : "Geen resultaten"
     }
 }

@@ -328,34 +328,23 @@ export default function HomeScreen({ navigation }) {
                     />
                 }
             >
-                {/* Header with Drawer Button */}
-                <View
-                    style={[
-                        styles.header,
-                        {
-                            flexDirection: "row",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                        },
-                    ]}
-                >
-                    <View style={{ flexDirection: "row", alignItems: "center" }}>
-                        <TouchableOpacity
-                            onPress={() => navigation.openDrawer()}
-                            style={{ marginRight: 12 }}
-                        >
-                            <Ionicons name="menu" size={28} color={colors.text} />
-                        </TouchableOpacity>
-                        <Text style={styles.headerTitle}>📊 {t('dashboard.title')}</Text>
-                        <TouchableOpacity onPress={loadAll} style={{ marginLeft: 8 }}>
-                            <Ionicons name="refresh" size={22} color={colors.textSoft} />
-                        </TouchableOpacity>
+                {/* HEADER */}
+                <View style={[styles.header, { marginBottom: 16 }]}>
+                    <TouchableOpacity onPress={() => navigation.openDrawer()}>
+                        <Ionicons name="menu" size={26} color={colors.text} />
+                    </TouchableOpacity>
+
+                    <View style={{ flex: 1, alignItems: "center" }}>
+                        <Text style={styles.title}>📊 {t("dashboard.title")}</Text>
+                        <Text style={styles.subtitle}>
+                            {t("dashboard.subtitle")}
+                        </Text>
                     </View>
 
-
+                    <View style={{ width: 26 }} />
                 </View>
 
-                {/* Date */}
+                {/* DATE SELECTOR */}
                 {showDatePicker && (
                     <DateTimePicker
                         value={currentMonth}
@@ -365,51 +354,53 @@ export default function HomeScreen({ navigation }) {
                     />
                 )}
 
-
                 {!isOnline && (
                     <View style={styles.warningContainer}>
                         <Text style={styles.warningText}>
-                            {t('dashboard.offlineWarning')}
+                            {t("dashboard.offlineWarning")}
                         </Text>
                     </View>
                 )}
 
-                {/* KPIs */}
+                {/* KPI GRID */}
                 <View style={styles.kpiGrid}>
-                    {/* Date Selector Card */}
                     <TouchableOpacity
                         onPress={() => setShowDatePicker(true)}
                         activeOpacity={0.85}
                         style={styles.dateCard}
                     >
-                        <Ionicons name="calendar" size={22} color="#fff" style={styles.dateIcon} />
+                        <Ionicons
+                            name="calendar"
+                            size={22}
+                            color="#fff"
+                            style={styles.dateIcon}
+                        />
                         <Text style={styles.dateText}>{getMonthLabel()}</Text>
                     </TouchableOpacity>
 
-                    {/* KPI Cards */}
                     <View style={styles.kpiCard}>
-                        <Text style={styles.kpiTitle}>{t('dashboard.income')}</Text>
+                        <Text style={styles.kpiTitle}>{t("dashboard.income")}</Text>
                         <Text style={[styles.kpiValue, styles.success]}>
                             {formatCurrency(totalIncome)}
                         </Text>
                     </View>
 
                     <View style={styles.kpiCard}>
-                        <Text style={styles.kpiTitle}>{t('dashboard.expense')}</Text>
+                        <Text style={styles.kpiTitle}>{t("dashboard.expense")}</Text>
                         <Text style={[styles.kpiValue, styles.danger]}>
                             {formatCurrency(totalExpense)}
                         </Text>
                     </View>
 
                     <View style={styles.kpiCard}>
-                        <Text style={styles.kpiTitle}>{t('dashboard.transfer')}</Text>
+                        <Text style={styles.kpiTitle}>{t("dashboard.transfer")}</Text>
                         <Text style={[styles.kpiValue, styles.warning]}>
                             {formatCurrency(totalTransfer)}
                         </Text>
                     </View>
 
                     <View style={styles.kpiCard}>
-                        <Text style={styles.kpiTitle}>{t('dashboard.netBalance')}</Text>
+                        <Text style={styles.kpiTitle}>{t("dashboard.netBalance")}</Text>
                         <Text
                             style={[
                                 styles.kpiValue,
@@ -421,7 +412,7 @@ export default function HomeScreen({ navigation }) {
                     </View>
 
                     <View style={styles.kpiCard}>
-                        <Text style={styles.kpiTitle}>{t('dashboard.savingsRate')}</Text>
+                        <Text style={styles.kpiTitle}>{t("dashboard.savingsRate")}</Text>
                         <Text style={styles.kpiValue}>
                             {(savingsRate * 100).toFixed(0)}%
                         </Text>
@@ -429,11 +420,13 @@ export default function HomeScreen({ navigation }) {
                 </View>
 
 
-                {/* Revenus / Dépenses Chart */}
+                {/* REVENUE VS EXPENSE CHART */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>
-                        {t('dashboard.income')} / {t('dashboard.expense')} / {t('dashboard.transfer')}
+                        {t("dashboard.income")} / {t("dashboard.expense")} /{" "}
+                        {t("dashboard.transfer")}
                     </Text>
+
                     {revExpData ? (
                         <LineChart
                             data={revExpData}
@@ -444,15 +437,16 @@ export default function HomeScreen({ navigation }) {
                             style={styles.chart}
                         />
                     ) : (
-                        <Text style={styles.emptyText}>{t('dashboard.noData')}.</Text>
+                        <Text style={styles.emptyText}>{t("dashboard.noData")}</Text>
                     )}
                 </View>
 
-                {/* Dépenses par catégorie */}
+                {/* PIE CHART */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>
-                        {t('dashboard.expenseByCategory')} ({getMonthLabel()})
+                        {t("dashboard.expenseByCategory")} ({getMonthLabel()})
                     </Text>
+
                     {pieData.length > 0 ? (
                         <PieChart
                             data={pieData}
@@ -460,38 +454,35 @@ export default function HomeScreen({ navigation }) {
                             height={220}
                             chartConfig={{
                                 backgroundColor: colors.chartBg,
-                                color: (opacity = 1) => colors.text,
+                                color: () => colors.text,
                                 labelColor: () => colors.chartLabel,
                             }}
                             accessor="amount"
                             backgroundColor="transparent"
                             absolute
                         />
-
                     ) : (
                         <Text style={styles.emptyText}>
-                            {t('dashboard.noExpenseThisMonth')}
+                            {t("dashboard.noExpenseThisMonth")}
                         </Text>
                     )}
                 </View>
 
-                {/* À venir */}
+                {/* UPCOMING PAYMENTS */}
                 <View style={styles.card}>
-                    <Text style={styles.cardTitle}>{t('dashboard.upcoming')} </Text>
+                    <Text style={styles.cardTitle}>{t("dashboard.upcoming")}</Text>
+
                     {upcomingPayments.length === 0 ? (
                         <Text style={styles.emptyText}>
-                            {t('dashboard.noUpcoming')} 🎉
+                            {t("dashboard.noUpcoming")} 🎉
                         </Text>
                     ) : (
                         upcomingPayments.map((p) => (
                             <View key={p.id} style={styles.upcomingItem}>
                                 <View style={styles.upcomingLeft}>
-                                    <Text style={styles.upcomingName}>
-                                        {p.name}
-                                    </Text>
+                                    <Text style={styles.upcomingName}>{p.name}</Text>
                                     <Text style={styles.upcomingMeta}>
-                                        {p.categoryName} ·{" "}
-                                        {formatDate(p.nextDueDate)}
+                                        {p.categoryName} · {formatDate(p.nextDueDate)}
                                     </Text>
                                 </View>
                                 <Text style={styles.upcomingAmount}>
@@ -504,4 +495,5 @@ export default function HomeScreen({ navigation }) {
             </ScrollView>
         </SafeAreaView>
     );
+
 }

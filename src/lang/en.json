@@ -17,6 +17,7 @@
     },
     "dashboard": {
         "title": "Dashboard",
+        "subtitle": "",
         "loading": "Loading dashboard...",
         "loadError": "Unable to load data.",
         "offlineWarning": "You are offline. Charts use local data.",
@@ -43,7 +44,8 @@
         "delete": "Delete",
         "reset": "Reset",
         "cancel": "Cancel",
-        "create" : "Create"
+        "create" : "Create",
+        "add" : "Add"
     },
     "advice": {
         "headerTitle": "Financial Advice",
@@ -268,6 +270,7 @@
         "incomeType": "💰 Income",
         "expenseType": "💸 Expense",
         "transferType": "🔄 Transfer",
-        "formError": "Please fill in all required fields"
+        "formError": "Please fill in all required fields",
+        "noResults" : "No Results"
     }
 }

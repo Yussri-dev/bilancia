@@ -6,7 +6,9 @@ import {
     ScrollView,
     TouchableOpacity,
     ActivityIndicator,
+    Modal,
     Alert,
+    Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@contexts/authContext";
@@ -30,6 +32,9 @@ export default function GoalsScreen({ navigation }) {
     const [isSaving, setIsSaving] = useState(false);
     const [contrib, setContrib] = useState({});
 
+    const [modalVisible, setModalVisible] = useState(false);
+
+    // Load Goals
     const loadGoals = useCallback(async () => {
         setIsLoading(true);
         try {
@@ -50,6 +55,7 @@ export default function GoalsScreen({ navigation }) {
         loadGoals();
     }, [loadGoals]);
 
+    // Save goal
     const saveGoal = async () => {
         if (!form.name || !form.targetAmount) {
             Alert.alert(t("common.error"), t("goals.nameAndAmountRequired"));
@@ -77,6 +83,7 @@ export default function GoalsScreen({ navigation }) {
             await loadGoals();
             setForm({ name: "", targetAmount: "", deadline: "" });
             setEditingId(null);
+            setModalVisible(false);
         } catch (error) {
             console.error("Save goal error:", error);
             Alert.alert(t("common.error"), t("goals.saveError"));
@@ -85,6 +92,7 @@ export default function GoalsScreen({ navigation }) {
         }
     };
 
+    // Delete goal
     const deleteGoal = async (id) => {
         Alert.alert(t("common.confirm"), t("goals.deleteConfirm"), [
             { text: t("common.cancel"), style: "cancel" },
@@ -106,6 +114,7 @@ export default function GoalsScreen({ navigation }) {
         ]);
     };
 
+    // Contribute
     const contribute = async (id) => {
         const amount = parseFloat(contrib[id] || 0);
         if (isNaN(amount) || amount <= 0) return;
@@ -124,6 +133,7 @@ export default function GoalsScreen({ navigation }) {
         }
     };
 
+    // Loading screen
     if (isLoading) {
         return (
             <SafeAreaView style={styles.centered}>
@@ -136,65 +146,23 @@ export default function GoalsScreen({ navigation }) {
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView
-                contentContainerStyle={{ paddingBottom: 100 }}
-                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
+                showsVerticalScrollIndicator={false}
             >
-                {/* === HEADER === */}
-                <View
-                    style={[
-                        styles.header,
-                        {
-                            flexDirection: "row",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            marginBottom: 12,
-                        },
-                    ]}
-                >
-                    {/* Drawer Button */}
+                {/* HEADER */}
+                <View style={[styles.header, { marginBottom: 20 }]}>
                     <TouchableOpacity onPress={() => navigation.openDrawer()}>
                         <Ionicons name="menu" size={26} color={colors.text} />
                     </TouchableOpacity>
 
-                    <View style={{ flex: 1, alignItems: "center" }}>
-                        <Text style={[styles.headerTitle, { fontSize: 20 }]}>
-                            🎯 {t("goals.title")}
-                        </Text>
-                        <Text style={styles.subtitle}>{t("goals.subtitle")}</Text>
-                    </View>
+                    <Text style={[styles.headerTitle, { fontSize: 22 }]}>
+                        🎯 {t("goals.title")}
+                    </Text>
 
                     <View style={{ width: 26 }} />
                 </View>
 
-                {/* === FORM === */}
-                <View style={styles.filterCard}>
-                    <TextInput
-                        style={styles.input}
-                        placeholder={t("goals.namePlaceholder")}
-                        placeholderTextColor={colors.textSoft}
-                        value={form.name}
-                        onChangeText={(v) => setForm({ ...form, name: v })}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder={t("goals.targetPlaceholder")}
-                        placeholderTextColor={colors.textSoft}
-                        keyboardType="numeric"
-                        value={form.targetAmount}
-                        onChangeText={(v) => setForm({ ...form, targetAmount: v })}
-                    />
-                    <TouchableOpacity
-                        style={[styles.btnPrimary, isSaving && { opacity: 0.6 }]}
-                        onPress={saveGoal}
-                        disabled={isSaving}
-                    >
-                        <Text style={styles.btnText}>
-                            {editingId ? t("common.saveWithIcon") : t("common.addWithIcon")}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-
-                {/* === LIST === */}
+                {/* GOALS LIST */}
                 {goals.length === 0 ? (
                     <View style={styles.empty}>
                         <Text style={styles.emptyText}>{t("goals.empty")}</Text>
@@ -215,6 +183,7 @@ export default function GoalsScreen({ navigation }) {
                                     {t("goals.saved")}: €{g.currentSaved.toFixed(2)}
                                 </Text>
 
+                                {/* Progress Bar */}
                                 <View style={styles.progressBarContainer}>
                                     <View
                                         style={[
@@ -233,7 +202,7 @@ export default function GoalsScreen({ navigation }) {
                                     {remaining}
                                 </Text>
 
-                                {/* Contribution input */}
+                                {/* Contribution */}
                                 <View style={styles.formRow}>
                                     <TextInput
                                         style={[styles.input, { flex: 1 }]}
@@ -245,18 +214,27 @@ export default function GoalsScreen({ navigation }) {
                                             setContrib((prev) => ({ ...prev, [g.id]: v }))
                                         }
                                     />
-                                    <TouchableOpacity
-                                        onPress={() => contribute(g.id)}
-                                        style={[styles.btn, styles.btnSuccess]}
-                                    >
-                                        <Ionicons name="add" color="#fff" size={20} />
-                                    </TouchableOpacity>
+
                                 </View>
 
                                 {/* Actions */}
-                                <View style={styles.cardActions}>
+                                <View style={[
+                                    styles.header,
+                                    {
+                                        flexDirection: "row",
+                                        alignItems: "center",
+                                        justifyContent: "space-between",
+                                        marginBottom: 12,
+                                    },
+                                ]}>
                                     <TouchableOpacity
-                                        style={[styles.btn, styles.btnPrimary, { flex: 1 }]}
+                                        onPress={() => contribute(g.id)}
+                                        style={[styles.btnAction, styles.btnSuccess]}
+                                    >
+                                        <Ionicons name="add" color="#fff" size={20} />
+                                        <Text style={styles.btnActionText}>{t("common.add")}</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
                                         onPress={() => {
                                             setEditingId(g.id);
                                             setForm({
@@ -264,20 +242,20 @@ export default function GoalsScreen({ navigation }) {
                                                 targetAmount: g.targetAmount.toString(),
                                                 deadline: g.deadline || "",
                                             });
+                                            setModalVisible(true);
                                         }}
+                                        style={[styles.btnAction, styles.btnPrimary]}
                                     >
-                                        <Text style={styles.btnActionText}>
-                                            ✏️ {t("common.edit")}
-                                        </Text>
+                                        <Ionicons name="pencil" color="#fff" size={20} />
+                                        <Text style={styles.btnActionText}> {t("common.edit")} </Text>
                                     </TouchableOpacity>
 
                                     <TouchableOpacity
-                                        style={[styles.btn, styles.btnDanger, { flex: 1 }]}
                                         onPress={() => deleteGoal(g.id)}
+                                        style={[styles.btnAction, styles.btnDanger]}
                                     >
-                                        <Text style={styles.btnActionText}>
-                                            🗑️ {t("common.delete")}
-                                        </Text>
+                                        <Ionicons name="trash" color="#fff" size={20} />
+                                        <Text style={styles.btnActionText}>{t("common.delete")}</Text>
                                     </TouchableOpacity>
                                 </View>
                             </View>
@@ -285,6 +263,58 @@ export default function GoalsScreen({ navigation }) {
                     })
                 )}
             </ScrollView>
+
+            {/* FLOATING ADD BUTTON */}
+            <TouchableOpacity
+                style={styles.fab}
+                onPress={() => {
+                    setForm({ name: "", targetAmount: "", deadline: "" });
+                    setEditingId(null);
+                    setModalVisible(true);
+                }}
+            >
+                <Ionicons name="add" size={30} color="#fff" />
+            </TouchableOpacity>
+
+            {/* MODAL — ADD / EDIT GOAL */}
+            <Modal visible={modalVisible} transparent animationType="fade">
+                <Pressable
+                    style={styles.modalBackdrop}
+                    onPress={() => setModalVisible(false)}
+                />
+                <View style={styles.modalContainer}>
+                    <Text style={styles.modalTitle}>
+                        {editingId ? t("goals.editGoal") : t("goals.newGoal")}
+                    </Text>
+
+                    <TextInput
+                        style={styles.input}
+                        placeholder={t("goals.namePlaceholder")}
+                        placeholderTextColor={colors.textSoft}
+                        value={form.name}
+                        onChangeText={(v) => setForm({ ...form, name: v })}
+                    />
+
+                    <TextInput
+                        style={styles.input}
+                        placeholder={t("goals.targetPlaceholder")}
+                        placeholderTextColor={colors.textSoft}
+                        keyboardType="numeric"
+                        value={form.targetAmount}
+                        onChangeText={(v) => setForm({ ...form, targetAmount: v })}
+                    />
+
+                    <TouchableOpacity
+                        style={[styles.btnPrimary, isSaving && { opacity: 0.6 }]}
+                        onPress={saveGoal}
+                        disabled={isSaving}
+                    >
+                        <Text style={styles.btnText}>
+                            {editingId ? t("common.saveWithIcon") : t("common.addWithIcon")}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
