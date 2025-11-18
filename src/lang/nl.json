@@ -45,7 +45,7 @@
         "reset": "Resetten",
         "cancel": "Annuleren",
         "create": "Aanmaken",
-        "add" : "toevoegen"
+        "add": "toevoegen"
     },
     "advice": {
         "headerTitle": "Financieel advies",
@@ -179,11 +179,12 @@
     },
     "invoices": {
         "title": "Facturen",
+        "newTitle": "Nieuwe factuur",
         "subtitle": "Beheer je facturen en volg betalingen op",
         "loading": "Facturen laden...",
-        "loadError": "Facturen kunnen niet worden geladen.",
-        "saveError": "De factuur kan niet worden opgeslagen.",
-        "deleteError": "De factuur kan niet worden verwijderd.",
+        "loadError": "Kan facturen niet laden.",
+        "saveError": "Kan de factuur niet opslaan.",
+        "deleteError": "Kan de factuur niet verwijderen.",
         "confirmDelete": "Factuur van {{client}} verwijderen?",
         "confirmTitle": "Bevestiging",
         "filters": "Filters",
@@ -199,11 +200,11 @@
         "editInvoice": "Factuur bewerken",
         "clientName": "Naam van de klant",
         "amount": "Bedrag (excl. btw)",
-        "tax": "BTW (€)",
+        "tax": "Btw (€)",
         "issueDate": "Uitgiftedatum",
         "paidDate": "Betalingsdatum",
         "status": "Status",
-        "pending": "In afwachting",
+        "pending": "In behandeling",
         "paid": "Betaald",
         "overdue": "Achterstallig",
         "cancelled": "Geannuleerd",
@@ -212,13 +213,18 @@
         "cancel": "Annuleren",
         "edit": "Bewerken",
         "delete": "Verwijderen",
-        "htAmount": "Bedrag (excl. btw): €{{amount}}",
-        "vatAmount": "BTW: €{{tax}}",
+        "htAmount": "Bedrag excl. btw: €{{amount}}",
+        "vatAmount": "Btw: €{{tax}}",
         "paidOn": "Betaald op: {{date}}",
         "client": "Klant",
         "from": "Van",
         "to": "Tot",
-        "empty": "Leeg"
+        "empty": "Leeg",
+        "clientPlaceholder": "Naam van de klant",
+        "summary": "Overzicht",
+        "amountHT": "Bedrag excl. btw",
+        "taxAmount": "Btw-bedrag",
+        "totalTTC": "Totaal incl. btw"
     },
     "profile": {
         "loading": "Profiel laden...",
@@ -271,6 +277,6 @@
         "expenseType": "💸 Uitgave",
         "transferType": "🔄 Overschrijving",
         "formError": "Vul alle verplichte velden in",
-        "noResults" : "Geen resultaten"
+        "noResults": "Geen resultaten"
     }
 }

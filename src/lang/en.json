@@ -44,8 +44,8 @@
         "delete": "Delete",
         "reset": "Reset",
         "cancel": "Cancel",
-        "create" : "Create",
-        "add" : "Add"
+        "create": "Create",
+        "add": "Add"
     },
     "advice": {
         "headerTitle": "Financial Advice",
@@ -179,6 +179,7 @@
     },
     "invoices": {
         "title": "Invoices",
+        "newTitle": "New Invoice",
         "subtitle": "Manage your invoices and track payments",
         "loading": "Loading invoices...",
         "loadError": "Unable to load invoices.",
@@ -218,7 +219,12 @@
         "client": "Client",
         "from": "From",
         "to": "To",
-        "empty": "Empty"
+        "empty": "Empty",
+        "clientPlaceholder": "Client name",
+        "summary": "Summary",
+        "amountHT": "Amount HT",
+        "taxAmount": "Tax Amount",
+        "totalTTC": "Total TTC"
     },
     "profile": {
         "loading": "Loading profile...",
@@ -271,6 +277,6 @@
         "expenseType": "💸 Expense",
         "transferType": "🔄 Transfer",
         "formError": "Please fill in all required fields",
-        "noResults" : "No Results"
+        "noResults": "No Results"
     }
 }

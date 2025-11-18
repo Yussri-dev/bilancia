@@ -53,12 +53,13 @@ export default function InvoiceModel({ route, navigation }) {
 
             const dto = {
                 client: form.client.trim(),
-                amount: parseFloat(form.amount),
-                tax: parseFloat(form.tax) || 0,
+                amount: Number(form.amount) || 0,
+                tax: Number(form.tax) || 0,
                 status: form.status,
-                issueDate: form.issueDate,
-                paidDate: form.paidDate || null,
+                issueDate: new Date(form.issueDate).toISOString(),
+                paidDate: form.paidDate ? new Date(form.paidDate).toISOString() : null,
             };
+
 
             apiClient.setAuthToken(token);
 

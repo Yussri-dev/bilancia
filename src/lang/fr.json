@@ -179,6 +179,7 @@
     },
     "invoices": {
         "title": "Factures",
+        "newTitle": "Nouvelle facture",
         "subtitle": "Gérez vos factures et suivez les paiements",
         "loading": "Chargement des factures...",
         "loadError": "Impossible de charger les factures.",
@@ -212,13 +213,18 @@
         "cancel": "Annuler",
         "edit": "Modifier",
         "delete": "Supprimer",
-        "htAmount": "Montant (HT) : €{{amount}}",
+        "htAmount": "Montant HT : €{{amount}}",
         "vatAmount": "TVA : €{{tax}}",
         "paidOn": "Payée le : {{date}}",
         "client": "Client",
         "from": "De",
         "to": "À",
-        "empty": "Vide"
+        "empty": "Vide",
+        "clientPlaceholder": "Nom du client",
+        "summary": "Résumé",
+        "amountHT": "Montant HT",
+        "taxAmount": "Montant TVA",
+        "totalTTC": "Total TTC"
     },
     "profile": {
         "loading": "Chargement du profil...",
