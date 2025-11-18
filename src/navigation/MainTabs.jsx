@@ -17,12 +17,8 @@ const Tab = createBottomTabNavigator();
 
 const TAB_SCREENS = [
     { name: "Home", title: "Accueil", icon: "home", component: HomeScreen },
-    // { name: "Categories", title: "Catégories", icon: "folder", component: CategoriesScreen },
-    // { name: "Analytics", title: "Analytics", icon: "stats-chart", component: AnalyticsScreen },
-    // { name: "Advices", title: "Conseils", icon: "bulb", component: AdviceScreen },
     { name: "Transaction", title: "Transactions", icon: "card", component: TransactionScreen },
-    { name: "Goals", title: "Objectifs", icon: "locate", component: GoalsScreen },
-    // { name: "Invoice", title: "Factures", icon: "newspaper", component: InvoiceScreen },
+    { name: "Invoice", title: "Factures", icon: "newspaper", component: InvoiceScreen },
 ];
 
 export default function MainTabs() {

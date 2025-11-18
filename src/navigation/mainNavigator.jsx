@@ -13,7 +13,6 @@ import {
     AdviceScreen,
     GoalsScreen,
     InvoiceScreen,
-    InvoiceModel,
     TransactionScreen,
     ProfileScreen
 } from "@screens";
@@ -73,15 +72,6 @@ export default function MainNavigator() {
             <Stack.Screen
                 name="CategoryModel"
                 component={CategoryModel}
-                options={{
-                    presentation: "modal",
-                    headerShown: false,
-                }}
-            />
-
-            <Stack.Screen
-                name="InvoiceModel"
-                component={InvoiceModel}
                 options={{
                     presentation: "modal",
                     headerShown: false,
