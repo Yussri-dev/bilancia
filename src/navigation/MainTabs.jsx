@@ -18,7 +18,7 @@ const Tab = createBottomTabNavigator();
 const TAB_SCREENS = [
     { name: "Home", title: "Accueil", icon: "home", component: HomeScreen },
     { name: "Transaction", title: "Transactions", icon: "card", component: TransactionScreen },
-    { name: "Invoice", title: "Factures", icon: "newspaper", component: InvoiceScreen },
+    { name: "Goal", title: "Goal", icon: "newspaper", component: GoalsScreen },
 ];
 
 export default function MainTabs() {

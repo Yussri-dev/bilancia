@@ -18,12 +18,19 @@ export const AuthProvider = ({ children }) => {
         (async () => {
             try {
                 const stored = await getToken();
-                if (stored) {
+                if (stored && stored !== "undefined" && stored !== "null" && stored.trim() !== "") {
                     setToken(stored);
                     apiClient.setAuthToken(stored);
-                    const profile = await authApi.getProfile(stored);
-                    setUser(profile);
+
+                    try {
+                        const profile = await authApi.getProfile(stored);
+                        setUser(profile);
+                    } catch (e) {
+                        await removeToken();
+                        setToken(null);
+                    }
                 }
+
             } catch (error) {
                 console.error("Error loading token/profile:", error);
             } finally {

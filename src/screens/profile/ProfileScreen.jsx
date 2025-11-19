@@ -105,13 +105,14 @@ export default function ProfileScreen({ navigation }) {
                     marginBottom: 20,
                 }}
             >
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Ionicons name="arrow-back" size={26} color="#fff" />
-                </TouchableOpacity>
-
                 <TouchableOpacity onPress={() => navigation.openDrawer()}>
                     <Ionicons name="menu" size={26} color="#fff" />
                 </TouchableOpacity>
+                
+                {/* <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <Ionicons name="arrow-back" size={26} color="#fff" />
+                </TouchableOpacity> */}
+
             </View>
 
             <View style={{ alignItems: "center", marginBottom: 24 }}>

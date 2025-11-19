@@ -17,6 +17,7 @@ import { getStyles } from "@theme/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import apiClient from "@apiClient";
 import { useTranslation } from "react-i18next";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 export default function GoalsScreen({ navigation }) {
     const { token } = useAuth();
@@ -50,6 +51,19 @@ export default function GoalsScreen({ navigation }) {
             setIsLoading(false);
         }
     }, [token, activeOnly, t]);
+
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [deadlineDate, setDeadlineDate] = useState(null);
+
+    const onSelectDeadline = (event, selectedDate) => {
+        setShowDatePicker(false);
+
+        if (selectedDate) {
+            const iso = selectedDate.toISOString().split("T")[0];
+            setDeadlineDate(selectedDate);
+            setForm((prev) => ({ ...prev, deadline: iso }));
+        }
+    };
 
     useEffect(() => {
         loadGoals();
@@ -278,43 +292,180 @@ export default function GoalsScreen({ navigation }) {
 
             {/* MODAL — ADD / EDIT GOAL */}
             <Modal visible={modalVisible} transparent animationType="fade">
-                <Pressable
-                    style={styles.modalBackdrop}
-                    onPress={() => setModalVisible(false)}
-                />
-                <View style={styles.modalContainer}>
-                    <Text style={styles.modalTitle}>
-                        {editingId ? t("goals.editGoal") : t("goals.newGoal")}
-                    </Text>
-
-                    <TextInput
-                        style={styles.input}
-                        placeholder={t("goals.namePlaceholder")}
-                        placeholderTextColor={colors.textSoft}
-                        value={form.name}
-                        onChangeText={(v) => setForm({ ...form, name: v })}
-                    />
-
-                    <TextInput
-                        style={styles.input}
-                        placeholder={t("goals.targetPlaceholder")}
-                        placeholderTextColor={colors.textSoft}
-                        keyboardType="numeric"
-                        value={form.targetAmount}
-                        onChangeText={(v) => setForm({ ...form, targetAmount: v })}
-                    />
-
-                    <TouchableOpacity
-                        style={[styles.btnPrimary, isSaving && { opacity: 0.6 }]}
-                        onPress={saveGoal}
-                        disabled={isSaving}
+                <View
+                    style={{
+                        flex: 1,
+                        backgroundColor: "rgba(0,0,0,0.55)",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        padding: 12,
+                    }}
+                >
+                    <SafeAreaView
+                        style={{
+                            backgroundColor: colors.background,
+                            width: "100%",
+                            maxHeight: "90%",
+                            borderRadius: 16,
+                            borderWidth: 1,
+                            borderColor: colors.border,
+                            overflow: "hidden",
+                        }}
                     >
-                        <Text style={styles.btnText}>
-                            {editingId ? t("common.saveWithIcon") : t("common.addWithIcon")}
-                        </Text>
-                    </TouchableOpacity>
+                        {/* HEADER */}
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                paddingHorizontal: 16,
+                                paddingVertical: 12,
+                                borderBottomWidth: 1,
+                                borderBottomColor: colors.border,
+                            }}
+                        >
+                            <Text style={{ fontSize: 18, fontWeight: "700", color: colors.text }}>
+                                {editingId ? t("goals.editGoal") : t("goals.newGoal")}
+                            </Text>
+
+                            <TouchableOpacity
+                                onPress={() => setModalVisible(false)}
+                                style={{ padding: 6 }}
+                            >
+                                <Ionicons name="close" size={22} color={colors.textSoft} />
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* BODY */}
+                        <ScrollView
+                            contentContainerStyle={{ padding: 16 }}
+                            keyboardShouldPersistTaps="handled"
+                        >
+                            {/* Name */}
+                            <View style={{ marginBottom: 14 }}>
+                                <Text style={{ color: colors.textSoft, marginBottom: 6, fontWeight: "600" }}>
+                                    {t("goals.name")}
+                                </Text>
+                                <TextInput
+                                    style={{
+                                        backgroundColor: colors.surface2,
+                                        borderWidth: 1,
+                                        borderColor: colors.border,
+                                        borderRadius: 12,
+                                        padding: 10,
+                                        color: colors.text,
+                                    }}
+                                    placeholder={t("goals.namePlaceholder")}
+                                    placeholderTextColor={colors.textSoft}
+                                    value={form.name}
+                                    onChangeText={(v) => setForm({ ...form, name: v })}
+                                />
+                            </View>
+
+                            {/* Target amount */}
+                            <View style={{ marginBottom: 14 }}>
+                                <Text style={{ color: colors.textSoft, marginBottom: 6, fontWeight: "600" }}>
+                                    {t("goals.target")}
+                                </Text>
+                                <TextInput
+                                    style={{
+                                        backgroundColor: colors.surface2,
+                                        borderWidth: 1,
+                                        borderColor: colors.border,
+                                        borderRadius: 12,
+                                        padding: 10,
+                                        color: colors.text,
+                                    }}
+                                    placeholder={t("goals.targetPlaceholder")}
+                                    placeholderTextColor={colors.textSoft}
+                                    keyboardType="numeric"
+                                    value={form.targetAmount}
+                                    onChangeText={(v) => setForm({ ...form, targetAmount: v })}
+                                />
+                            </View>
+
+                            {/* Deadline */}
+                            <View style={{ marginBottom: 14 }}>
+                                <Text style={{ color: colors.textSoft, marginBottom: 6, fontWeight: "600" }}>
+                                    {t("goals.deadline")}
+                                </Text>
+
+                                <TouchableOpacity
+                                    onPress={() => setShowDatePicker(true)}
+                                    style={{
+                                        backgroundColor: colors.surface2,
+                                        borderWidth: 1,
+                                        borderColor: colors.border,
+                                        borderRadius: 12,
+                                        padding: 12,
+                                    }}
+                                >
+                                    <Text style={{ color: form.deadline ? colors.text : colors.textSoft }}>
+                                        {form.deadline || t("goals.selectDeadline")}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            {showDatePicker && (
+                                <DateTimePicker
+                                    value={deadlineDate || new Date()}
+                                    mode="date"
+                                    display="calendar"
+                                    onChange={onSelectDeadline}
+                                />
+                            )}
+
+                        </ScrollView>
+
+                        {/* FOOTER */}
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                justifyContent: "flex-end",
+                                borderTopWidth: 1,
+                                borderTopColor: colors.border,
+                                padding: 14,
+                                gap: 10,
+                            }}
+                        >
+                            {/* Cancel */}
+                            <TouchableOpacity
+                                onPress={() => setModalVisible(false)}
+                                style={{
+                                    backgroundColor: "transparent",
+                                    borderColor: colors.border,
+                                    borderWidth: 1,
+                                    borderRadius: 10,
+                                    paddingVertical: 10,
+                                    paddingHorizontal: 20,
+                                }}
+                            >
+                                <Text style={{ color: colors.textSoft }}>{t("common.cancel")}</Text>
+                            </TouchableOpacity>
+
+                            {/* Save */}
+                            <TouchableOpacity
+                                onPress={saveGoal}
+                                disabled={isSaving}
+                                style={[
+                                    {
+                                        backgroundColor: colors.primary,
+                                        borderRadius: 10,
+                                        paddingVertical: 10,
+                                        paddingHorizontal: 20,
+                                    },
+                                    isSaving && { opacity: 0.6 },
+                                ]}
+                            >
+                                <Text style={{ color: "#fff", fontWeight: "700" }}>
+                                    {editingId ? t("common.save") : t("common.create")}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </SafeAreaView>
                 </View>
             </Modal>
+
         </SafeAreaView>
     );
 }

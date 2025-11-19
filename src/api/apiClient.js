@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://saasfinanceapp-v8zp.onrender.com/api";
+const API_BASE_URL = "https://attractive-connection-production.up.railway.app/api";
 
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
@@ -20,17 +20,21 @@ apiClient.setAuthToken = (token) => {
 apiClient.interceptors.response.use(
     (response) => response,
     async (error) => {
+
         if (!error.config._retry && !error.response) {
             error.config._retry = true;
             console.warn("Retrying request once due to network error...");
             return apiClient(error.config);
         }
 
+        const apiError = error.response?.data;
+
         const message =
-            error.response?.data?.message ||
-            error.response?.data?.error ||
-            Object.values(error.response?.data?.errors || {})[0]?.[0] ||
-            error.response?.data?.title ||
+            apiError?.message ||
+            apiError?.error ||
+            apiError?.code ||
+            Object.values(apiError?.errors || {})[0]?.[0] ||
+            apiError?.title ||
             "Erreur réseau ou serveur";
 
         console.error("API error:", message);

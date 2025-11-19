@@ -160,6 +160,9 @@
     },
     "goals": {
         "title": "Savings Goals",
+        "newGoal": "New Goal",
+        "name": "Goal Name",
+        "deadline": "Deadline",
         "subtitle": "Create and track your financial goals",
         "loading": "Loading goals...",
         "namePlaceholder": "Goal name",
