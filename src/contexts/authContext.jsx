@@ -11,9 +11,8 @@ export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(null);
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [pendingAuth, setPendingAuth] = useState(null); // Holds auth data before navigation
+    const [pendingAuth, setPendingAuth] = useState(null);
 
-    //  Charger token + profil au démarrage
     useEffect(() => {
         (async () => {
             try {
@@ -55,7 +54,6 @@ export const AuthProvider = ({ children }) => {
 
             const profile = await authApi.getProfile(raw);
 
-            // Store auth data but don't set token yet
             setPendingAuth({ token: raw, user: profile });
 
             return { token: raw, user: profile };
@@ -65,7 +63,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // Confirm login - actually sets the token to trigger navigation
     const confirmLogin = () => {
         if (pendingAuth) {
             setToken(pendingAuth.token);
@@ -74,7 +71,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // Cancel login - clears pending auth
     const cancelLogin = async () => {
         if (pendingAuth) {
             await removeToken();
@@ -83,7 +79,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    //  Déconnexion
     const logout = async () => {
         await removeToken();
         setToken(null);
@@ -91,7 +86,6 @@ export const AuthProvider = ({ children }) => {
         apiClient.setAuthToken(null);
     };
 
-    //  Recharger manuellement le profil
     const fetchUser = async () => {
         if (!token) return null;
         try {
