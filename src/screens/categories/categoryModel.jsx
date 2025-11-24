@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@contexts/authContext";
-import { categoryApi } from "@api/categoryApi";
+import categoryApi from "@api/categoryApi";
 import { useTheme } from "@contexts/ThemeContext";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
@@ -39,6 +39,29 @@ export default function CategoryModel({ route, navigation }) {
     );
 
     const [isSaving, setIsSaving] = useState(false);
+    /*
+        const saveCategory = async () => {
+            if (!form.name.trim()) {
+                Alert.alert(t("common.error"), t("categoryModel.nameRequired"));
+                return;
+            }
+    
+            try {
+                setIsSaving(true);
+                if (isEditing) {
+                    await categoryApi.updateCategory(token, form.id, form);
+                } else {
+                    await categoryApi.createCategory(token, form);
+                }
+                navigation.goBack();
+            } catch (err) {
+                console.error("Save error:", err);
+                Alert.alert(t("common.error"), t("categoryModel.saveError"));
+            } finally {
+                setIsSaving(false);
+            }
+        };
+        */
 
     const saveCategory = async () => {
         if (!form.name.trim()) {
@@ -48,15 +71,33 @@ export default function CategoryModel({ route, navigation }) {
 
         try {
             setIsSaving(true);
+
+            const payload = {
+                name: form.name.trim(),
+                type: form.type,
+                icon: form.icon || null,
+                colorHex: form.colorHex || null,
+                groupName: form.groupName || null,
+                order: form.order || 0,
+                isArchived: form.isArchived || false,
+                isDefault: false,
+            };
+
+            console.log("Sending payload:", payload);
+
             if (isEditing) {
-                await categoryApi.updateCategory(token, form.id, form);
+                await categoryApi.updateCategory(token, form.id, payload);
             } else {
-                await categoryApi.createCategory(token, form);
+                await categoryApi.createCategory(token, payload);
             }
             navigation.goBack();
         } catch (err) {
             console.error("Save error:", err);
-            Alert.alert(t("common.error"), t("categoryModel.saveError"));
+            console.error("Error response:", err.response?.data);
+            Alert.alert(
+                t("common.error"),
+                err.response?.data?.message || t("categoryModel.saveError")
+            );
         } finally {
             setIsSaving(false);
         }
