@@ -1,5 +1,5 @@
 // src/screens/transactions/TransactionScreen.jsx
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
     View,
     Text,
@@ -10,6 +10,7 @@ import {
     ScrollView,
     Alert,
     ActivityIndicator,
+    DeviceEventEmitter
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,6 +21,7 @@ import { useAuth } from "@contexts/authContext";
 import { useTheme } from "@contexts/ThemeContext";
 import { getStyles } from "@theme/styles";
 import { useTranslation } from "react-i18next";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 export default function TransactionScreen({ navigation }) {
     const { token } = useAuth();
@@ -50,6 +52,8 @@ export default function TransactionScreen({ navigation }) {
         type: "Expense",
     });
 
+    const scrollRef = useRef(null);
+
     const [saving, setSaving] = useState(false);
 
     // Format currency safely
@@ -74,7 +78,13 @@ export default function TransactionScreen({ navigation }) {
             }));
 
             setTransactions(tx);
-            setCategories(catRes.data || []);
+            setCategories(
+                (catRes.data || []).map(c => ({
+                    id: c.id ?? c.Id,
+                    name: c.name ?? c.Name,
+                    type: (c.type ?? c.Type) || "Expense",
+                }))
+            );
         } catch (err) {
             Alert.alert(t("transactions.error"), t("transactions.loadError"));
         } finally {
@@ -93,7 +103,7 @@ export default function TransactionScreen({ navigation }) {
 
         if (searchText) {
             result = result.filter((tx) =>
-                (tx.description || "")
+                (tx.categoryName || "")
                     .toLowerCase()
                     .includes(searchText.toLowerCase())
             );
@@ -102,17 +112,17 @@ export default function TransactionScreen({ navigation }) {
         result.sort((a, b) => new Date(b.date) - new Date(a.date));
         setFiltered(result);
 
-        setIncomeTotal(
-            result
-                .filter((t) => t.type?.toLowerCase() === "income")
-                .reduce((sum, t) => sum + Number(t.amount), 0)
-        );
+        // setIncomeTotal(
+        //     result
+        //         .filter((t) => t.type?.toLowerCase() === "income")
+        //         .reduce((sum, t) => sum + Number(t.amount), 0)
+        // );
 
-        setExpenseTotal(
-            result
-                .filter((t) => t.type?.toLowerCase() === "expense")
-                .reduce((sum, t) => sum + Number(t.amount), 0)
-        );
+        // setExpenseTotal(
+        //     result
+        //         .filter((t) => t.type?.toLowerCase() === "expense")
+        //         .reduce((sum, t) => sum + Number(t.amount), 0)
+        // );
     }, [transactions, searchText]);
 
     // Modal helpers
@@ -164,7 +174,7 @@ export default function TransactionScreen({ navigation }) {
             } else {
                 await apiClient.post("/transaction", dto);
             }
-
+            DeviceEventEmitter.emit("transactions:updated");
             setShowModal(false);
             await loadData();
         } catch (err) {
@@ -197,6 +207,18 @@ export default function TransactionScreen({ navigation }) {
         );
     };
 
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [transactionDate, setTransactionDate] = useState(null);
+
+    const onSelectTransaction = (event, selectedDate) => {
+        setShowDatePicker(false);
+
+        if (selectedDate) {
+            const iso = selectedDate.toISOString().split("T")[0];
+            setTransactionDate(selectedDate);
+            setForm((prev) => ({ ...prev, transaction: iso }));
+        }
+    };
     // Render transaction card
     const renderItem = ({ item }) => {
         const category = categories.find((c) => c.id === item.categoryId);
@@ -223,8 +245,8 @@ export default function TransactionScreen({ navigation }) {
                                         item.type === "Income"
                                             ? colors.success
                                             : item.type === "Transfer"
-                                            ? colors.warning
-                                            : colors.danger,
+                                                ? colors.warning
+                                                : colors.danger,
                                 },
                             ]}
                         >
@@ -373,7 +395,7 @@ export default function TransactionScreen({ navigation }) {
                             </TouchableOpacity>
                         </View>
 
-                        <ScrollView>
+                        <ScrollView ref={scrollRef}>
                             {/* Amount */}
                             <View style={styles.formGroup}>
                                 <Text style={styles.label}>{t("transactions.amount")}</Text>
@@ -390,45 +412,82 @@ export default function TransactionScreen({ navigation }) {
                             {/* Date */}
                             <View style={styles.formGroup}>
                                 <Text style={styles.label}>{t("transactions.date")}</Text>
-                                <TextInput
-                                    style={styles.inputRounded}
-                                    value={form.date}
-                                    onChangeText={(v) =>
-                                        setForm({ ...form, date: v })
-                                    }
-                                />
+
+                                <TouchableOpacity
+                                    onPress={() => setShowDatePicker(true)}
+                                    style={{
+                                        backgroundColor: colors.surface2,
+                                        borderWidth: 1,
+                                        borderColor: colors.border,
+                                        borderRadius: 12,
+                                        padding: 12,
+                                    }}
+                                >
+                                    <Text style={{ color: form.transaction ? colors.text : colors.textSoft }}>
+                                        {form.transaction || t("transactions.date")}
+                                    </Text>
+                                </TouchableOpacity>
                             </View>
+
+                            {showDatePicker && (
+                                <DateTimePicker
+                                    value={transactionDate || new Date()}
+                                    mode="date"
+                                    display="calendar"
+                                    onChange={onSelectTransaction}
+                                />
+                            )}
 
                             {/* Category */}
-                            <View style={styles.formGroup}>
-                                <Text style={styles.label}>{t("transactions.category")}</Text>
-
-                                {categories.map((cat) => (
-                                    <TouchableOpacity
-                                        key={cat.id}
-                                        style={[
-                                            styles.toggleButtonRounded,
-                                            form.categoryId === cat.id &&
-                                                styles.toggleButtonActive,
-                                            { marginBottom: 8 },
-                                        ]}
-                                        onPress={() =>
-                                            setForm({ ...form, categoryId: cat.id })
-                                        }
-                                    >
-                                        <Text
+                            <Text style={styles.label}>{t("transactions.category")}</Text>
+                            <ScrollView style={{ maxHeight: 160, marginBottom: 12 }}>
+                                <View style={styles.formGroup}>
+                                    {categories.map((cat) => (
+                                        <TouchableOpacity
+                                            key={cat.id}
                                             style={[
-                                                styles.toggleButtonText,
+                                                styles.toggleButtonRounded,
                                                 form.categoryId === cat.id &&
-                                                    styles.toggleButtonTextActive,
+                                                styles.toggleButtonActive,
+                                                { marginBottom: 10 },
                                             ]}
-                                        >
-                                            {cat.name}
-                                        </Text>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
+                                            onPress={() => {
+                                                setForm({
+                                                    ...form,
+                                                    categoryId: cat.id,
+                                                    type: cat.type || "expense"
+                                                });
 
+                                                setTimeout(() => {
+                                                    scrollRef.current?.scrollTo({ y: 600, animated: true });
+                                                }, 50);
+                                            }}
+                                        >
+                                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                                                <Text
+                                                    style={[
+                                                        styles.toggleButtonText,
+                                                        form.categoryId === cat.id &&
+                                                        styles.toggleButtonTextActive,
+                                                    ]}
+                                                >
+                                                    {cat.name}
+                                                </Text>
+                                                <Text
+                                                    style={[
+                                                        styles.toggleButtonText,
+                                                        form.categoryId === cat.id &&
+                                                        styles.toggleButtonTextActive,
+                                                        { fontSize: 12, opacity: 0.7 }
+                                                    ]}
+                                                >
+                                                    {cat.type || "Expense"}
+                                                </Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            </ScrollView>
                             {/* Type */}
                             <View style={styles.formGroup}>
                                 <Text style={styles.label}>{t("transactions.type")}</Text>
@@ -439,7 +498,7 @@ export default function TransactionScreen({ navigation }) {
                                         style={[
                                             styles.toggleButtonRounded,
                                             form.type === type &&
-                                                styles.toggleButtonActive,
+                                            styles.toggleButtonActive,
                                             { marginBottom: 8 },
                                         ]}
                                         onPress={() =>
@@ -450,7 +509,7 @@ export default function TransactionScreen({ navigation }) {
                                             style={[
                                                 styles.toggleButtonText,
                                                 form.type === type &&
-                                                    styles.toggleButtonTextActive,
+                                                styles.toggleButtonTextActive,
                                             ]}
                                         >
                                             {type}

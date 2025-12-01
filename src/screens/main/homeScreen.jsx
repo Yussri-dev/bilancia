@@ -8,6 +8,7 @@ import {
     Alert,
     RefreshControl,
     TouchableOpacity,
+    DeviceEventEmitter
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { LineChart, PieChart } from "react-native-chart-kit";
@@ -43,6 +44,7 @@ export default function HomeScreen({ navigation }) {
     const [totalTransfer, setTotalTransfer] = useState(0);
     const [netBalance, setNetBalance] = useState(0);
     const [savingsRate, setSavingsRate] = useState(0);
+    const [lifetimeNet, setLifetimeNet] = useState(0);
 
     // Charts
     const [revExpData, setRevExpData] = useState(null);
@@ -75,13 +77,16 @@ export default function HomeScreen({ navigation }) {
         }
     }, [token]);
 
-    //  Refresh when screen focused or month changes
     useEffect(() => {
-        const unsubscribe = navigation.addListener("focus", () => {
-            loadAll();
-        });
+        const unsubscribe = navigation.addListener("focus", loadAll);
         return unsubscribe;
     }, [navigation, loadAll, currentMonth]);
+
+    useEffect(() => {
+        const sub = DeviceEventEmitter.addListener("transactions:updated", loadAll);
+        return () => sub.remove();
+    }, [loadAll]);
+
 
     //  Process payments due in next 14 days
     const processUpcomingPayments = (all) => {
@@ -137,6 +142,18 @@ export default function HomeScreen({ navigation }) {
 
         const net = income - expense;
         setNetBalance(net);
+
+        const allIncome = transactions
+            .filter(t => t.type?.toLowerCase() === "income")
+            .reduce((sum, t) => sum + t.amount, 0);
+
+        const allExpense = transactions
+            .filter(t => t.type?.toLowerCase() === "expense")
+            .reduce((sum, t) => sum + t.amount, 0);
+
+        setLifetimeNet(allIncome - allExpense);
+
+
         setSavingsRate(income > 0 ? net / income : 0);
 
         buildRevExpChart(transactions);
@@ -379,6 +396,18 @@ export default function HomeScreen({ navigation }) {
                     </TouchableOpacity>
 
                     <View style={styles.kpiCard}>
+                        <Text style={styles.kpiTitle}>Lifetime Balance</Text>
+                        <Text
+                            style={[
+                                styles.kpiValue,
+                                lifetimeNet >= 0 ? styles.success : styles.danger,
+                            ]}
+                        >
+                            {formatCurrency(lifetimeNet)}
+                        </Text>
+                    </View>
+                    
+                    <View style={styles.kpiCard}>
                         <Text style={styles.kpiTitle}>{t("dashboard.income")}</Text>
                         <Text style={[styles.kpiValue, styles.success]}>
                             {formatCurrency(totalIncome)}
@@ -418,7 +447,6 @@ export default function HomeScreen({ navigation }) {
                         </Text>
                     </View>
                 </View>
-
 
                 {/* REVENUE VS EXPENSE CHART */}
                 <View style={styles.card}>
