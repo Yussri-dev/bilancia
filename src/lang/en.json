@@ -9,7 +9,8 @@
         "forgotPassword": "Forgot Password?",
         "success": "Login Succeeded",
         "error": "Error",
-        "fillAllFields": "Fill All Fields"
+        "fillAllFields": "Fill All Fields",
+        "backToLogin": "Back To login"
     },
     "theme": {
         "dark": "Dark",
@@ -121,7 +122,12 @@
         "success": "Account created successfully!",
         "missingToken": "Registration succeeded but no token was returned.",
         "failed": "Registration failed.",
-        "info": "Info"
+        "info": "Info",
+        "short": "Too short",
+        "lower": "No lowercase letter",
+        "upper": "No uppercase letter",
+        "digit": "No digit",
+        "special": "No special character"
     },
     "categories": {
         "title": "My Categories",

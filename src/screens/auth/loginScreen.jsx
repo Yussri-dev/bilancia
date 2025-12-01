@@ -10,10 +10,10 @@ import {
     Animated,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "@contexts/authContext";
 import { useTheme } from "@contexts/ThemeContext";
 import { getStyles } from "@theme/styles";
+import { LinearGradient } from "expo-linear-gradient";
 import CustomAlert from "@components/CustomAlert";
 
 export default function LoginScreen({ navigation }) {
@@ -88,17 +88,14 @@ export default function LoginScreen({ navigation }) {
     const handleAlertClose = () => {
         setAlertVisible(false);
 
-        // Clear any pending navigation timeout
         if (navigationTimeoutRef.current) {
             clearTimeout(navigationTimeoutRef.current);
         }
 
-        // Confirm login after alert closes if login was successful
         if (shouldNavigateRef.current) {
-            // This will trigger automatic navigation via conditional rendering
             navigationTimeoutRef.current = setTimeout(() => {
                 shouldNavigateRef.current = false;
-                confirmLogin(); // Sets token, AppNavigator handles navigation automatically
+                confirmLogin();
             }, 300);
         }
     };
@@ -121,19 +118,8 @@ export default function LoginScreen({ navigation }) {
         >
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : undefined}
-                style={styles.container}
             >
-                {/* Theme toggle */}
-                <TouchableOpacity
-                    onPress={toggleTheme}
-                    style={{ alignSelf: "flex-end", marginBottom: 12 }}
-                >
-                    <Text style={{ color: colors.primary }}>
-                        {mode === "light"
-                            ? "🌙 " + t("theme.dark")
-                            : "☀️ " + t("theme.light")}
-                    </Text>
-                </TouchableOpacity>
+
 
                 {/* Language Switcher */}
                 <View
@@ -157,6 +143,17 @@ export default function LoginScreen({ navigation }) {
 
                 {/* Login Card */}
                 <View style={styles.cardLogin}>
+                    {/* Theme toggle */}
+                    <TouchableOpacity
+                        onPress={toggleTheme}
+                        style={{ alignSelf: "flex-end", marginBottom: 12 }}
+                    >
+                        <Text style={{ color: colors.primary }}>
+                            {mode === "light"
+                                ? "🌙 " + t("theme.dark")
+                                : "☀️ " + t("theme.light")}
+                        </Text>
+                    </TouchableOpacity>
                     <Text style={styles.title}>Bilancia</Text>
                     <Text style={styles.subtitle}>{t("login.subtitle")}</Text>
 
@@ -232,7 +229,6 @@ export default function LoginScreen({ navigation }) {
                     </View>
                 </View>
 
-                {/* Custom styled alert - Always rendered */}
                 {alertVisible && (
                     <CustomAlert
                         visible={alertVisible}

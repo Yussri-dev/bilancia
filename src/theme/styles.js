@@ -637,12 +637,11 @@ export const getStyles = (colors) =>
             shadowOffset: { width: 0, height: 3 },
         },
 
-        // === AUTH SCREEN (LOGIN) ===
         gradient: {
             flex: 1,
             justifyContent: "center",
-            alignItems: "center",
         },
+
         loginContainer: {
             width: "100%",
             paddingHorizontal: 24,
@@ -650,14 +649,14 @@ export const getStyles = (colors) =>
         cardLogin: {
             backgroundColor: colors.card,
             borderRadius: 20,
-            padding: 24,
+            padding: 30,
+            margin: 30,
             shadowColor: "#000",
             shadowOpacity: 0.25,
             shadowRadius: 12,
             elevation: 10,
         },
 
-        // FIXED duplicate
         loginTitle: {
             fontSize: 32,
             fontWeight: "bold",
@@ -704,5 +703,11 @@ export const getStyles = (colors) =>
         },
         linkSecondary: {
             color: "#CBD5E1",
+        },
+        errorText: {
+            Color: colors.danger,
+        },
+        successText: {
+            Color: colors.success,
         },
     });

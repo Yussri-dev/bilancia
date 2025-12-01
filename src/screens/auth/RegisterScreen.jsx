@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
     View,
     Text,
@@ -10,34 +10,85 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
+    Animated
 } from "react-native";
 import { authApi } from "@api/authApi";
 import { useAuth } from "@contexts/authContext";
-import { useTranslation } from "react-i18next"; 
+import { useTranslation } from "react-i18next";
+import { useTheme } from "@contexts/ThemeContext";
+import { getStyles } from "@theme/styles";
+import { LinearGradient } from "expo-linear-gradient";
+import CustomAlert from "@components/CustomAlert";
 
 export default function RegisterScreen({ navigation }) {
+    const scaleAnim = new Animated.Value(1);
+
     const { setUser } = useAuth();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const { colors, toggleTheme, mode } = useTheme();
+    const styles = getStyles(colors);
 
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
     const [loading, setLoading] = useState(false);
 
-    const isFormValid = () => {
-        if (!fullName || !email || !password || !confirmPassword) return false;
-        if (password.length < 6) return false;
-        if (password !== confirmPassword) return false;
-        return true;
+    // Alert states
+    const [alertVisible, setAlertVisible] = useState(false);
+    const [alertType, setAlertType] = useState("success");
+    const [alertMessage, setAlertMessage] = useState("");
+
+    // Use ref to prevent navigation during alert display
+    const navigationTimeoutRef = useRef(null);
+    const shouldNavigateRef = useRef(false);
+
+    const passwordIssue = (p) => {
+        if (p.length < 8) return t("register.short");
+        if (!/[a-z]/.test(p)) return t("register.lower");
+        if (!/[A-Z]/.test(p)) return t("register.upper");
+        if (!/\d/.test(p)) return t("register.diggit");
+        if (!/[#@!$%^&*?]/.test(p)) return t("register.special");;
+        return null;
+    };
+
+    const handlePressIn = () => {
+        Animated.spring(scaleAnim, {
+            toValue: 0.96,
+            useNativeDriver: true,
+        }).start();
+    };
+
+    const handlePressOut = () => {
+        Animated.spring(scaleAnim, {
+            toValue: 1,
+            useNativeDriver: true,
+        }).start();
     };
 
     const handleRegister = async () => {
-        if (!isFormValid()) {
-            Alert.alert(
-                t("common.error"),
-                t("register.invalidForm")
-            );
+        if (!fullName || !email || !password || !confirmPassword) {
+            shouldNavigateRef.current = false;
+            setAlertType("error");
+            setAlertMessage(t("login.fillAllFields"));
+            setAlertVisible(true);
+            return;
+        }
+
+        const issue = passwordIssue(password);
+        if (issue) {
+            shouldNavigateRef.current = false;
+            setAlertType("error");
+            setAlertMessage(t(`${issue}`));
+            setAlertVisible(true);
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            Alert.alert(t("common.error"), t("register.passwordsMismatch"));
             return;
         }
 
@@ -68,16 +119,66 @@ export default function RegisterScreen({ navigation }) {
         }
     };
 
+    const handleAlertClose = () => {
+        setAlertVisible(false);
+
+        if (navigationTimeoutRef.current) {
+            clearTimeout(navigationTimeoutRef.current);
+        }
+
+        if (shouldNavigateRef.current) {
+            navigationTimeoutRef.current = setTimeout(() => {
+                shouldNavigateRef.current = false;
+                confirmLogin();
+            }, 300);
+        }
+    };
     return (
-        <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
+        <LinearGradient
+            colors={
+                mode === "light" ? ["#F9FAFB", "#E5E7EB"] : ["#0F172A", "#1E1B4B"]
+            }
+            style={styles.gradient}
         >
-            <ScrollView
-                contentContainerStyle={styles.container}
-                keyboardShouldPersistTaps="handled"
+
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
             >
-                <View style={styles.inner}>
+
+
+                {/* Language Switcher */}
+                <View
+                    style={{
+                        flexDirection: "row",
+                        justifyContent: "center",
+                        marginBottom: 16,
+                        gap: 10,
+                    }}
+                >
+                    <TouchableOpacity onPress={() => i18n.changeLanguage("fr")}>
+                        <Text style={{ fontSize: 18 }}>🇫🇷</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => i18n.changeLanguage("en")}>
+                        <Text style={{ fontSize: 18 }}>🇬🇧</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => i18n.changeLanguage("nl")}>
+                        <Text style={{ fontSize: 18 }}>🇳🇱</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <View style={styles.cardLogin}>
+                    {/* Theme toggle */}
+                    <TouchableOpacity
+                        onPress={toggleTheme}
+                        style={{ alignSelf: "flex-end", marginBottom: 12 }}
+                    >
+                        <Text style={{ color: colors.primary }}>
+                            {mode === "light"
+                                ? "🌙 " + t("theme.dark")
+                                : "☀️ " + t("theme.light")}
+                        </Text>
+                    </TouchableOpacity>
+
                     <Text style={styles.title}>{t("register.title")}</Text>
 
                     <TextInput
@@ -98,47 +199,82 @@ export default function RegisterScreen({ navigation }) {
                         style={styles.input}
                     />
 
-                    <TextInput
-                        placeholder={t("register.password")}
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry
-                        placeholderTextColor="#94A3B8"
-                        style={styles.input}
-                    />
-
-                    <TextInput
-                        placeholder={t("register.confirmPassword")}
-                        value={confirmPassword}
-                        onChangeText={setConfirmPassword}
-                        secureTextEntry
-                        placeholderTextColor="#94A3B8"
-                        style={styles.input}
-                    />
-
-                    {password && confirmPassword ? (
-                        password === confirmPassword ? (
-                            <Text style={styles.successText}>
-                                ✅ {t("register.passwordsMatch")}
+                    <View style={{ position: "relative" }}>
+                        <TextInput
+                            placeholder={t("register.password")}
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry={!showPassword}
+                            placeholderTextColor="#A1A1AA"
+                            style={[styles.input, { paddingRight: 40 }]}
+                        />
+                        <TouchableOpacity
+                            onPress={() => setShowPassword((prev) => !prev)}
+                            style={styles.eyeButton}
+                        >
+                            <Text style={{ color: "#A1A1AA" }}>
+                                {showPassword ? "🙈" : "👁️"}
                             </Text>
-                        ) : (
-                            <Text style={styles.errorText}>
-                                ❌ {t("register.passwordsMismatch")}
-                            </Text>
-                        )
-                    ) : null}
+                        </TouchableOpacity>
+                    </View>
 
-                    <TouchableOpacity
-                        style={[styles.button, loading && { opacity: 0.7 }]}
-                        onPress={handleRegister}
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <ActivityIndicator color="#fff" />
-                        ) : (
-                            <Text style={styles.buttonText}>{t("register.button")}</Text>
-                        )}
-                    </TouchableOpacity>
+                    <View style={{ position: "relative" }}>
+                        <TextInput
+                            placeholder={t("register.password")}
+                            value={confirmPassword}
+                            onChangeText={setConfirmPassword}
+                            secureTextEntry={!showConfirmPassword}
+                            placeholderTextColor="#A1A1AA"
+                            style={[styles.input, { paddingRight: 40 }]}
+                        />
+                        <TouchableOpacity
+                            onPress={() => setShowConfirmPassword((prev) => !prev)}
+                            style={styles.eyeButton}
+                        >
+                            <Text style={{ color: "#A1A1AA" }}>
+                                {showConfirmPassword ? "🙈" : "👁️"}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={{ alignItems: "center", marginBottom: "10", height: "20" }}>
+                        {password && confirmPassword ? (
+                            password === confirmPassword ? (
+                                <Text style={styles.successText}>
+                                    ✅ {t("register.passwordsMatch")}
+                                </Text>
+                            ) : (
+                                <Text style={styles.errorText}>
+                                    ❌ {t("register.passwordsMismatch")}
+                                </Text>
+                            )
+                        ) : null}
+                    </View>
+
+                    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+                        <TouchableOpacity
+                            activeOpacity={0.9}
+                            onPressIn={handlePressIn}
+                            onPressOut={handlePressOut}
+                            onPress={handleRegister}
+                            style={[styles.button, loading && { opacity: 0.7 }]}
+                            disabled={loading}
+                        >
+                            <LinearGradient
+                                colors={["#8B5CF6", "#7C3AED"]}
+                                style={styles.buttonGradient}
+                            >
+                                {loading ? (
+                                    <ActivityIndicator color="#fff" />
+                                ) : (
+                                    <Text style={styles.buttonText}>
+                                        {t("login.button")}
+                                    </Text>
+                                )}
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    </Animated.View>
+
 
                     <TouchableOpacity
                         onPress={() => navigation.navigate("Login")}
@@ -150,64 +286,18 @@ export default function RegisterScreen({ navigation }) {
                         </Text>
                     </TouchableOpacity>
                 </View>
-            </ScrollView>
-        </KeyboardAvoidingView>
+
+                {alertVisible && (
+                    <CustomAlert
+                        visible={alertVisible}
+                        type={alertType}
+                        title={t(`common.${alertType}`)}
+                        message={alertMessage}
+                        onClose={handleAlertClose}
+                    />
+                )}
+            </KeyboardAvoidingView>
+        </LinearGradient>
+
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flexGrow: 1,
-        justifyContent: "center",
-        backgroundColor: "#0B1221",
-        paddingVertical: 20,
-    },
-    inner: {
-        paddingHorizontal: 24,
-    },
-    title: {
-        fontSize: 26,
-        fontWeight: "bold",
-        color: "#7C3AED",
-        textAlign: "center",
-        marginBottom: 24,
-    },
-    input: {
-        backgroundColor: "#1E293B",
-        color: "#fff",
-        padding: 14,
-        borderRadius: 10,
-        marginBottom: 12,
-        fontSize: 16,
-    },
-    button: {
-        backgroundColor: "#7C3AED",
-        padding: 16,
-        borderRadius: 10,
-        marginTop: 12,
-    },
-    buttonText: {
-        color: "#fff",
-        textAlign: "center",
-        fontWeight: "600",
-        fontSize: 16,
-    },
-    errorText: {
-        color: "#f87171",
-        marginBottom: 8,
-        textAlign: "center",
-    },
-    successText: {
-        color: "#22c55e",
-        marginBottom: 8,
-        textAlign: "center",
-    },
-    linkText: {
-        color: "#94A3B8",
-        textAlign: "center",
-    },
-    linkHighlight: {
-        color: "#7C3AED",
-        fontWeight: "600",
-    },
-});

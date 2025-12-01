@@ -9,7 +9,8 @@
         "forgotPassword": "Wachtwoord vergeten?",
         "success": "Inloggen gelukt",
         "error": "Fout",
-        "fillAllFields": "Vul alle velden in"
+        "fillAllFields": "Vul alle velden in",
+        "backToLogin": "Terug naar inloggen"
     },
     "theme": {
         "dark": "Donker",
@@ -121,7 +122,12 @@
         "success": "Account succesvol aangemaakt!",
         "missingToken": "Registratie voltooid maar geen token ontvangen.",
         "failed": "Registratie mislukt.",
-        "info": "Info"
+        "info": "Info",
+        "short": "Te kort",
+        "lower": "Geen kleine letter",
+        "upper": "Geen hoofdletter",
+        "digit": "Geen cijfer",
+        "special": "Geen speciaal teken"
     },
     "categories": {
         "title": "Mijn categorieën",

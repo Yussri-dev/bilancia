@@ -9,7 +9,8 @@
         "forgotPassword": "Mot de passe oublié?",
         "success": "Connexion réussie",
         "error": "Erreur",
-        "fillAllFields": "Remplis tous les champs"
+        "fillAllFields": "Remplis tous les champs",
+        "backToLogin": "Retour à la connexion"
     },
     "theme": {
         "dark": "Sombre",
@@ -121,7 +122,12 @@
         "success": "Compte créé avec succès !",
         "missingToken": "Inscription réussie mais token manquant.",
         "failed": "Échec de l'inscription.",
-        "info": "Info"
+        "info": "Info",
+        "short": "Trop court",
+        "lower": "Aucune lettre minuscule",
+        "upper": "Aucune lettre majuscule",
+        "digit": "Aucun chiffre",
+        "special": "Aucun caractère spécial"
     },
     "categories": {
         "title": "Mes Catégories",
