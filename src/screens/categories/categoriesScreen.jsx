@@ -32,7 +32,11 @@ export default function CategoriesScreen({ navigation }) {
         try {
             apiClient.setAuthToken(token);
             const res = await apiClient.get("/category");
-            setCategories(res.data || []);
+            // Map the data to ensure consistent field names
+            setCategories((res.data || []).map(c => ({
+                ...c,
+                type: (c.type ?? c.Type) || "Expense",
+            })));
         } catch (error) {
             console.error("Error fetching categories:", error);
             Alert.alert(t("common.error"), t("categories.loadError"));
@@ -126,11 +130,11 @@ export default function CategoriesScreen({ navigation }) {
                 ].map((stat) => {
                     const count =
                         stat.label === t("categories.income")
-                            ? filtered.filter((c) => c.type === "Income").length
+                            ? filtered.filter((c) => c.type === "Income".toLowerCase()).length
                             : stat.label === t("categories.expense")
-                                ? filtered.filter((c) => c.type === "Expense").length
+                                ? filtered.filter((c) => c.type === "Expense".toLowerCase()).length
                                 : stat.label === t("categories.transfer")
-                                    ? filtered.filter((c) => c.type === "Transfer").length
+                                    ? filtered.filter((c) => c.type === "Transfer".toLowerCase()).length
                                     : filtered.length;
 
                     return (

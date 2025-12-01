@@ -400,13 +400,13 @@ export default function HomeScreen({ navigation }) {
                         <Text
                             style={[
                                 styles.kpiValue,
-                                lifetimeNet >= 0 ? styles.success : styles.danger,
+                                lifetimeNet >= 0 ? styles.primary : styles.danger,
                             ]}
                         >
                             {formatCurrency(lifetimeNet)}
                         </Text>
                     </View>
-                    
+
                     <View style={styles.kpiCard}>
                         <Text style={styles.kpiTitle}>{t("dashboard.income")}</Text>
                         <Text style={[styles.kpiValue, styles.success]}>

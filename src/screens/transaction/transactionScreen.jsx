@@ -223,6 +223,13 @@ export default function TransactionScreen({ navigation }) {
     const renderItem = ({ item }) => {
         const category = categories.find((c) => c.id === item.categoryId);
 
+        const badgeColor =
+            item.type === "Income".toLowerCase()
+                ? colors.success
+                : item.type === "Expense".toLowerCase()
+                    ? colors.danger
+                    : colors.warning;
+
         return (
             <View style={[styles.card, { marginBottom: 12 }]}>
                 <View style={styles.cardHeader}>
@@ -242,9 +249,9 @@ export default function TransactionScreen({ navigation }) {
                                     fontSize: 20,
                                     marginTop: 6,
                                     color:
-                                        item.type === "Income"
+                                        item.type === "Income".toLowerCase()
                                             ? colors.success
-                                            : item.type === "Transfer"
+                                            : item.type === "Transfer".toLocaleLowerCase()
                                                 ? colors.warning
                                                 : colors.danger,
                                 },
@@ -253,14 +260,14 @@ export default function TransactionScreen({ navigation }) {
                             {formatCurrency(item.amount)}
                         </Text>
                     </View>
-
+                    {/* showing badge*/}
                     <View
                         style={[
                             styles.statusBadge,
-                            { backgroundColor: colors.surface2 },
+                            { backgroundColor: badgeColor }
                         ]}
                     >
-                        <Text style={[styles.statusText, { color: colors.text }]}>
+                        <Text style={[styles.statusText, { color: "#fff" }]}>
                             {item.type}
                         </Text>
                     </View>
@@ -440,8 +447,9 @@ export default function TransactionScreen({ navigation }) {
 
                             {/* Category */}
                             <Text style={styles.label}>{t("transactions.category")}</Text>
-                            <ScrollView style={{ maxHeight: 160, marginBottom: 12 }}>
+                            <ScrollView style={{ maxHeight: 160 }}>
                                 <View style={styles.formGroup}>
+                                    <Text style={styles.label}>{t("transactions.category")}</Text>
                                     {categories.map((cat) => (
                                         <TouchableOpacity
                                             key={cat.id}
@@ -449,13 +457,13 @@ export default function TransactionScreen({ navigation }) {
                                                 styles.toggleButtonRounded,
                                                 form.categoryId === cat.id &&
                                                 styles.toggleButtonActive,
-                                                { marginBottom: 10 },
+                                                { marginBottom: 8 },
                                             ]}
                                             onPress={() => {
                                                 setForm({
                                                     ...form,
                                                     categoryId: cat.id,
-                                                    type: cat.type || "expense"
+                                                    type: cat.type || "Expense"
                                                 });
 
                                                 setTimeout(() => {
