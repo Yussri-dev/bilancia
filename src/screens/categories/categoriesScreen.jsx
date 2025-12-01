@@ -31,26 +31,36 @@ export default function CategoriesScreen({ navigation }) {
         setIsLoading(true);
         try {
             apiClient.setAuthToken(token);
-            const res = await apiClient.get("/category");
+            // Pass includeArchived parameter to API
+            const res = await apiClient.get(`/category?includeArchived=${showArchived}`);
             // Map the data to ensure consistent field names
-            setCategories((res.data || []).map(c => ({
+            const mapped = (res.data || []).map(c => ({
                 ...c,
+                id: c.id ?? c.Id,
+                name: c.name ?? c.Name,
                 type: (c.type ?? c.Type) || "Expense",
-            })));
+                isArchived: c.isArchived ?? c.IsArchived ?? false,
+            }));
+            // console.log("Categories loaded:", mapped);
+            setCategories(mapped);
         } catch (error) {
             console.error("Error fetching categories:", error);
             Alert.alert(t("common.error"), t("categories.loadError"));
         } finally {
             setIsLoading(false);
         }
-    }, [token, t]);
+    }, [token, showArchived, t]);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData, showArchived]);
 
     useEffect(() => {
         const unsubscribe = navigation.addListener("focus", loadData);
         return unsubscribe;
     }, [navigation, loadData]);
 
-    const filtered = categories.filter((c) => showArchived || !c.isArchived);
+    const filtered = categories;
 
     const deleteCategory = async (id) => {
         Alert.alert(t("common.confirm"), t("categories.deleteConfirm"), [
@@ -130,11 +140,11 @@ export default function CategoriesScreen({ navigation }) {
                 ].map((stat) => {
                     const count =
                         stat.label === t("categories.income")
-                            ? filtered.filter((c) => c.type === "Income".toLowerCase()).length
+                            ? filtered.filter((c) => c.type?.toLowerCase() === "income").length
                             : stat.label === t("categories.expense")
-                                ? filtered.filter((c) => c.type === "Expense".toLowerCase()).length
+                                ? filtered.filter((c) => c.type?.toLowerCase() === "expense").length
                                 : stat.label === t("categories.transfer")
-                                    ? filtered.filter((c) => c.type === "Transfer".toLowerCase()).length
+                                    ? filtered.filter((c) => c.type?.toLowerCase() === "transfer").length
                                     : filtered.length;
 
                     return (
