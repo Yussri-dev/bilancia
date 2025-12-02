@@ -11,6 +11,7 @@ export { default as AdviceScreen } from "@screens/advice/adviceScreen";
 export { default as AnalyticsScreen } from "@screens/analytic/analyticsScreen";
 export { default as CategoryModel } from "@screens/categories/categoryModel";
 export { default as InvoiceModel } from "@screens/invoice/invoiceModel";
-export { default as ProfileScreen } from "@screens/profile/ProfileScreen"
+export { default as ProfileScreen } from "@screens/profile/ProfileScreen";
+export { default as recurringPaymentScreen } from "@screens/recurring/recurringPaymentScreen";
 // ===== Optional future screens =====
 // export { default as NotificationScreen } from "./main/NotificationScreen";

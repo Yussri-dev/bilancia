@@ -449,7 +449,6 @@ export default function TransactionScreen({ navigation }) {
                             <Text style={styles.label}>{t("transactions.category")}</Text>
                             <ScrollView style={{ maxHeight: 160 }}>
                                 <View style={styles.formGroup}>
-                                    <Text style={styles.label}>{t("transactions.category")}</Text>
                                     {categories.map((cat) => (
                                         <TouchableOpacity
                                             key={cat.id}

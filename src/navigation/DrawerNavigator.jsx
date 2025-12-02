@@ -16,6 +16,7 @@ import {
     GoalsScreen,
     InvoiceScreen,
     TransactionScreen,
+    recurringPaymentScreen,
     ProfileScreen,
 } from "@screens";
 
@@ -163,6 +164,17 @@ export default function DrawerNavigator() {
                     title: t("goals.title"),
                     drawerIcon: ({ color, size }) => (
                         <Ionicons name="football" size={size} color={color} />
+                    ),
+                }}
+            />
+
+            <Drawer.Screen
+                name="Recurring"
+                component={recurringPaymentScreen}
+                options={{
+                    title: t("recurring.title"),
+                    drawerIcon: ({ color, size }) => (
+                        <Ionicons name="calculator" size={size} color={color} />
                     ),
                 }}
             />

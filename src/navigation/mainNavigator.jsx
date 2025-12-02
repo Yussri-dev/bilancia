@@ -14,6 +14,7 @@ import {
     GoalsScreen,
     InvoiceScreen,
     TransactionScreen,
+    recurringPaymentScreen,
     ProfileScreen
 } from "@screens";
 
@@ -29,6 +30,7 @@ const TAB_SCREENS = [
     { name: "Goals", title: "Objectifs", icon: "locate", component: GoalsScreen },
     { name: "Invoice", title: "Factures", icon: "newspaper", component: InvoiceScreen },
     { name: "Transaction", title: "Transactions", icon: "card", component: TransactionScreen },
+    { name: "Recurring", title: "Recurrings", icon: "card", component: recurringPaymentScreen },
 ];
 
 function Tabs() {
