@@ -18,7 +18,6 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { BarChart } from "react-native-chart-kit";
 import apiClient from "@apiClient";
 import { recurringPaymentApi } from "@api/recurringPaymentApi";
-import { transactionApi } from "@api/transactionApi";
 
 import { useAuth } from "@contexts/authContext";
 import { useTheme } from "@contexts/ThemeContext";
@@ -51,6 +50,9 @@ export default function RecurringPaymentScreen({ navigation }) {
     const [editing, setEditing] = useState(null);
 
     const [saving, setSaving] = useState(false);
+
+    const [showNextDuePicker, setShowNextDuePicker] = useState(false);
+    const [showFrequencyPicker, setShowFrequencyPicker] = useState(false);
 
     const [form, setForm] = useState({
         name: "",
@@ -233,7 +235,7 @@ export default function RecurringPaymentScreen({ navigation }) {
             setShowModal(false);
             await loadData();
         } catch {
-            Alert.alert("Erreur", "Échec de l'enregistrement");
+            Alert.alert(t("common.error"), t("common.saveFailed"));
         } finally {
             setSaving(false);
         }
@@ -242,7 +244,7 @@ export default function RecurringPaymentScreen({ navigation }) {
     const remove = id => {
         Alert.alert(
             t("common.confirm"),
-            "Supprimer ?",
+            t("common.deleteConfirm"),
             [
                 { text: t("common.cancel"), style: "cancel" },
                 {
@@ -303,7 +305,7 @@ export default function RecurringPaymentScreen({ navigation }) {
                                     goalId: null
                                 });
 
-                                Alert.alert("Succès", "Transaction créée");
+                                Alert.alert(t("common.success"), t("recurring.transactionCreated"));
                                 await loadData();
                             } catch (err) {
                                 console.error("Transaction creation error:", err);
@@ -373,7 +375,7 @@ export default function RecurringPaymentScreen({ navigation }) {
                 </TouchableOpacity>
 
                 <View style={{ flex: 1, alignItems: "center" }}>
-                    <Text style={[styles.headerTitle, { fontSize: 20 }]}>Paiements récurrents</Text>
+                    <Text style={[styles.headerTitle, { fontSize: 20 }]}>{t("recurring.title")}</Text>
                 </View>
 
                 <View style={{ width: 26 }} />
@@ -388,7 +390,7 @@ export default function RecurringPaymentScreen({ navigation }) {
                         <View style={styles.card}>
                             <TextInput
                                 style={styles.input}
-                                placeholder="Nom..."
+                                placeholder={t("recurring.name")}
                                 placeholderTextColor={colors.textSoft}
                                 value={fName}
                                 onChangeText={setFName}
@@ -396,7 +398,7 @@ export default function RecurringPaymentScreen({ navigation }) {
 
                             <TextInput
                                 style={styles.input}
-                                placeholder="Catégorie..."
+                                placeholder={t("recurring.category")}
                                 placeholderTextColor={colors.textSoft}
                                 value={fCategory}
                                 onChangeText={setFCategory}
@@ -404,7 +406,7 @@ export default function RecurringPaymentScreen({ navigation }) {
 
                             <TextInput
                                 style={styles.input}
-                                placeholder="Actif (true/false)"
+                                placeholder={t("recurring.active")}
                                 placeholderTextColor={colors.textSoft}
                                 value={fActive}
                                 onChangeText={setFActive}
@@ -412,7 +414,7 @@ export default function RecurringPaymentScreen({ navigation }) {
 
                             <TouchableOpacity style={styles.input} onPress={() => setShowFromPicker(true)}>
                                 <Text style={{ color: fromDate ? colors.text : colors.textSoft }}>
-                                    {fromDate ? dayjs(fromDate).format("DD/MM/YYYY") : "Date min"}
+                                    {fromDate ? dayjs(fromDate).format("DD/MM/YYYY") : t("recurring.dateMin")}
                                 </Text>
                             </TouchableOpacity>
 
@@ -430,7 +432,7 @@ export default function RecurringPaymentScreen({ navigation }) {
 
                             <TouchableOpacity style={styles.input} onPress={() => setShowToPicker(true)}>
                                 <Text style={{ color: toDate ? colors.text : colors.textSoft }}>
-                                    {toDate ? dayjs(toDate).format("DD/MM/YYYY") : "Date max"}
+                                    {toDate ? dayjs(toDate).format("DD/MM/YYYY") : t("recurring.dateMax")}
                                 </Text>
                             </TouchableOpacity>
 
@@ -462,19 +464,19 @@ export default function RecurringPaymentScreen({ navigation }) {
 
                         <View style={styles.kpiGrid}>
                             <View style={styles.kpiCard}>
-                                <Text>Total mensualisé</Text>
+                                <Text>{t("recurring.totalMonthly")}</Text>
                                 <Text style={{ fontSize: 22, color: colors.success }}>
                                     €{monthlyTotal.toFixed(2)}
                                 </Text>
                             </View>
 
                             <View style={styles.kpiCard}>
-                                <Text>Prochaines</Text>
+                                <Text>{t("recurring.upcoming")}</Text>
                                 <Text style={{ fontSize: 22 }}>{upcomingCount}</Text>
                             </View>
 
                             <View style={styles.kpiCard}>
-                                <Text>Inactifs</Text>
+                                <Text>{t("recurring.inactive")}</Text>
                                 <Text style={{ fontSize: 22, color: colors.danger }}>{inactive}</Text>
                             </View>
                         </View>
@@ -496,13 +498,13 @@ export default function RecurringPaymentScreen({ navigation }) {
                             />
                         </View>
 
-                        <Text style={styles.cardTitle}>Liste ({filtered.length})</Text>
+                        <Text style={styles.cardTitle}>{t("recurring.list")} ({filtered.length})</Text>
                     </>
                 }
                 ListEmptyComponent={
                     <View style={{ padding: 40, alignItems: "center" }}>
                         <Text style={{ fontSize: 42 }}>📄</Text>
-                        <Text>Aucun paiement</Text>
+                        <Text>{t("recurring.noPayments")}</Text>
                     </View>
                 }
                 contentContainerStyle={{ paddingBottom: 120 }}
@@ -517,7 +519,7 @@ export default function RecurringPaymentScreen({ navigation }) {
                     <View style={styles.modalCardCentered}>
                         <View style={styles.modalHeaderPrimary}>
                             <Text style={styles.modalTitlePrimary}>
-                                {editing ? "Modifier" : "Nouveau paiement"}
+                                {editing ? t("recurring.edit") : t("recurring.newPayment")}
                             </Text>
                             <TouchableOpacity onPress={() => setShowModal(false)}>
                                 <Ionicons name="close" size={24} color={colors.textSoft} />
@@ -531,7 +533,7 @@ export default function RecurringPaymentScreen({ navigation }) {
                             renderItem={() => (
                                 <>
                                     <View style={styles.formGroup}>
-                                        <Text style={styles.label}>Nom</Text>
+                                        <Text style={styles.label}>{t("recurring.name")}</Text>
                                         <TextInput
                                             style={styles.inputRounded}
                                             value={form.name}
@@ -540,7 +542,7 @@ export default function RecurringPaymentScreen({ navigation }) {
                                     </View>
 
                                     <View style={styles.formGroup}>
-                                        <Text style={styles.label}>Montant</Text>
+                                        <Text style={styles.label}>{t("recurring.amount")}</Text>
                                         <TextInput
                                             style={styles.inputRounded}
                                             keyboardType="numeric"
@@ -550,25 +552,100 @@ export default function RecurringPaymentScreen({ navigation }) {
                                     </View>
 
                                     <View style={styles.formGroup}>
-                                        <Text style={styles.label}>Fréquence (jours)</Text>
-                                        <TextInput
+                                        <Text style={styles.label}>{t("recurring.frequency")}</Text>
+
+                                        <TouchableOpacity
                                             style={styles.inputRounded}
-                                            keyboardType="number-pad"
-                                            value={form.frequencyInDays}
-                                            onChangeText={v => setForm({ ...form, frequencyInDays: v })}
-                                        />
+                                            onPress={() => setShowFrequencyPicker(true)}
+                                        >
+                                            <Text style={{ color: form.frequencyInDays ? colors.text : colors.textSoft }}>
+                                                {form.frequencyInDays
+                                                    ? `${form.frequencyInDays} ${t("recurring.frequency").toLowerCase()}`
+                                                    : t("recurring.frequency")}
+                                            </Text>
+                                        </TouchableOpacity>
+
+                                        {showFrequencyPicker && (
+                                            <Modal transparent animationType="fade">
+                                                <View style={styles.modalOverlay}>
+                                                    <View style={[styles.modalCardCentered, { padding: 20 }]}>
+                                                        <Text style={[styles.modalTitlePrimary, { marginBottom: 10 }]}>
+                                                            {t("recurring.frequency")}
+                                                        </Text>
+
+                                                        {[
+                                                            { label: "Hebdomadaire (7 jours)", value: 7 },
+                                                            { label: "Bi-hebdomadaire (14 jours)", value: 14 },
+                                                            { label: "Mensuel (30 jours)", value: 30 },
+                                                            { label: "Bi-mensuel (60 jours)", value: 60 },
+                                                            { label: "Trimestriel (90 jours)", value: 90 },
+                                                            { label: "Annuel (365 jours)", value: 365 }
+                                                        ].map(opt => (
+                                                            <TouchableOpacity
+                                                                key={opt.value}
+                                                                style={[styles.toggleButtonRounded, { marginBottom: 10 }]}
+                                                                onPress={() => {
+                                                                    setForm({
+                                                                        ...form,
+                                                                        frequencyInDays: String(opt.value)
+                                                                    });
+                                                                    setShowFrequencyPicker(false);
+                                                                }}
+                                                            >
+                                                                <Text style={styles.toggleButtonText}>{opt.label}</Text>
+                                                            </TouchableOpacity>
+                                                        ))}
+
+                                                        <TouchableOpacity
+                                                            onPress={() => setShowFrequencyPicker(false)}
+                                                            style={[styles.btnCancelRounded, { marginTop: 10 }]}
+                                                        >
+                                                            <Text style={styles.btnCancelText}>{t("common.cancel")}</Text>
+                                                        </TouchableOpacity>
+                                                    </View>
+                                                </View>
+                                            </Modal>
+                                        )}
                                     </View>
+
 
                                     <View style={styles.formGroup}>
-                                        <Text style={styles.label}>Prochaine échéance</Text>
-                                        <TextInput
+                                        <Text style={styles.label}>{t("recurring.nextDueDate")}</Text>
+
+                                        <TouchableOpacity
                                             style={styles.inputRounded}
-                                            value={form.nextDueDate}
-                                            onChangeText={v => setForm({ ...form, nextDueDate: v })}
-                                        />
+                                            onPress={() => setShowNextDuePicker(true)}
+                                        >
+                                            <Text
+                                                style={{
+                                                    color: form.nextDueDate ? colors.text : colors.textSoft
+                                                }}
+                                            >
+                                                {form.nextDueDate
+                                                    ? dayjs(form.nextDueDate).format("DD/MM/YYYY")
+                                                    : t("recurring.nextDueDate")}
+                                            </Text>
+                                        </TouchableOpacity>
+
+                                        {showNextDuePicker && (
+                                            <DateTimePicker
+                                                value={form.nextDueDate ? new Date(form.nextDueDate) : new Date()}
+                                                mode="date"
+                                                display="calendar"
+                                                onChange={(event, selected) => {
+                                                    setShowNextDuePicker(false);
+                                                    if (selected) {
+                                                        setForm({
+                                                            ...form,
+                                                            nextDueDate: dayjs(selected).format("YYYY-MM-DD")
+                                                        });
+                                                    }
+                                                }}
+                                            />
+                                        )}
                                     </View>
 
-                                    <Text style={styles.label}>Catégorie</Text>
+                                    <Text style={styles.label}>{t("recurring.category")}</Text>
 
                                     <ScrollView style={{ maxHeight: 125 }}>
                                         {categories.map(cat => (
@@ -611,9 +688,8 @@ export default function RecurringPaymentScreen({ navigation }) {
                                         ))}
                                     </ScrollView>
 
-
                                     <View style={styles.formGroup}>
-                                        <Text style={styles.label}>Notes</Text>
+                                        <Text style={styles.label}>{t("recurring.notes")}</Text>
                                         <TextInput
                                             style={[styles.inputRounded, { height: 80 }]}
                                             multiline
@@ -631,7 +707,7 @@ export default function RecurringPaymentScreen({ navigation }) {
                                 onPress={() => setShowModal(false)}
                                 style={styles.btnCancelRounded}
                             >
-                                <Text style={styles.btnCancelText}>Annuler</Text>
+                                <Text style={styles.btnCancelText}>{t("recurring.buttonCancel")}</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
@@ -640,7 +716,7 @@ export default function RecurringPaymentScreen({ navigation }) {
                                 style={[styles.btnPrimaryRounded, saving && { opacity: 0.6 }]}
                             >
                                 <Text style={styles.btnPrimaryText}>
-                                    {editing ? "Enregistrer" : "Créer"}
+                                    {editing ? t("recurring.buttonSave") : t("recurring.buttonCreate")}
                                 </Text>
                             </TouchableOpacity>
                         </View>

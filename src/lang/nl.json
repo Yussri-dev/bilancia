@@ -285,5 +285,31 @@
         "transferType": "🔄 Overschrijving",
         "formError": "Vul alle verplichte velden in",
         "noResults": "Geen resultaten"
+    },
+    "recurring": {
+        "title": "Terugkerende betalingen",
+        "name": "Naam",
+        "category": "Categorie",
+        "active": "Actief",
+        "dateMin": "Min. datum",
+        "dateMax": "Max. datum",
+        "buttonReset": "Resetten",
+        "totalMonthly": "Maandelijks totaal",
+        "upcoming": "Aankomende betalingen",
+        "inactive": "Inactief",
+        "list": "Lijst",
+        "noPayments": "Geen betalingen",
+        "newPayment": "Nieuwe betaling",
+        "amount": "Bedrag",
+        "frequency": "Frequentie (dagen)",
+        "nextDueDate": "Volgende vervaldag",
+        "notes": "Notities",
+        "buttonCancel": "Annuleren",
+        "buttonCreate": "Aanmaken",
+        "buttonSave": "Opslaan",
+        "edit": "Bewerken",
+        "askCreateTransaction": "Transactie aanmaken?",
+        "categoryNotFound": "Categorie niet gevonden",
+        "transactionCreated": "Transactie aangemaakt"
     }
 }

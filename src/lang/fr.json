@@ -231,7 +231,7 @@
         "amountHT": "Montant HT",
         "taxAmount": "Montant TVA",
         "totalTTC": "Total TTC",
-        "requiredFields" : "Veuillez remplir tous les champs obligatoires"
+        "requiredFields": "Veuillez remplir tous les champs obligatoires"
     },
     "profile": {
         "loading": "Chargement du profil...",
@@ -285,5 +285,31 @@
         "transferType": "🔄 Transfert",
         "formError": "Veuillez remplir tous les champs obligatoires",
         "noResults": "Aucun résultat"
+    },
+    "recurring": {
+        "title": "Paiements récurrents",
+        "name": "Nom",
+        "category": "Catégorie",
+        "active": "Actif",
+        "dateMin": "Date min",
+        "dateMax": "Date max",
+        "buttonReset": "Réinitialiser",
+        "totalMonthly": "Total mensualisé",
+        "upcoming": "Prochains paiements",
+        "inactive": "Inactifs",
+        "list": "Liste",
+        "noPayments": "Aucun paiement",
+        "newPayment": "Nouveau paiement",
+        "amount": "Montant",
+        "frequency": "Fréquence (jours)",
+        "nextDueDate": "Prochaine échéance",
+        "notes": "Notes",
+        "buttonCancel": "Annuler",
+        "buttonCreate": "Créer",
+        "buttonSave": "Enregistrer",
+        "edit": "Modifier",
+        "askCreateTransaction": "Créer une transaction ?",
+        "categoryNotFound": "Catégorie non trouvée",
+        "transactionCreated": "Transaction créée"
     }
 }

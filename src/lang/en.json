@@ -234,7 +234,7 @@
         "amountHT": "Amount HT",
         "taxAmount": "Tax Amount",
         "totalTTC": "Total TTC",
-        "requiredFields" : "Please fill in all required fields"
+        "requiredFields": "Please fill in all required fields"
     },
     "profile": {
         "loading": "Loading profile...",
@@ -288,5 +288,31 @@
         "transferType": "🔄 Transfer",
         "formError": "Please fill in all required fields",
         "noResults": "No Results"
+    },
+    "recurring": {
+        "title": "Recurring Payments",
+        "name": "Name",
+        "category": "Category",
+        "active": "Active",
+        "dateMin": "Min date",
+        "dateMax": "Max date",
+        "buttonReset": "Reset",
+        "totalMonthly": "Monthly total",
+        "upcoming": "Upcoming payments",
+        "inactive": "Inactive",
+        "list": "List",
+        "noPayments": "No payments",
+        "newPayment": "New payment",
+        "amount": "Amount",
+        "frequency": "Frequency (days)",
+        "nextDueDate": "Next due date",
+        "notes": "Notes",
+        "buttonCancel": "Cancel",
+        "buttonCreate": "Create",
+        "buttonSave": "Save",
+        "edit": "Edit",
+        "askCreateTransaction": "Create a transaction?",
+        "categoryNotFound": "Category not found",
+        "transactionCreated": "Transaction created"
     }
 }
