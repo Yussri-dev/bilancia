@@ -12,8 +12,8 @@ import { getStyles } from "@theme/styles";
 import AnalyticsApi from "@api/analyticsApi";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import * as FileSystem from "expo-file-system";
-import { Buffer } from "buffer";
+import { File, Paths } from "expo-file-system";
+import * as Sharing from 'expo-sharing';
 import { useTranslation } from "react-i18next";
 
 export default function AnalyticsScreen({ navigation }) {
@@ -67,31 +67,45 @@ export default function AnalyticsScreen({ navigation }) {
         loadData();
     }, []);
 
-    // EXCEL / PDF EXPORT
+    // EXCEL / PDF EXPORT with NEW FileSystem API
     const exportFile = async (format) => {
         try {
-            const res = await AnalyticsApi.exportReport(format);
-            const base64 = Buffer.from(res.data, "binary").toString("base64");
+            const { base64, fileName } = await AnalyticsApi.exportReport(format);
 
-            const fileName =
-                format === "pdf"
-                    ? t("analytics.reportPdf")
-                    : t("analytics.reportExcel");
-            const path = `${FileSystem.documentDirectory}${fileName}`;
+            // Use the new File API
+            const file = new File(Paths.cache, fileName);
 
-            await FileSystem.writeAsStringAsync(path, base64, {
-                encoding: FileSystem.EncodingType.Base64,
-            });
+            // Write the base64 content to file
+            await file.write(base64, { encoding: 'base64' });
 
-            Alert.alert(
-                t("analytics.exportSuccessTitle"),
-                t("analytics.exportSuccessMessage", { path })
-            );
+            // Check if sharing is available
+            const isSharingAvailable = await Sharing.isAvailableAsync();
+
+            if (isSharingAvailable) {
+                // Share the file
+                await Sharing.shareAsync(file.uri, {
+                    mimeType: format === "pdf"
+                        ? "application/pdf"
+                        : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    dialogTitle: t("analytics.shareReport") || "Share Report"
+                });
+            } else {
+                // Fallback: just show the path
+                Alert.alert(
+                    t("analytics.exportSuccessTitle"),
+                    `${t("analytics.exportSuccessMessage")}\n\n${fileName}`,
+                    [{ text: "OK" }]
+                );
+            }
         } catch (err) {
             console.error("Export error:", err);
+            console.error("Error response:", err.response?.data);
+            console.error("Error status:", err.response?.status);
+
             Alert.alert(
                 t("analytics.errorTitle"),
-                t("analytics.exportError", { format: format.toUpperCase() })
+                t("analytics.exportError", { format: format.toUpperCase() }) +
+                `\n${err.message || 'Unknown error'}`
             );
         }
     };

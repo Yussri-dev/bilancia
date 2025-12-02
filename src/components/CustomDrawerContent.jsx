@@ -35,9 +35,9 @@ export default function CustomDrawerContent(props) {
                                 source={
                                     user.avatarUrl
                                         ? { uri: user.avatarUrl }
-                                        : require("@assets/default-avatar.jpg")
+                                        : require("@assets/default-avatar.png")
                                 }
-                                defaultSource={require("@assets/default-avatar.jpg")}
+                                defaultSource={require("@assets/default-avatar.png")}
                                 style={{
                                     width: 60,
                                     height: 60,
