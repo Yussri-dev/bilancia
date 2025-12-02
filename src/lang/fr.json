@@ -230,7 +230,8 @@
         "summary": "Résumé",
         "amountHT": "Montant HT",
         "taxAmount": "Montant TVA",
-        "totalTTC": "Total TTC"
+        "totalTTC": "Total TTC",
+        "requiredFields" : "Veuillez remplir tous les champs obligatoires"
     },
     "profile": {
         "loading": "Chargement du profil...",

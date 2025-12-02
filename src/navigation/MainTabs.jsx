@@ -4,21 +4,16 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import {
     HomeScreen,
-    CategoriesScreen,
-    CategoryModel,
-    AnalyticsScreen,
-    AdviceScreen,
     GoalsScreen,
-    InvoiceScreen,
     TransactionScreen,
 } from "@screens";
 
 const Tab = createBottomTabNavigator();
 
 const TAB_SCREENS = [
+    { name: "Goal", title: "Goal", icon: "newspaper", component: GoalsScreen },
     { name: "Home", title: "Accueil", icon: "home", component: HomeScreen },
     { name: "Transaction", title: "Transactions", icon: "card", component: TransactionScreen },
-    { name: "Goal", title: "Goal", icon: "newspaper", component: GoalsScreen },
 ];
 
 export default function MainTabs() {

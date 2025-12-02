@@ -12,6 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import dayjs from "dayjs";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 import { useAuth } from "@contexts/authContext";
 import { useTheme } from "@contexts/ThemeContext";
@@ -42,6 +43,36 @@ export default function InvoiceModel({ route, navigation }) {
 
     const [isSaving, setIsSaving] = useState(false);
 
+    // Date picker states
+    const [showIssueDatePicker, setShowIssueDatePicker] = useState(false);
+    const [showPaidDatePicker, setShowPaidDatePicker] = useState(false);
+    const [issueDate, setIssueDate] = useState(
+        form.issueDate ? new Date(form.issueDate) : new Date()
+    );
+    const [paidDate, setPaidDate] = useState(
+        form.paidDate ? new Date(form.paidDate) : new Date()
+    );
+
+    const onSelectIssueDate = (event, selectedDate) => {
+        setShowIssueDatePicker(false);
+
+        if (selectedDate) {
+            const iso = selectedDate.toISOString().split("T")[0];
+            setIssueDate(selectedDate);
+            setForm((prev) => ({ ...prev, issueDate: iso }));
+        }
+    };
+
+    const onSelectPaidDate = (event, selectedDate) => {
+        setShowPaidDatePicker(false);
+
+        if (selectedDate) {
+            const iso = selectedDate.toISOString().split("T")[0];
+            setPaidDate(selectedDate);
+            setForm((prev) => ({ ...prev, paidDate: iso }));
+        }
+    };
+
     const saveInvoice = async () => {
         if (!form.client.trim() || !form.amount) {
             Alert.alert(t("common.error"), t("invoices.requiredFields"));
@@ -59,7 +90,6 @@ export default function InvoiceModel({ route, navigation }) {
                 issueDate: new Date(form.issueDate).toISOString(),
                 paidDate: form.paidDate ? new Date(form.paidDate).toISOString() : null,
             };
-
 
             apiClient.setAuthToken(token);
 
@@ -127,29 +157,52 @@ export default function InvoiceModel({ route, navigation }) {
                         </View>
                     </View>
 
+                    {/* Date Pickers */}
                     <View style={{ flexDirection: "row", gap: 10, marginTop: 14 }}>
                         <View style={{ flex: 1 }}>
                             <Text style={styles.label}>{t("invoices.issueDate")}</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="YYYY-MM-DD"
-                                placeholderTextColor={colors.textSoft}
-                                value={form.issueDate}
-                                onChangeText={(v) => setForm({ ...form, issueDate: v })}
-                            />
+                            <TouchableOpacity
+                                onPress={() => setShowIssueDatePicker(true)}
+                                style={[styles.input, { justifyContent: 'center' }]}
+                            >
+                                <Text style={{ color: form.issueDate ? colors.text : colors.textSoft }}>
+                                    {form.issueDate ? dayjs(form.issueDate).format("DD/MM/YYYY") : "Select Date"}
+                                </Text>
+                            </TouchableOpacity>
                         </View>
 
                         <View style={{ flex: 1 }}>
                             <Text style={styles.label}>{t("invoices.paidDate")}</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="YYYY-MM-DD"
-                                placeholderTextColor={colors.textSoft}
-                                value={form.paidDate}
-                                onChangeText={(v) => setForm({ ...form, paidDate: v })}
-                            />
+                            <TouchableOpacity
+                                onPress={() => setShowPaidDatePicker(true)}
+                                style={[styles.input, { justifyContent: 'center' }]}
+                            >
+                                <Text style={{ color: form.paidDate ? colors.text : colors.textSoft }}>
+                                    {form.paidDate ? dayjs(form.paidDate).format("DD/MM/YYYY") : "Select Date"}
+                                </Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
+
+                    {/* Issue Date Picker */}
+                    {showIssueDatePicker && (
+                        <DateTimePicker
+                            value={issueDate}
+                            mode="date"
+                            display="calendar"
+                            onChange={onSelectIssueDate}
+                        />
+                    )}
+
+                    {/* Paid Date Picker */}
+                    {showPaidDatePicker && (
+                        <DateTimePicker
+                            value={paidDate}
+                            mode="date"
+                            display="calendar"
+                            onChange={onSelectPaidDate}
+                        />
+                    )}
 
                     <View style={styles.formGroup}>
                         <Text style={styles.label}>{t("invoices.status")}</Text>
@@ -298,7 +351,6 @@ const getStyles = (colors) =>
             gap: 10,
             marginTop: 6,
         },
-
         typeOption: {
             flex: 1,
             height: 42,
@@ -309,7 +361,6 @@ const getStyles = (colors) =>
             alignItems: "center",
             justifyContent: "center",
         },
-
         typeSelected: {
             borderColor: colors.primary,
             backgroundColor: "#1e1b4b",

@@ -230,7 +230,8 @@
         "summary": "Overzicht",
         "amountHT": "Bedrag excl. btw",
         "taxAmount": "Btw-bedrag",
-        "totalTTC": "Totaal incl. btw"
+        "totalTTC": "Totaal incl. btw",
+        "requiredFields": "Vul alle verplichte velden in"
     },
     "profile": {
         "loading": "Profiel laden...",

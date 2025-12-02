@@ -222,9 +222,9 @@
         "cancel": "Cancel",
         "edit": "Edit",
         "delete": "Delete",
-        "htAmount": "Amount (excl. tax): €{{amount}}",
-        "vatAmount": "VAT: €{{tax}}",
-        "paidOn": "Paid on: {{date}}",
+        "htAmount": "Amount (excl. tax): €",
+        "vatAmount": "VAT: €",
+        "paidOn": "Paid on: ",
         "client": "Client",
         "from": "From",
         "to": "To",
@@ -233,7 +233,8 @@
         "summary": "Summary",
         "amountHT": "Amount HT",
         "taxAmount": "Tax Amount",
-        "totalTTC": "Total TTC"
+        "totalTTC": "Total TTC",
+        "requiredFields" : "Please fill in all required fields"
     },
     "profile": {
         "loading": "Loading profile...",

@@ -12,12 +12,12 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import dayjs from "dayjs";
-
 import apiClient from "@apiClient";
 import { useAuth } from "@contexts/authContext";
 import { useTheme } from "@contexts/ThemeContext";
 import { getStyles } from "@theme/styles";
 import { useTranslation } from "react-i18next";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 export default function InvoiceScreen({ navigation }) {
     const { token } = useAuth();
@@ -33,6 +33,12 @@ export default function InvoiceScreen({ navigation }) {
     const [filterFrom, setFilterFrom] = useState("");
     const [filterTo, setFilterTo] = useState("");
 
+    // Date picker states
+    const [showIssueDatePicker, setShowIssueDatePicker] = useState(false);
+    const [showToDatePicker, setShowToDatePicker] = useState(false);
+    const [issueDate, setIssueDate] = useState(null);
+    const [toDate, setToDate] = useState(null);
+
     const loadData = useCallback(async () => {
         setLoading(true);
         try {
@@ -46,6 +52,26 @@ export default function InvoiceScreen({ navigation }) {
             setLoading(false);
         }
     }, [token, t]);
+
+    const onSelectIssueDate = (event, selectedDate) => {
+        setShowIssueDatePicker(false);
+
+        if (selectedDate) {
+            const iso = selectedDate.toISOString().split("T")[0];
+            setIssueDate(selectedDate);
+            setFilterFrom(iso);
+        }
+    };
+
+    const onSelectToDate = (event, selectedDate) => {
+        setShowToDatePicker(false);
+
+        if (selectedDate) {
+            const iso = selectedDate.toISOString().split("T")[0];
+            setToDate(selectedDate);
+            setFilterTo(iso);
+        }
+    };
 
     useEffect(() => {
         const unsub = navigation.addListener("focus", loadData);
@@ -73,6 +99,8 @@ export default function InvoiceScreen({ navigation }) {
         setFilterStatus("");
         setFilterFrom("");
         setFilterTo("");
+        setIssueDate(null);
+        setToDate(null);
     };
 
     // DELETE
@@ -237,6 +265,7 @@ export default function InvoiceScreen({ navigation }) {
             <View style={styles.card}>
                 <Text style={styles.cardTitle}>{t("invoices.filters")}</Text>
 
+                {/* Client Filter */}
                 <TextInput
                     style={styles.input}
                     placeholder={t("invoices.filterClient")}
@@ -245,6 +274,7 @@ export default function InvoiceScreen({ navigation }) {
                     onChangeText={setFilterClient}
                 />
 
+                {/* Status Filter */}
                 <TextInput
                     style={styles.input}
                     placeholder={t("invoices.filterStatus")}
@@ -253,23 +283,45 @@ export default function InvoiceScreen({ navigation }) {
                     onChangeText={setFilterStatus}
                 />
 
-                <View style={{ flexDirection: "row", gap: 10 }}>
-                    <TextInput
-                        style={[styles.input, { flex: 1 }]}
-                        placeholder="Du (YYYY-MM-DD)"
-                        placeholderTextColor={colors.textSoft}
-                        value={filterFrom}
-                        onChangeText={setFilterFrom}
-                    />
-                    <TextInput
-                        style={[styles.input, { flex: 1 }]}
-                        placeholder="Au (YYYY-MM-DD)"
-                        placeholderTextColor={colors.textSoft}
-                        value={filterTo}
-                        onChangeText={setFilterTo}
-                    />
-                </View>
+                {/* From Date Filter */}
+                <TouchableOpacity
+                    onPress={() => setShowIssueDatePicker(true)}
+                    style={[styles.input, { justifyContent: 'center' }]}
+                >
+                    <Text style={{ color: filterFrom ? colors.text : colors.textSoft }}>
+                        {filterFrom ? `From: ${dayjs(filterFrom).format("DD/MM/YYYY")}` : t("invoices.filterFrom")}
+                    </Text>
+                </TouchableOpacity>
 
+                {showIssueDatePicker && (
+                    <DateTimePicker
+                        value={issueDate || new Date()}
+                        mode="date"
+                        display="calendar"
+                        onChange={onSelectIssueDate}
+                    />
+                )}
+
+                {/* To Date Filter */}
+                <TouchableOpacity
+                    onPress={() => setShowToDatePicker(true)}
+                    style={[styles.input, { justifyContent: 'center' }]}
+                >
+                    <Text style={{ color: filterTo ? colors.text : colors.textSoft }}>
+                        {filterTo ? `To: ${dayjs(filterTo).format("DD/MM/YYYY")}` : t("invoices.filterTo")}
+                    </Text>
+                </TouchableOpacity>
+
+                {showToDatePicker && (
+                    <DateTimePicker
+                        value={toDate || new Date()}
+                        mode="date"
+                        display="calendar"
+                        onChange={onSelectToDate}
+                    />
+                )}
+
+                {/* Reset Button */}
                 <TouchableOpacity style={styles.btnSecondary} onPress={resetFilters}>
                     <Text style={styles.btnSecondaryText}>{t("common.reset")}</Text>
                 </TouchableOpacity>
