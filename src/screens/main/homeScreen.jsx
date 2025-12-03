@@ -408,28 +408,28 @@ export default function HomeScreen({ navigation }) {
                     </View>
 
                     <View style={styles.kpiCard}>
-                        <Text style={styles.kpiTitle}>{t("dashboard.income")}</Text>
+                        <Text style={styles.kpiTitle}>{t("dashboard.income")} (This Month)</Text>
                         <Text style={[styles.kpiValue, styles.success]}>
                             {formatCurrency(totalIncome)}
                         </Text>
                     </View>
 
                     <View style={styles.kpiCard}>
-                        <Text style={styles.kpiTitle}>{t("dashboard.expense")}</Text>
+                        <Text style={styles.kpiTitle}>{t("dashboard.expense")} (This Month)</Text>
                         <Text style={[styles.kpiValue, styles.danger]}>
                             {formatCurrency(totalExpense)}
                         </Text>
                     </View>
 
                     <View style={styles.kpiCard}>
-                        <Text style={styles.kpiTitle}>{t("dashboard.transfer")}</Text>
+                        <Text style={styles.kpiTitle}>{t("dashboard.transfer")} (This Month)</Text>
                         <Text style={[styles.kpiValue, styles.warning]}>
                             {formatCurrency(totalTransfer)}
                         </Text>
                     </View>
 
                     <View style={styles.kpiCard}>
-                        <Text style={styles.kpiTitle}>{t("dashboard.netBalance")}</Text>
+                        <Text style={styles.kpiTitle}>{t("dashboard.netBalance")} (This Month)</Text>
                         <Text
                             style={[
                                 styles.kpiValue,

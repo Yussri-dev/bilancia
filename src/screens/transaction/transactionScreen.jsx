@@ -112,17 +112,17 @@ export default function TransactionScreen({ navigation }) {
         result.sort((a, b) => new Date(b.date) - new Date(a.date));
         setFiltered(result);
 
-        // setIncomeTotal(
-        //     result
-        //         .filter((t) => t.type?.toLowerCase() === "income")
-        //         .reduce((sum, t) => sum + Number(t.amount), 0)
-        // );
+        setIncomeTotal(
+            result
+                .filter((t) => t.type?.toLowerCase() === "income")
+                .reduce((sum, t) => sum + Number(t.amount), 0)
+        );
 
-        // setExpenseTotal(
-        //     result
-        //         .filter((t) => t.type?.toLowerCase() === "expense")
-        //         .reduce((sum, t) => sum + Number(t.amount), 0)
-        // );
+        setExpenseTotal(
+            result
+                .filter((t) => t.type?.toLowerCase() === "expense")
+                .reduce((sum, t) => sum + Number(t.amount), 0)
+        );
     }, [transactions, searchText]);
 
     // Modal helpers
@@ -216,7 +216,7 @@ export default function TransactionScreen({ navigation }) {
         if (selectedDate) {
             const iso = selectedDate.toISOString().split("T")[0];
             setTransactionDate(selectedDate);
-            setForm((prev) => ({ ...prev, transaction: iso }));
+            setForm((prev) => ({ ...prev, date: iso }));
         }
     };
     // Render transaction card
@@ -431,7 +431,7 @@ export default function TransactionScreen({ navigation }) {
                                     }}
                                 >
                                     <Text style={{ color: form.transaction ? colors.text : colors.textSoft }}>
-                                        {form.transaction || t("transactions.date")}
+                                        {form.date || t("transactions.date")}
                                     </Text>
                                 </TouchableOpacity>
                             </View>

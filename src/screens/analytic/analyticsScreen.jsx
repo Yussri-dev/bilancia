@@ -68,44 +68,59 @@ export default function AnalyticsScreen({ navigation }) {
     }, []);
 
     // EXCEL / PDF EXPORT with NEW FileSystem API
+    // EXCEL / PDF EXPORT with NEW FileSystem API
     const exportFile = async (format) => {
         try {
             const { base64, fileName } = await AnalyticsApi.exportReport(format);
 
-            // Use the new File API
+            // Verify the base64 string is valid
+            if (!base64 || base64.length === 0) {
+                throw new Error('Received empty file data');
+            }
+
+            console.log('Base64 length:', base64.length);
+            console.log('File name:', fileName);
+
+            // Use the new File API (already imported at the top)
             const file = new File(Paths.cache, fileName);
 
             // Write the base64 content to file
             await file.write(base64, { encoding: 'base64' });
 
+            console.log('File written to:', file.uri);
+
+            // The File API doesn't have a stat() method
+            // If write() succeeds, the file exists
+            // Just proceed to sharing
+
             // Check if sharing is available
             const isSharingAvailable = await Sharing.isAvailableAsync();
 
             if (isSharingAvailable) {
-                // Share the file
+                // Share the file using file.uri
                 await Sharing.shareAsync(file.uri, {
                     mimeType: format === "pdf"
                         ? "application/pdf"
                         : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    dialogTitle: t("analytics.shareReport") || "Share Report"
+                    dialogTitle: t("analytics.shareReport") || "Share Report",
+                    UTI: format === "pdf" ? "com.adobe.pdf" : "org.openxmlformats.spreadsheetml.sheet"
                 });
             } else {
                 // Fallback: just show the path
                 Alert.alert(
-                    t("analytics.exportSuccessTitle"),
-                    `${t("analytics.exportSuccessMessage")}\n\n${fileName}`,
+                    t("analytics.exportSuccessTitle") || "Success",
+                    `${t("analytics.exportSuccessMessage") || "File saved"}\n\n${fileName}`,
                     [{ text: "OK" }]
                 );
             }
         } catch (err) {
             console.error("Export error:", err);
-            console.error("Error response:", err.response?.data);
-            console.error("Error status:", err.response?.status);
+            console.error("Error stack:", err.stack);
 
             Alert.alert(
-                t("analytics.errorTitle"),
-                t("analytics.exportError", { format: format.toUpperCase() }) +
-                `\n${err.message || 'Unknown error'}`
+                t("analytics.errorTitle") || "Error",
+                (t("analytics.exportError", { format: format.toUpperCase() }) || `Failed to export ${format}`) +
+                `\n\n${err.message || 'Unknown error'}`
             );
         }
     };
