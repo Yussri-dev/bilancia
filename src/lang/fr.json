@@ -264,6 +264,7 @@
         "noTransaction": "Aucune transaction trouvée",
         "income": "Revenus",
         "expense": "Dépenses",
+        "transfer": "Transferts",
         "balance": "Solde",
         "searchPlaceholder": "Rechercher une description...",
         "newTransaction": "Nouvelle transaction",

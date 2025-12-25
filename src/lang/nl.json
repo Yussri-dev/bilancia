@@ -264,6 +264,7 @@
         "noTransaction": "Geen transacties gevonden",
         "income": "Inkomsten",
         "expense": "Uitgaven",
+        "transfer": "Overschrijvingen",
         "balance": "Saldo",
         "searchPlaceholder": "Beschrijving zoeken...",
         "newTransaction": "Nieuwe transactie",

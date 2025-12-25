@@ -1,6 +1,5 @@
 // src/api/analyticsApi.js
 import apiClient from "./apiClient";
-import { Buffer } from "buffer";
 
 const AnalyticsApi = {
     // --- 1) Overview ---
@@ -55,28 +54,40 @@ const AnalyticsApi = {
             throw new Error("Invalid format. Use 'pdf' or 'excel'.");
         }
 
-        const res = await apiClient.get(`/analytics/export?format=${format}`, {
-            responseType: "arraybuffer", // get file bytes
-        });
+        try {
+            const res = await apiClient.get(`/analytics/export?format=${format}`);
 
-        // return { contentType, fileName, base64 }
-        const contentType =
-            res.headers["content-type"] ||
-            (format === "pdf"
-                ? "application/pdf"
-                : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            console.log("Export API Response:", res);
+            console.log("Export API Response Data:", res.data);
 
-        const contentDisposition = res.headers["content-disposition"];
-        const fileNameMatch = contentDisposition?.match(/filename\*?="?([^";]+)"?/i);
-        const fileName =
-            decodeURIComponent(fileNameMatch?.[1] || "") ||
-            (format === "pdf"
-                ? "transaction_history_report.pdf"
-                : "transaction_history_report.xlsx");
+            // Validate response structure
+            if (!res.data) {
+                throw new Error("No data received from export API");
+            }
 
-        const base64 = Buffer.from(res.data, "binary").toString("base64");
+            if (!res.data.base64) {
+                console.error("Response data:", JSON.stringify(res.data));
+                throw new Error("base64 data missing from API response");
+            }
 
-        return { base64, contentType, fileName };
+            if (!res.data.fileName) {
+                console.error("Response data:", JSON.stringify(res.data));
+                throw new Error("fileName missing from API response");
+            }
+
+            return {
+                base64: res.data.base64,
+                fileName: res.data.fileName
+            };
+        } catch (error) {
+            console.error("Export API Error:", error);
+            console.error("Error response:", error.response?.data);
+            throw new Error(
+                error.response?.data?.message ||
+                error.message ||
+                "Failed to export report"
+            );
+        }
     },
 };
 

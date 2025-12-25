@@ -140,7 +140,7 @@ export default function HomeScreen({ navigation }) {
         setTotalExpense(expense);
         setTotalTransfer(transfer);
 
-        const net = income - expense;
+        const net = income - expense - transfer;
         setNetBalance(net);
 
         const allIncome = transactions
@@ -151,7 +151,11 @@ export default function HomeScreen({ navigation }) {
             .filter(t => t.type?.toLowerCase() === "expense")
             .reduce((sum, t) => sum + t.amount, 0);
 
-        setLifetimeNet(allIncome - allExpense);
+        const allTransfers = transactions
+            .filter(t => t.type?.toLowerCase() === "transfer")
+            .reduce((sum, t) => sum + t.amount, 0);
+
+        setLifetimeNet(allIncome - allExpense - allTransfers);
 
 
         setSavingsRate(income > 0 ? net / income : 0);
@@ -251,14 +255,20 @@ export default function HomeScreen({ navigation }) {
             return (
                 date >= monthStart &&
                 date <= monthEnd &&
-                t.type?.toLowerCase() === "expense"
+                t.type?.toLowerCase() === "expense" ||
+                t.type?.toLowerCase() === "transfer"
             );
         });
 
         const totals = {};
         monthTransactions.forEach((t) => {
-            const cat = t.categoryName || "Autre";
-            totals[cat] = (totals[cat] || 0) + t.amount;
+            const cat = t.categoryName || "Autres";
+            totals[cat] = (totals[cat] || 0) + Number(t.amount);
+        });
+
+        // Arrondir après si nécessaire
+        Object.keys(totals).forEach(key => {
+            totals[key] = Number(totals[key].toFixed(2));
         });
 
         const colors = [
@@ -275,7 +285,7 @@ export default function HomeScreen({ navigation }) {
                 name,
                 amount,
                 color: colors[index % colors.length],
-                legendFontColor: "#E5E7EB",
+                legendFontColor: "#121213ff",
                 legendFontSize: 12,
             }))
             .sort((a, b) => b.amount - a.amount);

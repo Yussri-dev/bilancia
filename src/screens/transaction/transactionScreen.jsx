@@ -24,6 +24,10 @@ import { useTranslation } from "react-i18next";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 export default function TransactionScreen({ navigation }) {
+
+    const PAGE_SIZE = 10;
+    const [page, setPage] = useState(1);
+
     const { token } = useAuth();
     const { colors } = useTheme();
     const styles = getStyles(colors);
@@ -33,13 +37,16 @@ export default function TransactionScreen({ navigation }) {
     const [categories, setCategories] = useState([]);
     const [filtered, setFiltered] = useState([]);
 
+    const paginatedData = filtered.slice(0, page * PAGE_SIZE);
+
     const [loading, setLoading] = useState(true);
     const [searchText, setSearchText] = useState("");
 
     const [incomeTotal, setIncomeTotal] = useState(0);
     const [expenseTotal, setExpenseTotal] = useState(0);
+    const [transferTotal, setTransferTotal] = useState(0);
 
-    const balance = incomeTotal - expenseTotal;
+    const balance = incomeTotal - expenseTotal - transferTotal;
 
     const [showModal, setShowModal] = useState(false);
     const [editing, setEditing] = useState(null);
@@ -55,6 +62,8 @@ export default function TransactionScreen({ navigation }) {
     const scrollRef = useRef(null);
 
     const [saving, setSaving] = useState(false);
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [transactionDate, setTransactionDate] = useState(null);
 
     // Format currency safely
     const formatCurrency = (val) => `€${Number(val || 0).toFixed(2)}`;
@@ -90,7 +99,7 @@ export default function TransactionScreen({ navigation }) {
         } finally {
             setLoading(false);
         }
-    }, [token]);
+    }, [token, t]);
 
     useEffect(() => {
         const unsubscribe = navigation.addListener("focus", loadData);
@@ -123,6 +132,12 @@ export default function TransactionScreen({ navigation }) {
                 .filter((t) => t.type?.toLowerCase() === "expense")
                 .reduce((sum, t) => sum + Number(t.amount), 0)
         );
+
+        setTransferTotal(
+            result
+                .filter((t) => t.type?.toLowerCase() === "transfer")
+                .reduce((sum, t) => sum + Number(t.amount), 0)
+        );
     }, [transactions, searchText]);
 
     // Modal helpers
@@ -135,6 +150,7 @@ export default function TransactionScreen({ navigation }) {
             categoryId: "",
             type: "Expense",
         });
+        setTransactionDate(new Date());
         setShowModal(true);
     };
 
@@ -147,6 +163,7 @@ export default function TransactionScreen({ navigation }) {
             categoryId: tx.categoryId,
             type: tx.type,
         });
+        setTransactionDate(new Date(tx.date));
         setShowModal(true);
     };
 
@@ -207,9 +224,6 @@ export default function TransactionScreen({ navigation }) {
         );
     };
 
-    const [showDatePicker, setShowDatePicker] = useState(false);
-    const [transactionDate, setTransactionDate] = useState(null);
-
     const onSelectTransaction = (event, selectedDate) => {
         setShowDatePicker(false);
 
@@ -219,14 +233,15 @@ export default function TransactionScreen({ navigation }) {
             setForm((prev) => ({ ...prev, date: iso }));
         }
     };
+
     // Render transaction card
     const renderItem = ({ item }) => {
         const category = categories.find((c) => c.id === item.categoryId);
 
         const badgeColor =
-            item.type === "Income".toLowerCase()
+            item.type?.toLowerCase() === "income"
                 ? colors.success
-                : item.type === "Expense".toLowerCase()
+                : item.type?.toLowerCase() === "expense"
                     ? colors.danger
                     : colors.warning;
 
@@ -249,9 +264,9 @@ export default function TransactionScreen({ navigation }) {
                                     fontSize: 20,
                                     marginTop: 6,
                                     color:
-                                        item.type === "Income".toLowerCase()
+                                        item.type?.toLowerCase() === "income"
                                             ? colors.success
-                                            : item.type === "Transfer".toLocaleLowerCase()
+                                            : item.type?.toLowerCase() === "transfer"
                                                 ? colors.warning
                                                 : colors.danger,
                                 },
@@ -318,62 +333,78 @@ export default function TransactionScreen({ navigation }) {
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* HEADER */}
-            <View style={[styles.header, { marginBottom: 16 }]}>
-                <TouchableOpacity onPress={() => navigation.openDrawer()}>
-                    <Ionicons name="menu" size={26} color={colors.text} />
-                </TouchableOpacity>
-
-                <Text style={styles.title}>{t("transactions.title")}</Text>
-
-                <View style={{ width: 26 }} />
-            </View>
-
-            {/* KPIs */}
-            <View style={styles.kpiGrid}>
-                <View style={styles.kpiCard}>
-                    <Text style={styles.kpiTitle}>{t("transactions.income")}</Text>
-                    <Text style={[styles.kpiValue, styles.success]}>
-                        {formatCurrency(incomeTotal)}
-                    </Text>
-                </View>
-
-                <View style={styles.kpiCard}>
-                    <Text style={styles.kpiTitle}>{t("transactions.expense")}</Text>
-                    <Text style={[styles.kpiValue, styles.danger]}>
-                        {formatCurrency(expenseTotal)}
-                    </Text>
-                </View>
-
-                <View style={styles.kpiCard}>
-                    <Text style={styles.kpiTitle}>{t("transactions.balance")}</Text>
-                    <Text
-                        style={[
-                            styles.kpiValue,
-                            balance >= 0 ? styles.success : styles.danger,
-                        ]}
-                    >
-                        {formatCurrency(balance)}
-                    </Text>
-                </View>
-            </View>
-
-            {/* Search */}
-            <View style={styles.card}>
-                <TextInput
-                    style={styles.input}
-                    placeholder={t("transactions.searchPlaceholder")}
-                    placeholderTextColor={colors.textSoft}
-                    value={searchText}
-                    onChangeText={setSearchText}
-                />
-            </View>
-
             {/* List */}
             <FlatList
-                data={filtered}
+                data={paginatedData}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={renderItem}
+                onEndReached={() => {
+                    if (paginatedData.length < filtered.length) {
+                        setPage(p => p + 1);
+                    }
+                }}
+                onEndReachedThreshold={0.5}
+                ListHeaderComponent={
+                    <>
+                        {/* HEADER */}
+                        <View style={[styles.header, { marginBottom: 16 }]}>
+                            <TouchableOpacity onPress={() => navigation.openDrawer()}>
+                                <Ionicons name="menu" size={26} color={colors.text} />
+                            </TouchableOpacity>
+
+                            <Text style={styles.title}>{t("transactions.title")}</Text>
+
+                            <View style={{ width: 26 }} />
+                        </View>
+
+                        {/* KPIs */}
+                        <View style={styles.kpiGrid}>
+                            <View style={styles.kpiCard}>
+                                <Text style={styles.kpiTitle}>{t("transactions.income")}</Text>
+                                <Text style={[styles.kpiValue, styles.success]}>
+                                    {formatCurrency(incomeTotal)}
+                                </Text>
+                            </View>
+
+                            <View style={styles.kpiCard}>
+                                <Text style={styles.kpiTitle}>{t("transactions.expense")}</Text>
+                                <Text style={[styles.kpiValue, styles.danger]}>
+                                    {formatCurrency(expenseTotal)}
+                                </Text>
+                            </View>
+
+                            <View style={styles.kpiCard}>
+                                <Text style={styles.kpiTitle}>{t("transactions.transfer")}</Text>
+                                <Text style={[styles.kpiValue, styles.warning]}>
+                                    {formatCurrency(transferTotal)}
+                                </Text>
+                            </View>
+
+                            <View style={styles.kpiCard}>
+                                <Text style={styles.kpiTitle}>{t("transactions.balance")}</Text>
+                                <Text
+                                    style={[
+                                        styles.kpiValue,
+                                        balance >= 0 ? styles.success : styles.danger,
+                                    ]}
+                                >
+                                    {formatCurrency(balance)}
+                                </Text>
+                            </View>
+                        </View>
+
+                        {/* Search */}
+                        <View style={styles.card}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder={t("transactions.searchPlaceholder")}
+                                placeholderTextColor={colors.textSoft}
+                                value={searchText}
+                                onChangeText={setSearchText}
+                            />
+                        </View>
+                    </>
+                }
                 ListEmptyComponent={
                     <View style={styles.empty}>
                         <Text style={styles.emptyText}>{t("transactions.noResults")}</Text>
@@ -430,7 +461,7 @@ export default function TransactionScreen({ navigation }) {
                                         padding: 12,
                                     }}
                                 >
-                                    <Text style={{ color: form.transaction ? colors.text : colors.textSoft }}>
+                                    <Text style={{ color: form.date ? colors.text : colors.textSoft }}>
                                         {form.date || t("transactions.date")}
                                     </Text>
                                 </TouchableOpacity>

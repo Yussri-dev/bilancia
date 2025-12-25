@@ -12,9 +12,10 @@ import { getStyles } from "@theme/styles";
 import AnalyticsApi from "@api/analyticsApi";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { File, Paths } from "expo-file-system";
 import * as Sharing from 'expo-sharing';
 import { useTranslation } from "react-i18next";
+import * as FileSystem from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
 
 export default function AnalyticsScreen({ navigation }) {
     const { colors } = useTheme();
@@ -67,63 +68,60 @@ export default function AnalyticsScreen({ navigation }) {
         loadData();
     }, []);
 
-    // EXCEL / PDF EXPORT with NEW FileSystem API
-    // EXCEL / PDF EXPORT with NEW FileSystem API
     const exportFile = async (format) => {
         try {
-            const { base64, fileName } = await AnalyticsApi.exportReport(format);
-
-            // Verify the base64 string is valid
-            if (!base64 || base64.length === 0) {
-                throw new Error('Received empty file data');
+            // 1) Android permission
+            const { status } = await MediaLibrary.requestPermissionsAsync();
+            if (status !== "granted") {
+                throw new Error("Permission required to save files.");
             }
 
-            console.log('Base64 length:', base64.length);
-            console.log('File name:', fileName);
+            // 2) API call
+            const result = await AnalyticsApi.exportReport(format);
 
-            // Use the new File API (already imported at the top)
-            const file = new File(Paths.cache, fileName);
+            if (!result || !result.base64 || !result.fileName) {
+                throw new Error("Invalid export data received");
+            }
 
-            // Write the base64 content to file
-            await file.write(base64, { encoding: 'base64' });
+            const { base64, fileName } = result;
 
-            console.log('File written to:', file.uri);
+            // 3) Prefer documentDirectory on Android
+            const directory = FileSystem.documentDirectory || FileSystem.cacheDirectory;
 
-            // The File API doesn't have a stat() method
-            // If write() succeeds, the file exists
-            // Just proceed to sharing
+            if (!directory) throw new Error("File system not available");
 
-            // Check if sharing is available
-            const isSharingAvailable = await Sharing.isAvailableAsync();
+            const fileUri = directory + fileName;
 
-            if (isSharingAvailable) {
-                // Share the file using file.uri
-                await Sharing.shareAsync(file.uri, {
-                    mimeType: format === "pdf"
+            // 4) Write base64 file
+            await FileSystem.writeAsStringAsync(fileUri, base64, {
+                encoding: FileSystem.EncodingType.Base64,
+            });
+
+            const info = await FileSystem.getInfoAsync(fileUri);
+            if (!info.exists) throw new Error("Failed to create file");
+
+            // 5) Share
+            await Sharing.shareAsync(fileUri, {
+                mimeType:
+                    format === "pdf"
                         ? "application/pdf"
                         : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    dialogTitle: t("analytics.shareReport") || "Share Report",
-                    UTI: format === "pdf" ? "com.adobe.pdf" : "org.openxmlformats.spreadsheetml.sheet"
-                });
-            } else {
-                // Fallback: just show the path
-                Alert.alert(
-                    t("analytics.exportSuccessTitle") || "Success",
-                    `${t("analytics.exportSuccessMessage") || "File saved"}\n\n${fileName}`,
-                    [{ text: "OK" }]
-                );
-            }
+                dialogTitle: "Share Report",
+            });
+
         } catch (err) {
             console.error("Export error:", err);
-            console.error("Error stack:", err.stack);
-
-            Alert.alert(
-                t("analytics.errorTitle") || "Error",
-                (t("analytics.exportError", { format: format.toUpperCase() }) || `Failed to export ${format}`) +
-                `\n\n${err.message || 'Unknown error'}`
-            );
+            Alert.alert("Export Error", err.message || "Failed to export report.");
         }
     };
+
+    // Format currency safely
+    const formatCurrency = (val) => `€${Number(val || 0).toFixed(2)}`;
+
+    // Calculate balance
+    const balance = overview 
+        ? (overview.totalIncome || 0) - (overview.totalExpense || 0) 
+        : 0;
 
     if (loading)
         return (
@@ -159,44 +157,48 @@ export default function AnalyticsScreen({ navigation }) {
                     <View style={{ width: 26 }} />
                 </View>
 
-                {/* KPI GRID */}
+                {/* KPI GRID - Same style as TransactionScreen */}
                 {overview && (
                     <View style={styles.kpiGrid}>
-                        <StatCard
-                            icon="cash-outline"
-                            label={t("analytics.income")}
-                            value={overview.totalIncome}
-                            color={colors.success}
-                            colors={colors}
-                        />
-                        <StatCard
-                            icon="trending-down-outline"
-                            label={t("analytics.expenses")}
-                            value={overview.totalExpense}
-                            color={colors.danger}
-                            colors={colors}
-                        />
-                        <StatCard
-                            icon="wallet-outline"
-                            label={t("analytics.netBalance")}
-                            value={overview.netBalance}
-                            color={colors.text}
-                            colors={colors}
-                        />
-                        <StatCard
-                            icon="swap-horizontal-outline"
-                            label={t("analytics.transactions")}
-                            value={overview.transactionCount}
-                            color={colors.text}
-                            colors={colors}
-                        />
-                        <StatCard
-                            icon="file-tray-outline"
-                            label={t("analytics.pendingInvoices")}
-                            value={overview.pendingInvoicesTotal}
-                            color={colors.warning}
-                            colors={colors}
-                        />
+                        <View style={styles.kpiCard}>
+                            <Text style={styles.kpiTitle}>{t("analytics.income")}</Text>
+                            <Text style={[styles.kpiValue, styles.success]}>
+                                {formatCurrency(overview.totalIncome)}
+                            </Text>
+                        </View>
+
+                        <View style={styles.kpiCard}>
+                            <Text style={styles.kpiTitle}>{t("analytics.expenses")}</Text>
+                            <Text style={[styles.kpiValue, styles.danger]}>
+                                {formatCurrency(overview.totalExpense)}
+                            </Text>
+                        </View>
+
+                        <View style={styles.kpiCard}>
+                            <Text style={styles.kpiTitle}>{t("analytics.netBalance")}</Text>
+                            <Text
+                                style={[
+                                    styles.kpiValue,
+                                    balance >= 0 ? styles.success : styles.danger,
+                                ]}
+                            >
+                                {formatCurrency(balance)}
+                            </Text>
+                        </View>
+
+                        <View style={styles.kpiCard}>
+                            <Text style={styles.kpiTitle}>{t("analytics.transactions")}</Text>
+                            <Text style={styles.kpiValue}>
+                                {overview.transactionCount || 0}
+                            </Text>
+                        </View>
+
+                        <View style={styles.kpiCard}>
+                            <Text style={styles.kpiTitle}>{t("analytics.pendingInvoices")}</Text>
+                            <Text style={[styles.kpiValue, styles.warning]}>
+                                {formatCurrency(overview.pendingInvoicesTotal)}
+                            </Text>
+                        </View>
                     </View>
                 )}
 
@@ -208,7 +210,7 @@ export default function AnalyticsScreen({ navigation }) {
 
                     {ratio && (
                         <Text style={styles.meta}>
-                            {ratio.income.toFixed(2)} / {ratio.expense.toFixed(2)} →{" "}
+                            {formatCurrency(ratio.income)} / {formatCurrency(ratio.expense)} →{" "}
                             <Text style={{ fontWeight: "700", color: colors.primary }}>
                                 {ratio.ratio.toFixed(2)}
                             </Text>
@@ -229,7 +231,7 @@ export default function AnalyticsScreen({ navigation }) {
                                 { marginBottom: 6, fontSize: 22 },
                             ]}
                         >
-                            {avg.averageMonthlyExpense.toFixed(2)} €
+                            {formatCurrency(avg.averageMonthlyExpense)}
                         </Text>
                     )}
 
@@ -245,7 +247,7 @@ export default function AnalyticsScreen({ navigation }) {
                                     fontWeight: "bold",
                                 }}
                             >
-                                {prediction.predictedExpenseNextMonth.toFixed(2)} €
+                                {formatCurrency(prediction.predictedExpenseNextMonth)}
                             </Text>
                         </View>
                     )}
@@ -273,7 +275,7 @@ export default function AnalyticsScreen({ navigation }) {
                                 >
                                     <Text style={styles.meta}>{tItem.category}</Text>
                                     <Text style={styles.kpiValue}>
-                                        {tItem.totalSpent.toFixed(2)} €
+                                        {formatCurrency(tItem.totalSpent)}
                                     </Text>
                                 </View>
 
@@ -332,11 +334,11 @@ export default function AnalyticsScreen({ navigation }) {
                                 <Text style={styles.meta}>{item.month}</Text>
 
                                 <Text style={{ color: colors.success }}>
-                                    +{item.income.toFixed(2)}
+                                    +{formatCurrency(item.income)}
                                 </Text>
 
                                 <Text style={{ color: colors.danger }}>
-                                    -{item.expense.toFixed(2)}
+                                    -{formatCurrency(item.expense)}
                                 </Text>
 
                                 <Text
@@ -348,7 +350,7 @@ export default function AnalyticsScreen({ navigation }) {
                                         fontWeight: "700",
                                     }}
                                 >
-                                    {(item.income - item.expense).toFixed(2)}
+                                    {formatCurrency(item.income - item.expense)}
                                 </Text>
                             </View>
                         ))
@@ -397,36 +399,3 @@ export default function AnalyticsScreen({ navigation }) {
         </SafeAreaView>
     );
 }
-
-/* === COMPONENT: StatCard (REBUILT) === */
-const StatCard = ({ icon, label, value, color, colors }) => {
-    return (
-        <View
-            style={{
-                backgroundColor: colors.card,
-                padding: 16,
-                borderRadius: 18,
-                marginBottom: 16,
-                flexBasis: "48%",
-                shadowColor: "#000",
-                shadowOpacity: 0.12,
-                shadowRadius: 6,
-                shadowOffset: { width: 0, height: 3 },
-                elevation: 4,
-                borderLeftWidth: 3,
-                borderLeftColor: color,
-            }}
-        >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <Ionicons name={icon} size={20} color={color} />
-                <Text style={{ color: color, fontWeight: "700", fontSize: 18 }}>
-                    € {value?.toFixed(2) ?? "0.00"}
-                </Text>
-            </View>
-
-            <Text style={{ color: colors.textSoft, fontSize: 13, marginTop: 6 }}>
-                {label}
-            </Text>
-        </View>
-    );
-};
